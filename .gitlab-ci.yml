@@ -1,0 +1,53 @@
+stages:
+  - test
+  - build
+  - deploy
+  - dast
+
+include:
+  - template: SAST.gitlab-ci.yml
+  - template: DAST.gitlab-ci.yml
+  - template: Dependency-Scanning.gitlab-ci.yml
+  - template: License-Scanning.gitlab-ci.yml
+
+lint:
+  image: node:latest
+  stage: test
+  before_script:
+    - yarn install --pure-lockfile
+  script:
+    - yarn lint
+    - prettier --check "src/**/*.{js,ts,vue}"
+
+buildPackage:
+  image: node:latest
+  stage: build
+  when: manual
+  script:
+    - curl "https://gitlab.com/api/v4/projects/18158864/releases" > public/changelog.json
+    - yarn install --pure-lockfile
+    - yarn build
+  artifacts:
+    paths:
+      - dist
+  only:
+    - master
+
+pages: # the job must be named pages
+  image: node:latest
+  variables:
+    GIT_STRATEGY: none
+  stage: deploy
+  when: manual
+  needs:
+    - buildPackage
+  script:
+    - mv public public-vue # GitLab Pages hooks on the public folder
+    - mv dist public # rename the dist folder (result of npm run build)
+    # activate gzip support
+    - find public -type f -regex '.*\.\(htm\|html\|txt\|text\|js\|css\)$' -exec gzip -f -k {} \;
+  artifacts:
+    paths:
+      - public # artifact path must be /public for GitLab Pages to pick it up
+  only:
+    - master

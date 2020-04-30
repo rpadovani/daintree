@@ -17,7 +17,7 @@ lint:
     - yarn install --pure-lockfile
   script:
     - yarn lint
-    - prettier --check "src/**/*.{js,ts,vue}"
+    - yarn run prettier --check "src/**/*.{js,ts,vue}"
 
 buildPackage:
   image: node:latest

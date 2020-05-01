@@ -3,7 +3,6 @@ import { Role, STSState } from "@/store/sts/state";
 import STSClient from "aws-sdk/clients/sts";
 import { AppNotification } from "@/store/notifications/state";
 import CognitoIdentityClient from "aws-sdk/clients/cognitoidentity";
-import { Credentials } from "aws-sdk/lib/credentials";
 
 export const STSActions = {
   loginWithAccessKey(

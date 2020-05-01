@@ -2,7 +2,7 @@
   <div>
     <RegionModal />
     <AssumeRoleModal />
-    <gl-navbar variant="dark" type="dark">
+    <gl-navbar toggleable="lg" variant="dark" type="dark">
       <b-navbar-brand tag="h1" class="mb-0" to="/home">
         <img
           src="/assets/undraw_japan_ubgk.svg"
@@ -12,13 +12,14 @@
         />
         Daintree
       </b-navbar-brand>
-      <b-navbar-nav>
-        <gl-nav-item to="/changelog">{{ vueVersion }}</gl-nav-item>
-        <gl-nav-item to="/about">Features</gl-nav-item>
-        <gl-nav-item to="/contribute">Contribute</gl-nav-item>
-      </b-navbar-nav>
       <b-navbar-toggle target="nav-collapse"></b-navbar-toggle>
+
       <b-collapse id="nav-collapse" is-nav>
+        <b-navbar-nav>
+          <gl-nav-item to="/changelog">{{ vueVersion }}</gl-nav-item>
+          <gl-nav-item to="/about">Features</gl-nav-item>
+          <gl-nav-item to="/contribute">Contribute</gl-nav-item>
+        </b-navbar-nav>
         <b-navbar-nav class="ml-auto" v-if="prettyCredentials">
           <div
             class="col my-auto"

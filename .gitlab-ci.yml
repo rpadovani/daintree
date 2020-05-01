@@ -4,6 +4,9 @@ stages:
   - deploy
   - dast
 
+variables:
+  DAST_WEBSITE: https://daintree.app
+
 include:
   - template: SAST.gitlab-ci.yml
   - template: DAST.gitlab-ci.yml

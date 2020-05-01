@@ -2,7 +2,11 @@
   <div>
     <Header :hide-sub-header="true" />
 
-    <gl-tabs theme="blue" class="mx-auto mt-5" style="width: 600px;">
+    <gl-tabs
+      theme="blue"
+      class="mx-auto mt-5"
+      style="max-width: 600px; width: 99%"
+    >
       <gl-tab title="Login with Access Key">
         <gl-form-group
           id="access-key-id"

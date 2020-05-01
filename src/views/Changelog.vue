@@ -2,30 +2,22 @@
   <div>
     <Header hide-sub-header />
 
-    <section class="gl-banner" v-if="loading">
-      <img
-        src="/assets/undraw_news_go0e.svg"
-        alt="Changelog"
-        role="presentation"
-      />
-      <div class="gl-banner-content">
-        <h1>Hold tight!</h1>
-        <p class="mt-2">
-          Daintree is parsing the latest news just for you, hold on!
-        </p>
-      </div>
-    </section>
-
     <div class="container">
-      <div v-for="news in data" :key="news.tagName" class="mt-1">
-        <h1>
-          {{ news.name }}
-          <gl-badge variant="info">{{
-            news.released_at | standardDate
-          }}</gl-badge>
-        </h1>
-        <p v-html="news.description_html"></p>
-      </div>
+      <section class="gl-banner">
+        <div
+          v-for="news in data"
+          :key="news.tagName"
+          class="gl-banner-content mt-1"
+        >
+          <h1 class="gl-banner-title">
+            {{ news.name }}
+            <gl-badge variant="info">{{
+              news.released_at | standardDate
+            }}</gl-badge>
+          </h1>
+          <p v-html="news.description_html"></p>
+        </div>
+      </section>
     </div>
   </div>
 </template>
@@ -46,13 +38,11 @@ import moment from "moment";
   }
 })
 export default class NotFound extends Vue {
-  loading = true;
   data = [];
 
   async mounted() {
     const response = await fetch("/changelog.json");
     this.data = await response.json();
-    this.loading = false;
   }
 }
 </script>

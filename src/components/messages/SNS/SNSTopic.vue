@@ -131,7 +131,6 @@ import {
   GlButtonGroup,
   GlIcon
 } from "@gitlab/ui";
-import AWS from "aws-sdk";
 import { Component, Prop, Watch } from "vue-property-decorator";
 import { Formatters } from "@/mixins/formatters";
 import TagsTable from "@/components/common/TagsTable.vue";
@@ -141,7 +140,7 @@ import { TopicWithRegion } from "@/components/messages/SNS/sns";
 
 import hljs from "highlight.js/lib/core";
 import json from "highlight.js/lib/languages/json";
-import { SubscriptionsList } from "aws-sdk/clients/sns";
+import SNSClient, { SubscriptionsList } from "aws-sdk/clients/sns";
 hljs.registerLanguage("json", json);
 
 @Component({
@@ -219,6 +218,10 @@ export default class SNSTopic extends mixins(Formatters, Notifications) {
     "Owner"
   ];
 
+  get credentials() {
+    return this.$store.getters["sts/credentials"];
+  }
+
   listSubscriptions() {
     if (!this.sns.topicArn) {
       return;
@@ -228,7 +231,10 @@ export default class SNSTopic extends mixins(Formatters, Notifications) {
     this.subscriptions = [];
     this.subscriptionsError = "";
 
-    const SNS = new AWS.SNS({ region: this.sns.region });
+    const SNS = new SNSClient({
+      region: this.sns.region,
+      credentials: this.credentials
+    });
 
     SNS.listSubscriptionsByTopic(
       { TopicArn: this.sns.topicArn },
@@ -253,7 +259,10 @@ export default class SNSTopic extends mixins(Formatters, Notifications) {
       return;
     }
 
-    const SNS = new AWS.SNS({ region: this.sns.region });
+    const SNS = new SNSClient({
+      region: this.sns.region,
+      credentials: this.credentials
+    });
 
     SNS.deleteTopic({ TopicArn: this.sns.topicArn }, err => {
       if (err) {

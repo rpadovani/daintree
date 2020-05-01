@@ -98,7 +98,8 @@ export default class CognitoCallback extends Notifications {
         this.failedLogin = false;
         localStorage.removeItem("routeAfterLogin"); // Clean for next time
       })
-      .catch(() => {
+      .catch(err => {
+        this.showError(err, "cognitoCallback");
         this.failedLogin = true;
       });
   }

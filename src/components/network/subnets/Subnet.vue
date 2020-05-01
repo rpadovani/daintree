@@ -167,7 +167,7 @@ import {
   GlModal,
   GlModalDirective
 } from "@gitlab/ui";
-import AWS from "aws-sdk";
+import EC2Client from "aws-sdk/clients/ec2";
 import { Component, Prop, Watch } from "vue-property-decorator";
 import { RouteTable, NetworkAcl, NetworkAclEntry } from "aws-sdk/clients/ec2";
 import { Formatters } from "@/mixins/formatters";
@@ -210,7 +210,10 @@ export default class Subnet extends mixins(Formatters, Notifications) {
   };
 
   get EC2() {
-    return new AWS.EC2({ region: this.subnet.region });
+    return new EC2Client({
+      region: this.subnet.region,
+      credentials: this.$store.getters["sts/credentials"]
+    });
   }
 
   //Route table tab
@@ -330,8 +333,7 @@ export default class Subnet extends mixins(Formatters, Notifications) {
       return;
     }
 
-    const EC2 = new AWS.EC2({ region: this.subnet.region });
-    EC2.deleteSubnet({ SubnetId: this.subnet.SubnetId }, err => {
+    this.EC2.deleteSubnet({ SubnetId: this.subnet.SubnetId }, err => {
       if (err) {
         this.showError(err.message, "deleteSubnet");
       } else {

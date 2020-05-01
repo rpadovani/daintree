@@ -1,4 +1,4 @@
-import { Credentials } from "aws-sdk";
+import { Credentials } from "aws-sdk/lib/credentials";
 
 export class STSState {
   userArn: string | null = null;
@@ -6,11 +6,27 @@ export class STSState {
   regionsEnabled: string[] = JSON.parse(
     localStorage.getItem("regionsEnabled") || "[]"
   );
-  accessKeyId: string | undefined = undefined;
-  secretAccessKey: string | undefined = undefined;
 
-  //cognito
-  credentials: Credentials | undefined = undefined;
+  //The original credentials used to login
+  credentials:
+    | Credentials
+    | {
+        accessKeyId: string;
+        secretAccessKey: string;
+        sessionToken?: string;
+        expiration?: Date;
+      }
+    | undefined = undefined;
+  //Current credentials when a role is assumed
+  currentCredentials:
+    | Credentials
+    | {
+        accessKeyId: string;
+        secretAccessKey: string;
+        sessionToken?: string;
+        expiration?: Date;
+      }
+    | undefined = undefined;
 
   loginMethod: "cognito" | "accessKey" | undefined = undefined;
 
@@ -26,4 +42,12 @@ export interface Role {
   accountId: string;
   role: string;
   nickname: string | undefined;
+  credentials?:
+    | {
+        accessKeyId: string;
+        secretAccessKey: string;
+        sessionToken?: string;
+        expiration?: Date;
+      }
+    | undefined;
 }

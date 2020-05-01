@@ -1,7 +1,9 @@
 import { ActionContext } from "vuex";
 import { Role, STSState } from "@/store/sts/state";
-import AWS from "aws-sdk";
+import STSClient from "aws-sdk/clients/sts";
 import { AppNotification } from "@/store/notifications/state";
+import CognitoIdentityClient from "aws-sdk/clients/cognitoidentity";
+import { Credentials } from "aws-sdk/lib/credentials";
 
 export const STSActions = {
   loginWithAccessKey(
@@ -9,11 +11,12 @@ export const STSActions = {
     payload: { ["accessKeyId"]: string; ["secretAccessKey"]: string }
   ) {
     return new Promise((resolve, reject) => {
-      AWS.config = new AWS.Config();
-      AWS.config.accessKeyId = payload.accessKeyId;
-      AWS.config.secretAccessKey = payload.secretAccessKey;
+      const credentials = {
+        accessKeyId: payload.accessKeyId,
+        secretAccessKey: payload.secretAccessKey
+      };
 
-      const STS = new AWS.STS();
+      const STS = new STSClient({ credentials });
 
       STS.getCallerIdentity({}, (err, data) => {
         context.commit("notifications/dismissByKey", "login", { root: true });
@@ -30,8 +33,7 @@ export const STSActions = {
           context.commit("login", {
             arn: data.Arn,
             account: data.Account,
-            accessKeyId: payload.accessKeyId,
-            secretAccessKey: payload.secretAccessKey
+            credentials
           });
 
           return resolve();
@@ -61,48 +63,69 @@ export const STSActions = {
       Logins[iss] = payload.idToken;
 
       //The cognito identity pool contains the region in the name
-      AWS.config.region = payload.cognitoIdentityPoolId.split(":")[0];
+      const region = payload.cognitoIdentityPoolId.split(":")[0];
 
-      const credentials = new AWS.CognitoIdentityCredentials({
-        IdentityPoolId: payload.cognitoIdentityPoolId,
-        Logins
-      });
+      const cognitoIdentityClient = new CognitoIdentityClient({ region });
 
-      AWS.config.credentials = credentials;
-      credentials.refresh(err => {
-        if (err) {
-          const notification: AppNotification = {
-            key: "cognitoCallback",
-            text: err.message,
-            variant: "danger"
+      //We first retrieve the ID of the user
+      cognitoIdentityClient.getId(
+        { IdentityPoolId: payload.cognitoIdentityPoolId, Logins },
+        (err, data) => {
+          if (!data.IdentityId) {
+            return reject("Identity not found");
+          }
+
+          const credentials = {
+            IdentityId: data.IdentityId,
+            Logins
           };
-          context.commit("notifications/show", notification, { root: true });
-          return reject();
-        } else {
-          const STS = new AWS.STS();
 
-          STS.getCallerIdentity({}, (err, data) => {
-            if (err) {
-              const notification: AppNotification = {
-                key: "cognitoCallback",
-                text: err.message,
-                variant: "danger"
+          cognitoIdentityClient.getCredentialsForIdentity(
+            credentials,
+            (err, data) => {
+              if (err) {
+                const notification: AppNotification = {
+                  key: "cognitoCallback",
+                  text: err.message,
+                  variant: "danger"
+                };
+                context.commit("notifications/show", notification, {
+                  root: true
+                });
+                return reject();
+              }
+              const credentials = {
+                accessKeyId: data.Credentials?.AccessKeyId || "",
+                secretAccessKey: data.Credentials?.SecretKey || "",
+                sessionToken: data.Credentials?.SessionToken,
+                expiration: data.Credentials?.Expiration
               };
-              context.commit("notifications/show", notification, {
-                root: true
+              const STS = new STSClient({ credentials, region });
+
+              STS.getCallerIdentity({}, (err, data) => {
+                if (err) {
+                  const notification: AppNotification = {
+                    key: "cognitoCallback",
+                    text: err.message,
+                    variant: "danger"
+                  };
+                  context.commit("notifications/show", notification, {
+                    root: true
+                  });
+                  return reject();
+                } else {
+                  context.commit("loginWithCognito", {
+                    credentials,
+                    userArn: data.Arn,
+                    accountId: data.Account
+                  });
+                  return resolve();
+                }
               });
-              return reject();
-            } else {
-              context.commit("loginWithCognito", {
-                credentials,
-                userArn: data.Arn,
-                accountId: data.Account
-              });
-              return resolve();
             }
-          });
+          );
         }
-      });
+      );
     });
   },
 
@@ -116,13 +139,14 @@ export const STSActions = {
     }
   ) {
     return new Promise((resolve, reject) => {
-      //If we aren't in the main account at the moment, we first switch to it
-      if (context.state.currentRole !== -1) {
-        //We do not commit in the state we have switched role to avoid unnecessary reloading of resources
-        context.commit("backToMain", true);
+      if (!context.state.credentials) {
+        return reject("Not logged in");
       }
 
-      const STS = new AWS.STS();
+      //We go back to the main account to switch role
+      const credentials = context.state.credentials;
+
+      const STS = new STSClient({ credentials });
       STS.assumeRole(
         {
           RoleArn: `arn:aws:iam::${payload.accountId}:role/${payload.role}`,
@@ -137,27 +161,30 @@ export const STSActions = {
             };
             context.commit("notifications/show", notification, { root: true });
             return reject();
-          } else {
-            AWS.config.update({
-              accessKeyId: data.Credentials?.AccessKeyId,
-              secretAccessKey: data.Credentials?.SecretAccessKey,
-              sessionToken: data.Credentials?.SessionToken
-            });
+          } else if (data.Credentials) {
+            const credentials = {
+              accessKeyId: data.Credentials?.AccessKeyId || "",
+              secretAccessKey: data.Credentials?.SecretAccessKey || "",
+              sessionToken: data.Credentials?.SessionToken,
+              expiration: data.Credentials?.Expiration
+            };
+
             if (payload.newRole) {
               const role: Role = {
                 accountId: payload.accountId,
                 nickname: payload.nickname,
-                role: payload.role
+                role: payload.role,
+                credentials
               };
               context.commit("addRole", role);
             } else {
-              context.commit(
-                "switchRole",
-                context.state.roles.findIndex(
+              context.commit("switchRole", {
+                roleIndex: context.state.roles.findIndex(
                   r =>
                     r.accountId === payload.accountId && r.role === payload.role
-                )
-              );
+                ),
+                credentials
+              });
             }
             return resolve();
           }

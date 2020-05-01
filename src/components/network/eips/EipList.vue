@@ -97,7 +97,7 @@
 </template>
 
 <script lang="ts">
-import AWS from "aws-sdk";
+import EC2Client from "aws-sdk/clients/ec2";
 
 import Header from "@/components/Header/Header.vue";
 import Eip from "./Eip.vue";
@@ -213,7 +213,10 @@ export default class EipList extends mixins(Formatters, Notifications) {
     if (!filterByEipsId) {
       this.loadingCount++;
     }
-    const EC2 = new AWS.EC2({ region });
+    const EC2 = new EC2Client({
+      region,
+      credentials: this.$store.getters["sts/credentials"]
+    });
     const params: DescribeAddressesRequest = {};
     if (filterByEipsId) {
       params.Filters = [

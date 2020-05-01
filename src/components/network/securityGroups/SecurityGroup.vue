@@ -80,7 +80,7 @@ import {
   GlModalDirective,
   GlButtonGroup
 } from "@gitlab/ui";
-import AWS from "aws-sdk";
+import EC2Client from "aws-sdk/clients/ec2";
 import { Component, Prop } from "vue-property-decorator";
 import { Formatters } from "@/mixins/formatters";
 import TagsTable from "@/components/common/TagsTable.vue";
@@ -128,7 +128,10 @@ export default class SecurityGroup extends mixins(Formatters, Notifications) {
   };
 
   get EC2() {
-    return new AWS.EC2({ region: this.securityGroup.region });
+    return new EC2Client({
+      region: this.securityGroup.region,
+      credentials: this.$store.getters["sts/credentials"]
+    });
   }
 
   deleteSecurityGroup() {
@@ -136,21 +139,24 @@ export default class SecurityGroup extends mixins(Formatters, Notifications) {
       return;
     }
 
-    const EC2 = new AWS.EC2({ region: this.securityGroup.region });
-    EC2.deleteSecurityGroup({ GroupId: this.securityGroup.GroupId }, err => {
-      if (err) {
-        this.showError(err.message, "deleteSecurityGroup");
-      } else {
-        this.hideErrors("deleteSecurityGroup");
-        this.showAlert({
-          variant: "info",
-          text: "Deleted security group with ID " + this.securityGroup.GroupId,
-          key: "deletingSecurityGroup",
-          resourceId: this.securityGroup.GroupId
-        });
-        this.$emit("deleted");
+    this.EC2.deleteSecurityGroup(
+      { GroupId: this.securityGroup.GroupId },
+      err => {
+        if (err) {
+          this.showError(err.message, "deleteSecurityGroup");
+        } else {
+          this.hideErrors("deleteSecurityGroup");
+          this.showAlert({
+            variant: "info",
+            text:
+              "Deleted security group with ID " + this.securityGroup.GroupId,
+            key: "deletingSecurityGroup",
+            resourceId: this.securityGroup.GroupId
+          });
+          this.$emit("deleted");
+        }
       }
-    });
+    );
   }
 }
 </script>

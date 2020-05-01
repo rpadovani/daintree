@@ -148,7 +148,7 @@ import {
   GlButtonGroup,
   GlIcon
 } from "@gitlab/ui";
-import AWS from "aws-sdk";
+import SNSClient from "aws-sdk/clients/sns";
 import { Component, Prop } from "vue-property-decorator";
 import { Formatters } from "@/mixins/formatters";
 import { mixins } from "vue-class-component";
@@ -227,7 +227,10 @@ export default class SNSSubscription extends mixins(Formatters, Notifications) {
       return;
     }
 
-    const SNS = new AWS.SNS({ region: this.sns.region });
+    const SNS = new SNSClient({
+      region: this.sns.region,
+      credentials: this.$store.getters["sts/credentials"]
+    });
 
     SNS.unsubscribe({ SubscriptionArn: this.sns.subscriptionArn }, err => {
       if (err) {

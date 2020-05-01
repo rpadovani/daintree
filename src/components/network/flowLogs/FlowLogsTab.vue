@@ -19,7 +19,7 @@
 
 <script lang="ts">
 import { Component, Prop, Vue } from "vue-property-decorator";
-import AWS from "aws-sdk";
+import EC2Client from "aws-sdk/clients/ec2";
 import { FlowLog } from "aws-sdk/clients/ec2";
 import { GlAlert, GlSkeletonLoading, GlEmptyState, GlTable } from "@gitlab/ui";
 @Component({
@@ -41,7 +41,10 @@ export default class FlowLogsTab extends Vue {
 
   describeFlowLogs() {
     this.tabState = "loading";
-    const EC2 = new AWS.EC2({ region: this.region });
+    const EC2 = new EC2Client({
+      region: this.region,
+      credentials: this.$store.getters["sts/credentials"]
+    });
     EC2.describeFlowLogs(
       {
         Filter: [

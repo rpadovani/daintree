@@ -111,7 +111,7 @@ import {
   GlButton
 } from "@gitlab/ui";
 import { BInputGroupText } from "bootstrap-vue";
-import AWS from "aws-sdk";
+import EC2Client from "aws-sdk/clients/ec2";
 import { Component, Watch } from "vue-property-decorator";
 import Notifications from "@/mixins/notifications";
 import {
@@ -185,12 +185,19 @@ export default class NewNat extends mixins(Notifications, Formatters) {
     this.getEipsForCurrentRegion();
   }
 
+  get credentials() {
+    return this.$store.getters["sts/credentials"];
+  }
+
   getSubnetsForCurrentRegion() {
     this.hideErrors("createNat");
     if (this.selectedRegion === "") {
       this.subnets = [];
     } else {
-      const EC2 = new AWS.EC2({ region: this.selectedRegion });
+      const EC2 = new EC2Client({
+        region: this.selectedRegion,
+        credentials: this.credentials
+      });
 
       this.loadingCount++;
 
@@ -210,7 +217,10 @@ export default class NewNat extends mixins(Notifications, Formatters) {
     if (this.selectedRegion === "") {
       this.eips = [];
     } else {
-      const EC2 = new AWS.EC2({ region: this.selectedRegion });
+      const EC2 = new EC2Client({
+        region: this.selectedRegion,
+        credentials: this.credentials
+      });
 
       this.loadingCount++;
       EC2.describeAddresses({}, (err, data) => {
@@ -225,7 +235,10 @@ export default class NewNat extends mixins(Notifications, Formatters) {
   }
 
   createNat() {
-    const EC2 = new AWS.EC2({ region: this.selectedRegion });
+    const EC2 = new EC2Client({
+      region: this.selectedRegion,
+      credentials: this.credentials
+    });
     const AllocationId = this.eips.find(
       eip => eip.PublicIp === this.selectedEip.split(" ")[0]
     )?.AllocationId;
@@ -267,7 +280,10 @@ export default class NewNat extends mixins(Notifications, Formatters) {
 
   newIp() {
     this.allocateLoading = true;
-    const EC2 = new AWS.EC2({ region: this.selectedRegion });
+    const EC2 = new EC2Client({
+      region: this.selectedRegion,
+      credentials: this.credentials
+    });
     EC2.allocateAddress({ Domain: "vpc" }, (err, data) => {
       this.allocateLoading = false;
       if (err) {

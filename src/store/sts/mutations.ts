@@ -1,13 +1,11 @@
 import { MutationTree } from "vuex";
 import { Role, STSState } from "@/store/sts/state";
-import AWS from "aws-sdk";
 
 export const STSMutations = {
-  login(state: STSState, { arn, account, accessKeyId, secretAccessKey }) {
+  login(state: STSState, { arn, account, credentials }) {
     state.userArn = arn;
     state.accountID = account;
-    state.accessKeyId = accessKeyId;
-    state.secretAccessKey = secretAccessKey;
+    state.credentials = credentials;
     state.loginMethod = "accessKey";
   },
   loginWithCognito(state: STSState, { accountId, userArn, credentials }) {
@@ -29,22 +27,18 @@ export const STSMutations = {
   addRole(state: STSState, payload: Role) {
     const newLength = state.roles.push(payload);
     state.currentRole = newLength - 1;
+    state.currentCredentials = payload.credentials;
   },
-  switchRole(state: STSState, roleIndex: number) {
+  switchRole(state: STSState, { roleIndex, credentials }) {
     state.currentRole = roleIndex;
+    state.currentCredentials = credentials;
   },
   backToMain(state: STSState, skipSwitchRole?: boolean) {
     if (!skipSwitchRole) {
       state.currentRole = -1;
     }
-    AWS.config = new AWS.Config();
 
-    if (state.loginMethod === "cognito") {
-      AWS.config.credentials = state.credentials;
-    } else {
-      AWS.config.accessKeyId = state.accessKeyId;
-      AWS.config.secretAccessKey = state.secretAccessKey;
-    }
+    state.currentCredentials = undefined;
   },
 
   routeAfterLogin(state: STSState, to) {

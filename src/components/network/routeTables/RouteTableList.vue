@@ -114,7 +114,7 @@
 </template>
 
 <script lang="ts">
-import AWS from "aws-sdk";
+import EC2Client from "aws-sdk/clients/ec2";
 
 import Header from "@/components/Header/Header.vue";
 import RegionText from "@/components/common/RegionText.vue";
@@ -238,6 +238,10 @@ export default class RouteTableList extends mixins(Formatters, Notifications) {
     );
   }
 
+  get credentials() {
+    return this.$store.getters["sts/credentials"];
+  }
+
   getAllRouteTables() {
     this.regionsEnabled.forEach(region => this.getRouteTableForRegion(region));
   }
@@ -245,7 +249,10 @@ export default class RouteTableList extends mixins(Formatters, Notifications) {
   getRouteTableForRegion(region: string) {
     this.loadingCount++;
 
-    const EC2 = new AWS.EC2({ region });
+    const EC2 = new EC2Client({
+      region,
+      credentials: this.credentials
+    });
     const params: DescribeRouteTablesRequest = {};
 
     EC2.describeRouteTables(params, (err, data) => {
@@ -354,7 +361,10 @@ export default class RouteTableList extends mixins(Formatters, Notifications) {
       this.selectedRouteTable.region &&
       this.selectedRouteTable.RouteTableId
     ) {
-      const EC2 = new AWS.EC2({ region: this.selectedRouteTable.region });
+      const EC2 = new EC2Client({
+        region: this.selectedRouteTable.region,
+        credentials: this.credentials
+      });
       const params: DescribeRouteTablesRequest = {};
       params.Filters = [
         {

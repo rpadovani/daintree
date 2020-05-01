@@ -110,8 +110,11 @@ import {
   GlButton,
   GlEmptyState
 } from "@gitlab/ui";
-import AWS from "aws-sdk";
+import EC2Client from "aws-sdk/clients/ec2";
+import SNSClient from "aws-sdk/clients/sns";
+import SQSClient from "aws-sdk/clients/sqs";
 import { isString } from "@/utils/isString";
+import { AWSError } from "aws-sdk/lib/error";
 
 interface TagWithMetadata extends Tag {
   editing: boolean;
@@ -158,6 +161,10 @@ export default class TagsTable extends Vue {
     return returnedTags;
   }
 
+  get credentials() {
+    return this.$store.getters["sts/credentials"];
+  }
+
   reloadAllTags() {
     if (this.provider === "EC2" || !this.provider) {
       const params = {
@@ -169,7 +176,10 @@ export default class TagsTable extends Vue {
         ]
       };
 
-      const EC2 = new AWS.EC2({ region: this.region });
+      const EC2 = new EC2Client({
+        region: this.region,
+        credentials: this.credentials
+      });
 
       EC2.describeTags(params, (err, data) => {
         if (err) {
@@ -180,7 +190,10 @@ export default class TagsTable extends Vue {
         }
       });
     } else if (this.provider === "SQS") {
-      const SQS = new AWS.SQS({ region: this.region });
+      const SQS = new SQSClient({
+        region: this.region,
+        credentials: this.credentials
+      });
       SQS.listQueueTags({ QueueUrl: this.resourceId }, (err, data) => {
         if (err) {
           this.alertMessage = err.message;
@@ -194,7 +207,10 @@ export default class TagsTable extends Vue {
         }
       });
     } else if (this.provider === "SNS") {
-      const SNS = new AWS.SNS({ region: this.region });
+      const SNS = new SNSClient({
+        region: this.region,
+        credentials: this.credentials
+      });
       SNS.listTagsForResource({ ResourceArn: this.resourceId }, (err, data) => {
         if (err) {
           this.alertMessage = err.message;
@@ -206,7 +222,7 @@ export default class TagsTable extends Vue {
     }
   }
 
-  callbackCreateNewTag(tag: Tag, err: AWS.AWSError) {
+  callbackCreateNewTag(tag: Tag, err: AWSError) {
     if (err) {
       this.alertMessage = err.message;
       this.alertVariant = "danger";
@@ -222,7 +238,7 @@ export default class TagsTable extends Vue {
     const tag = { Key: this.newTagKey, Value: this.newTagValue };
 
     if (this.provider === "EC2" || !this.provider) {
-      const EC2 = new AWS.EC2({ region: this.region });
+      const EC2 = new EC2Client({ region: this.region });
 
       const params = {
         Resources: [this.resourceId],
@@ -231,7 +247,10 @@ export default class TagsTable extends Vue {
 
       EC2.createTags(params, err => this.callbackCreateNewTag(tag, err));
     } else if (this.provider === "SQS") {
-      const SQS = new AWS.SQS({ region: this.region });
+      const SQS = new SQSClient({
+        region: this.region,
+        credentials: this.credentials
+      });
       const Tags: { [key: string]: string } = {};
       const params = {
         QueueUrl: this.resourceId,
@@ -242,7 +261,10 @@ export default class TagsTable extends Vue {
 
       SQS.tagQueue(params, err => this.callbackCreateNewTag(tag, err));
     } else if (this.provider === "SNS") {
-      const SNS = new AWS.SNS({ region: this.region });
+      const SNS = new SNSClient({
+        region: this.region,
+        credentials: this.credentials
+      });
       const params = {
         ResourceArn: this.resourceId,
         Tags: [tag]
@@ -252,7 +274,7 @@ export default class TagsTable extends Vue {
     }
   }
 
-  callbackSaveTag(tag: TagWithMetadata, err: AWS.AWSError) {
+  callbackSaveTag(tag: TagWithMetadata, err: AWSError) {
     if (err) {
       this.alertMessage = err.message;
       this.alertVariant = "danger";
@@ -277,7 +299,7 @@ export default class TagsTable extends Vue {
     }
 
     if (this.provider === "EC2" || !this.provider) {
-      const EC2 = new AWS.EC2({ region: this.region });
+      const EC2 = new EC2Client({ region: this.region });
 
       const params = {
         Resources: [this.resourceId],
@@ -290,7 +312,10 @@ export default class TagsTable extends Vue {
       isString(tag.Key) &&
       isString(tag.Value)
     ) {
-      const SQS = new AWS.SQS({ region: this.region });
+      const SQS = new SQSClient({
+        region: this.region,
+        credentials: this.credentials
+      });
       const Tags: { [key: string]: string } = {};
       const params = {
         QueueUrl: this.resourceId,
@@ -304,7 +329,10 @@ export default class TagsTable extends Vue {
       isString(tag.Key) &&
       isString(tag.Value)
     ) {
-      const SNS = new AWS.SNS({ region: this.region });
+      const SNS = new SNSClient({
+        region: this.region,
+        credentials: this.credentials
+      });
       const params = {
         ResourceArn: this.resourceId,
         Tags: [{ Key: tag.Key, Value: tag.Value }]
@@ -314,7 +342,7 @@ export default class TagsTable extends Vue {
     }
   }
 
-  callbackDeleteTag(originalKey: string | undefined, err: AWS.AWSError) {
+  callbackDeleteTag(originalKey: string | undefined, err: AWSError) {
     if (err) {
       this.alertMessage = err.message;
       this.alertVariant = "danger";
@@ -326,7 +354,7 @@ export default class TagsTable extends Vue {
 
   deleteTag(tag: TagWithMetadata) {
     if (this.provider === "EC2" || !this.provider) {
-      const EC2 = new AWS.EC2({ region: this.region });
+      const EC2 = new EC2Client({ region: this.region });
 
       const params = {
         Resources: [this.resourceId],
@@ -337,7 +365,10 @@ export default class TagsTable extends Vue {
         this.callbackDeleteTag(tag.originalKey, err)
       );
     } else if (this.provider === "SQS" && tag.Key) {
-      const SQS = new AWS.SQS({ region: this.region });
+      const SQS = new SQSClient({
+        region: this.region,
+        credentials: this.credentials
+      });
 
       const params = {
         QueueUrl: this.resourceId,
@@ -348,7 +379,10 @@ export default class TagsTable extends Vue {
         this.callbackDeleteTag(tag.originalKey, err)
       );
     } else if (this.provider === "SNS" && tag.Key) {
-      const SNS = new AWS.SNS({ region: this.region });
+      const SNS = new SNSClient({
+        region: this.region,
+        credentials: this.credentials
+      });
       const params = {
         ResourceArn: this.resourceId,
         TagKeys: [tag.Key]

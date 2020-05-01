@@ -103,7 +103,7 @@
 </template>
 
 <script lang="ts">
-import AWS from "aws-sdk";
+import EC2Client from "aws-sdk/clients/ec2";
 
 import Header from "@/components/Header/Header.vue";
 import RegionText from "@/components/common/RegionText.vue";
@@ -194,6 +194,10 @@ export default class SecurityGroupList extends mixins(
     return this.$store.getters["sts/currentRoleIndex"];
   }
 
+  get credentials() {
+    return this.$store.getters["sts/credentials"];
+  }
+
   get emptyStateDescription(): string {
     return (
       "Daintree hasn't found any security group in the selected regions! You can create a new one, or change selected regions in the settings. We have looked in " +
@@ -219,7 +223,7 @@ export default class SecurityGroupList extends mixins(
   getSecurityGroupForRegion(region: string) {
     this.loadingCount++;
 
-    const EC2 = new AWS.EC2({ region });
+    const EC2 = new EC2Client({ region, credentials: this.credentials });
     const params: DescribeSecurityGroupsRequest = {};
 
     EC2.describeSecurityGroups(params, (err, data) => {

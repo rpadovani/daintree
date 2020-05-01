@@ -6,6 +6,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Changed
+
+- Improve loading performance optimizing AWS library imports. The vendors file went from 3288.93 KiB to 933.97 KiB.
+
 ## [0.1.0]
 
 ### Added

@@ -163,7 +163,7 @@ import {
 import { Formatters } from "@/mixins/formatters";
 import { Prop, Component } from "vue-property-decorator";
 import TagsTable from "@/components/common/TagsTable.vue";
-import AWS from "aws-sdk";
+import EC2Client from "aws-sdk/clients/ec2";
 import { mixins } from "vue-class-component";
 import Notifications from "@/mixins/notifications";
 import { eips } from "@/components/network/eips/eip";
@@ -239,9 +239,14 @@ export default class Eip extends mixins(Formatters, Notifications) {
     }
   }
 
-  disassociateEip() {
-    const EC2 = new AWS.EC2({ region: this.eip.region });
+  get EC2() {
+    return new EC2Client({
+      region: this.eip.region,
+      credentials: this.$store.getters["sts/credentials"]
+    });
+  }
 
+  disassociateEip() {
     const params: DisassociateAddressRequest = {};
     if (this.eip.AssociationId) {
       params.AssociationId = this.eip.AssociationId;
@@ -249,7 +254,7 @@ export default class Eip extends mixins(Formatters, Notifications) {
       params.PublicIp = this.eip.PublicIp;
     }
 
-    EC2.disassociateAddress(params, err => {
+    this.EC2.disassociateAddress(params, err => {
       if (err) {
         this.showError(err.message, "disassociateEip");
       } else {
@@ -265,8 +270,7 @@ export default class Eip extends mixins(Formatters, Notifications) {
       return;
     }
 
-    const EC2 = new AWS.EC2({ region: this.eip.region });
-    EC2.releaseAddress({ AllocationId: this.eip.AllocationId }, err => {
+    this.EC2.releaseAddress({ AllocationId: this.eip.AllocationId }, err => {
       if (err) {
         this.showError(err.message, "releaseEip");
       } else {
@@ -286,8 +290,7 @@ export default class Eip extends mixins(Formatters, Notifications) {
     this.networkInterfaces = [];
     this.instances = [];
 
-    const EC2 = new AWS.EC2({ region: this.eip.region });
-    EC2.describeInstances({}, (err, data) => {
+    this.EC2.describeInstances({}, (err, data) => {
       if (err) {
         this.alertMessage = err.message;
         this.alertVariant = "danger";
@@ -306,7 +309,7 @@ export default class Eip extends mixins(Formatters, Notifications) {
       }
     });
 
-    EC2.describeNetworkInterfaces({}, (err, data) => {
+    this.EC2.describeNetworkInterfaces({}, (err, data) => {
       if (err) {
         this.alertMessage = err.message;
         this.alertVariant = "danger";
@@ -325,7 +328,6 @@ export default class Eip extends mixins(Formatters, Notifications) {
   }
 
   associateEip() {
-    const EC2 = new AWS.EC2({ region: this.eip.region });
     const params: AssociateAddressRequest = {
       AllocationId: this.eip.AllocationId
     };
@@ -336,7 +338,7 @@ export default class Eip extends mixins(Formatters, Notifications) {
       params.NetworkInterfaceId = this.selectedNetworkInterface.split(" ")[0];
     }
 
-    EC2.associateAddress(params, (err, data) => {
+    this.EC2.associateAddress(params, (err, data) => {
       if (err) {
         this.alertMessage = err.message;
         this.alertVariant = "danger";

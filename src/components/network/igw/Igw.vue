@@ -105,7 +105,7 @@ import {
 } from "@gitlab/ui";
 import { Prop, Component } from "vue-property-decorator";
 import TagsTable from "@/components/common/TagsTable.vue";
-import AWS from "aws-sdk";
+import EC2Client from "aws-sdk/clients/ec2";
 import Notifications from "@/mixins/notifications";
 import { igws } from "@/components/network/igw/igw";
 import IgwWithRegion = igws.IgwWithRegion;
@@ -186,8 +186,15 @@ export default class Igw extends mixins(Notifications, Formatters) {
     return "";
   }
 
+  get credentials() {
+    return this.$store.getters["sts/credentials"];
+  }
+
   attachIgw() {
-    const EC2 = new AWS.EC2({ region: this.igw.region });
+    const EC2 = new EC2Client({
+      region: this.igw.region,
+      credentials: this.credentials
+    });
 
     if (this.selectedVpc && this.igw.InternetGatewayId) {
       EC2.attachInternetGateway(
@@ -224,7 +231,10 @@ export default class Igw extends mixins(Notifications, Formatters) {
       return;
     }
 
-    const EC2 = new AWS.EC2({ region: this.igw.region });
+    const EC2 = new EC2Client({
+      region: this.igw.region,
+      credentials: this.credentials
+    });
     EC2.detachInternetGateway(
       {
         InternetGatewayId: this.igw.InternetGatewayId,
@@ -249,7 +259,10 @@ export default class Igw extends mixins(Notifications, Formatters) {
       return;
     }
 
-    const EC2 = new AWS.EC2({ region: this.igw.region });
+    const EC2 = new EC2Client({
+      region: this.igw.region,
+      credentials: this.credentials
+    });
     EC2.deleteInternetGateway(
       { InternetGatewayId: this.igw.InternetGatewayId },
       err => {
@@ -277,7 +290,10 @@ export default class Igw extends mixins(Notifications, Formatters) {
   }
 
   getVpcsForCurrentRegion() {
-    const EC2 = new AWS.EC2({ region: this.igw.region });
+    const EC2 = new EC2Client({
+      region: this.igw.region,
+      credentials: this.credentials
+    });
 
     EC2.describeVpcs(
       { Filters: [{ Name: "state", Values: ["available"] }] },

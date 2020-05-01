@@ -57,7 +57,7 @@ import {
   GlButton
 } from "@gitlab/ui";
 import { BInputGroupText } from "bootstrap-vue";
-import AWS from "aws-sdk";
+import SNSClient from "aws-sdk/clients/sns";
 import { Component } from "vue-property-decorator";
 import Notifications from "@/mixins/notifications";
 import { CreateTopicInput } from "aws-sdk/clients/sns";
@@ -79,7 +79,10 @@ export default class NewSNS extends Notifications {
   snsName = "";
 
   createSns() {
-    const SNS = new AWS.SNS({ region: this.selectedRegion });
+    const SNS = new SNSClient({
+      region: this.selectedRegion,
+      credentials: this.$store.getters["sts/credentials"]
+    });
 
     const params: CreateTopicInput = { Name: this.snsName };
     SNS.createTopic(params, (err, data) => {

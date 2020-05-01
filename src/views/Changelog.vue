@@ -3,12 +3,8 @@
     <Header hide-sub-header />
 
     <div class="container">
-      <section class="gl-banner">
-        <div
-          v-for="news in data"
-          :key="news.tagName"
-          class="gl-banner-content mt-1"
-        >
+      <section class="gl-banner mt-1" v-for="news in data" :key="news.tagName">
+        <div class="gl-banner-content ">
           <h1 class="gl-banner-title">
             {{ news.name }}
             <gl-badge variant="info">{{

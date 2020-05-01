@@ -88,7 +88,7 @@ import {
   GlButton
 } from "@gitlab/ui";
 import { BInputGroupText } from "bootstrap-vue";
-import AWS from "aws-sdk";
+import EC2Client from "aws-sdk/clients/ec2";
 import { Component, Watch } from "vue-property-decorator";
 import Notifications from "@/mixins/notifications";
 import { VpcList } from "aws-sdk/clients/ec2";
@@ -139,8 +139,15 @@ export default class NewSecurityGroup extends mixins(
     this.getVpcsForCurrentRegion();
   }
 
+  get credentials() {
+    return this.$store.getters["sts/credentials"];
+  }
+
   createSecurityGroup() {
-    const EC2 = new AWS.EC2({ region: this.selectedRegion });
+    const EC2 = new EC2Client({
+      region: this.selectedRegion,
+      credentials: this.credentials
+    });
     EC2.createSecurityGroup(
       {
         VpcId: this.selectedVpc.split(" ")[0],
@@ -165,7 +172,10 @@ export default class NewSecurityGroup extends mixins(
     if (this.selectedRegion === "") {
       this.vpcs = [];
     } else {
-      const EC2 = new AWS.EC2({ region: this.selectedRegion });
+      const EC2 = new EC2Client({
+        region: this.selectedRegion,
+        credentials: this.credentials
+      });
 
       this.loadingCount++;
       EC2.describeVpcs(

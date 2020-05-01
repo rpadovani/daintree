@@ -98,7 +98,7 @@
 </template>
 
 <script lang="ts">
-import AWS from "aws-sdk";
+import EC2Client from "aws-sdk/clients/ec2";
 
 import Header from "@/components/Header/Header.vue";
 import RegionText from "@/components/common/RegionText.vue";
@@ -176,6 +176,10 @@ export default class VPCList extends mixins(Formatters, Notifications) {
     return Object.values(this.vpcs);
   }
 
+  get credentials() {
+    return this.$store.getters["sts/credentials"];
+  }
+
   get regionsEnabled(): string[] {
     return this.$store.getters["sts/regions"];
   }
@@ -211,7 +215,7 @@ export default class VPCList extends mixins(Formatters, Notifications) {
       this.loadingCount++;
     }
 
-    const EC2 = new AWS.EC2({ region });
+    const EC2 = new EC2Client({ region, credentials: this.credentials });
     const params: DescribeVpcsRequest = {};
     if (filterByVpcsId) {
       params.Filters = [

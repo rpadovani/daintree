@@ -96,7 +96,7 @@ import { Prop, Component } from "vue-property-decorator";
 import { nats } from "@/components/network/NAT/nat";
 import NatWithRegion = nats.NatWithRegion;
 import TagsTable from "@/components/common/TagsTable.vue";
-import AWS from "aws-sdk";
+import EC2Client from "aws-sdk/clients/ec2";
 import { mixins } from "vue-class-component";
 import Notifications from "@/mixins/notifications";
 
@@ -138,12 +138,19 @@ export default class Nat extends mixins(Formatters, Notifications) {
     return "info";
   }
 
+  get credentials() {
+    return this.$store.getters["sts/credentials"];
+  }
+
   deleteNat() {
     if (!this.nat.NatGatewayId) {
       return;
     }
 
-    const EC2 = new AWS.EC2({ region: this.nat.region });
+    const EC2 = new EC2Client({
+      region: this.nat.region,
+      credentials: this.credentials
+    });
     EC2.deleteNatGateway(
       { NatGatewayId: this.nat.NatGatewayId },
       (err, data) => {

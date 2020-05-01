@@ -5,6 +5,9 @@ export const STSGetters = {
   isLoggedIn: function(state) {
     return state.loginMethod !== undefined;
   },
+  credentials: function(state) {
+    return state.currentCredentials || state.credentials;
+  },
   userArn: function(state) {
     return state.userArn;
   },

@@ -104,7 +104,7 @@
 </template>
 
 <script lang="ts">
-import AWS from "aws-sdk";
+import EC2Client from "aws-sdk/clients/ec2";
 
 import Header from "@/components/Header/Header.vue";
 import RegionText from "@/components/common/RegionText.vue";
@@ -178,6 +178,10 @@ export default class SubnetList extends mixins(Formatters, Notifications) {
     { key: "VpcId", sortable: true }
   ];
 
+  get credentials() {
+    return this.$store.getters["sts/credentials"];
+  }
+
   get subnetsAsList(): SubnetWithRegion[] {
     return Object.values(this.subnets);
   }
@@ -218,7 +222,10 @@ export default class SubnetList extends mixins(Formatters, Notifications) {
       this.loadingCount++;
     }
 
-    const EC2 = new AWS.EC2({ region });
+    const EC2 = new EC2Client({
+      region,
+      credentials: this.credentials
+    });
     const params: DescribeSubnetsRequest = {};
     if (filterBySubnetsId) {
       params.Filters = [

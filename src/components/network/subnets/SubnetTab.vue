@@ -27,7 +27,7 @@
 import { Component, Prop, Watch } from "vue-property-decorator";
 import { SubnetList } from "aws-sdk/clients/ec2";
 import { Formatters } from "@/mixins/formatters";
-import AWS from "aws-sdk";
+import EC2Client from "aws-sdk/clients/ec2";
 
 import { GlEmptyState, GlTable, GlAlert, GlSkeletonLoading } from "@gitlab/ui";
 
@@ -70,6 +70,10 @@ export default class SubnetTab extends Formatters {
     }
   ];
 
+  get credentials() {
+    return this.$store.getters["sts/credentials"];
+  }
+
   describeSubnets(fullReload = false) {
     if (fullReload) {
       this.state = "loading";
@@ -79,7 +83,10 @@ export default class SubnetTab extends Formatters {
     const params = {
       Filters: [{ Name: this.filterName, Values: this.filterValues }]
     };
-    const EC2 = new AWS.EC2({ region: this.region });
+    const EC2 = new EC2Client({
+      region: this.region,
+      credentials: this.credentials
+    });
 
     EC2.describeSubnets(params, (err, data) => {
       if (err) {

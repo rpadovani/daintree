@@ -95,7 +95,7 @@ import {
   GlModalDirective,
   GlButtonGroup
 } from "@gitlab/ui";
-import AWS from "aws-sdk";
+import EC2Client from "aws-sdk/clients/ec2";
 import { Component, Prop } from "vue-property-decorator";
 import { Formatters } from "@/mixins/formatters";
 import TagsTable from "@/components/common/TagsTable.vue";
@@ -144,7 +144,10 @@ export default class RouteTable extends mixins(Formatters, Notifications) {
   };
 
   get EC2() {
-    return new AWS.EC2({ region: this.routeTable.region });
+    return new EC2Client({
+      region: this.routeTable.region,
+      credentials: this.$store.getters["sts/credentials"]
+    });
   }
 
   get isMain(): boolean {
@@ -163,14 +166,13 @@ export default class RouteTable extends mixins(Formatters, Notifications) {
   }
 
   setAsMain() {
-    const EC2 = new AWS.EC2({ region: this.routeTable.region });
     if (!this.mainRouteAssociationId || !this.routeTable.RouteTableId) {
       this.alertMessage = "We weren't able to perform the operation";
       this.alertVariant = "danger";
       return;
     }
 
-    EC2.replaceRouteTableAssociation(
+    this.EC2.replaceRouteTableAssociation(
       {
         AssociationId: this.mainRouteAssociationId,
         RouteTableId: this.routeTable.RouteTableId
@@ -193,8 +195,7 @@ export default class RouteTable extends mixins(Formatters, Notifications) {
       return;
     }
 
-    const EC2 = new AWS.EC2({ region: this.routeTable.region });
-    EC2.deleteRouteTable(
+    this.EC2.deleteRouteTable(
       { RouteTableId: this.routeTable.RouteTableId },
       err => {
         if (err) {

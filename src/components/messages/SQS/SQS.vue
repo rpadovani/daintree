@@ -105,7 +105,7 @@ import {
   GlModalDirective,
   GlButtonGroup
 } from "@gitlab/ui";
-import AWS from "aws-sdk";
+import SQSClient from "aws-sdk/clients/sqs";
 import { Component, Prop } from "vue-property-decorator";
 import { Formatters } from "@/mixins/formatters";
 import TagsTable from "@/components/common/TagsTable.vue";
@@ -149,7 +149,10 @@ export default class SQS extends mixins(Formatters, Notifications) {
       return;
     }
 
-    const SQS = new AWS.SQS({ region: this.sqs.region });
+    const SQS = new SQSClient({
+      region: this.sqs.region,
+      credentials: this.$store.getters["sts/credentials"]
+    });
 
     SQS.deleteQueue({ QueueUrl: this.sqs.queueUrl }, err => {
       if (err) {
@@ -172,7 +175,10 @@ export default class SQS extends mixins(Formatters, Notifications) {
       return;
     }
 
-    const SQS = new AWS.SQS({ region: this.sqs.region });
+    const SQS = new SQSClient({
+      region: this.sqs.region,
+      credentials: this.$store.getters["sts/credentials"]
+    });
 
     SQS.purgeQueue({ QueueUrl: this.sqs.queueUrl }, err => {
       if (err) {

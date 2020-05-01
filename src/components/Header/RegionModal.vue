@@ -65,7 +65,7 @@ import {
 import { Component, Vue, Watch } from "vue-property-decorator";
 import { BFormCheckbox } from "bootstrap-vue";
 import RegionText from "@/components/common/RegionText.vue";
-import AWS from "aws-sdk";
+import EC2Client from "aws-sdk/clients/ec2";
 import { isString } from "@/utils/isString";
 
 @Component({
@@ -167,7 +167,10 @@ export default class RegionModal extends Vue {
 
   loadEnabledRegions() {
     //The region doesn't really matter here, but it is mandatory
-    const EC2 = new AWS.EC2({ region: "us-east-1" });
+    const EC2 = new EC2Client({
+      region: "us-east-1",
+      credentials: this.$store.getters["sts/credentials"]
+    });
     EC2.describeRegions({}, (err, data) => {
       if (err) {
         this.errorLoading = true;

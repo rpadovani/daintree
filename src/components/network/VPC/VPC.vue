@@ -180,7 +180,7 @@ import {
   GlModal,
   GlModalDirective
 } from "@gitlab/ui";
-import AWS from "aws-sdk";
+import EC2Client from "aws-sdk/clients/ec2";
 import { Component, Prop, Watch } from "vue-property-decorator";
 import {
   FilterList,
@@ -230,7 +230,10 @@ export default class VPC extends mixins(Formatters, Notifications) {
   }
 
   get EC2() {
-    return new AWS.EC2({ region: this.vpc.region });
+    return new EC2Client({
+      region: this.vpc.region,
+      credentials: this.$store.getters["sts/credentials"]
+    });
   }
 
   //Internet gateways tab
@@ -363,8 +366,7 @@ export default class VPC extends mixins(Formatters, Notifications) {
       return;
     }
 
-    const EC2 = new AWS.EC2({ region: this.vpc.region });
-    EC2.deleteVpc({ VpcId: this.vpc.VpcId }, err => {
+    this.EC2.deleteVpc({ VpcId: this.vpc.VpcId }, err => {
       if (err) {
         this.showError(err.message, "deleteVpc");
       } else {

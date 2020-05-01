@@ -58,10 +58,9 @@ import {
   GlButton
 } from "@gitlab/ui";
 import { BInputGroupText } from "bootstrap-vue";
-import AWS from "aws-sdk";
 import { Component } from "vue-property-decorator";
 import Notifications from "@/mixins/notifications";
-import { CreateQueueRequest } from "aws-sdk/clients/sqs";
+import SQSClient, { CreateQueueRequest } from "aws-sdk/clients/sqs";
 
 @Component({
   components: {
@@ -76,11 +75,13 @@ import { CreateQueueRequest } from "aws-sdk/clients/sqs";
 })
 export default class NewSQS extends Notifications {
   selectedRegion = "";
-  cidrBlock = "";
   sqsName = "";
 
   createSqs() {
-    const SQS = new AWS.SQS({ region: this.selectedRegion });
+    const SQS = new SQSClient({
+      region: this.selectedRegion,
+      credentials: this.$store.getters["sts/credentials"]
+    });
 
     const params: CreateQueueRequest = { QueueName: this.sqsName };
     SQS.createQueue(params, (err, data) => {

@@ -111,7 +111,7 @@
 </template>
 
 <script lang="ts">
-import AWS from "aws-sdk";
+import EC2Client from "aws-sdk/clients/ec2";
 
 import Header from "@/components/Header/Header.vue";
 import Nat from "./Nat.vue";
@@ -212,13 +212,20 @@ export default class NatList extends mixins(Formatters, Notifications) {
   getAllNats() {
     this.regionsEnabled.forEach(region => this.getNatForRegion(region));
   }
+  get credentials() {
+    return this.$store.getters["sts/credentials"];
+  }
 
   getNatForRegion(region: string, filterByNatsId?: string[]) {
     //While polling we do not set the loading state 'cause it is annoying
     if (!filterByNatsId) {
       this.loadingCount++;
     }
-    const EC2 = new AWS.EC2({ region });
+
+    const EC2 = new EC2Client({
+      region,
+      credentials: this.credentials
+    });
     const params: DescribeNatGatewaysRequest = {};
     if (filterByNatsId) {
       params.Filter = [

@@ -102,7 +102,7 @@ import {
   GlButton
 } from "@gitlab/ui";
 import { BInputGroupText } from "bootstrap-vue";
-import AWS from "aws-sdk";
+import EC2Client from "aws-sdk/clients/ec2";
 import { Component } from "vue-property-decorator";
 import Notifications from "@/mixins/notifications";
 import {
@@ -166,8 +166,14 @@ export default class NewSubnet extends mixins(Notifications, Formatters) {
     return options;
   }
 
+  get EC2() {
+    return new EC2Client({
+      region: this.selectedRegion,
+      credentials: this.$store.getters["sts/credentials"]
+    });
+  }
+
   createSubnet() {
-    const EC2 = new AWS.EC2({ region: this.selectedRegion });
     const params: CreateSubnetRequest = {
       CidrBlock: this.cidrBlock,
       VpcId: this.selectedVpc.split(" ")[0]
@@ -176,7 +182,7 @@ export default class NewSubnet extends mixins(Notifications, Formatters) {
     if (this.selectedAz !== "No preference") {
       params.AvailabilityZone = this.selectedAz;
     }
-    EC2.createSubnet(params, (err, data) => {
+    this.EC2.createSubnet(params, (err, data) => {
       if (err) {
         this.showError(err.message, "createSubnet");
       } else {
@@ -188,7 +194,7 @@ export default class NewSubnet extends mixins(Notifications, Formatters) {
             Resources: [data.Subnet.SubnetId],
             Tags: [{ Key: "Name", Value: this.subnetName }]
           };
-          EC2.createTags(params, err => {
+          this.EC2.createTags(params, err => {
             if (err) {
               this.showError(err.message, "createSubnet");
             } else {
@@ -211,10 +217,8 @@ export default class NewSubnet extends mixins(Notifications, Formatters) {
     if (this.selectedRegion === "") {
       this.vpcs = [];
     } else {
-      const EC2 = new AWS.EC2({ region: this.selectedRegion });
-
       this.loadingCount++;
-      EC2.describeVpcs(
+      this.EC2.describeVpcs(
         { Filters: [{ Name: "state", Values: ["available"] }] },
         (err, data) => {
           this.loadingCount--;
@@ -233,10 +237,8 @@ export default class NewSubnet extends mixins(Notifications, Formatters) {
     if (this.selectedRegion === "") {
       this.vpcs = [];
     } else {
-      const EC2 = new AWS.EC2({ region: this.selectedRegion });
-
       this.loadingCount++;
-      EC2.describeAvailabilityZones(
+      this.EC2.describeAvailabilityZones(
         { Filters: [{ Name: "state", Values: ["available"] }] },
         (err, data) => {
           this.loadingCount--;

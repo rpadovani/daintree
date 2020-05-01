@@ -107,7 +107,7 @@
 </template>
 
 <script lang="ts">
-import AWS from "aws-sdk";
+import SNSClient from "aws-sdk/clients/sns";
 
 import Header from "@/components/Header/Header.vue";
 import RegionText from "@/components/common/RegionText.vue";
@@ -207,6 +207,10 @@ export default class SNSTopicsList extends mixins(Formatters, Notifications) {
     return "";
   }
 
+  get credentials() {
+    return this.$store.getters["sts/credentials"];
+  }
+
   getAllTopics() {
     this.regionsEnabled.forEach(region => this.getTopicForRegion(region));
   }
@@ -214,7 +218,7 @@ export default class SNSTopicsList extends mixins(Formatters, Notifications) {
   getTopicForRegion(region: string) {
     this.loadingCount++;
 
-    const SNS = new AWS.SNS({ region });
+    const SNS = new SNSClient({ region, credentials: this.credentials });
 
     SNS.listTopics({}, (err, data) => {
       this.loadingCount--;

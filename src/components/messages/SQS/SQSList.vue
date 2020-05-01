@@ -107,7 +107,7 @@
 </template>
 
 <script lang="ts">
-import AWS from "aws-sdk";
+import SQSClient from "aws-sdk/clients/sqs";
 
 import Header from "@/components/Header/Header.vue";
 import RegionText from "@/components/common/RegionText.vue";
@@ -224,7 +224,10 @@ export default class SQSList extends mixins(Formatters, Notifications) {
       this.loadingCount++;
     }
 
-    const SQS = new AWS.SQS({ region });
+    const SQS = new SQSClient({
+      region,
+      credentials: this.$store.getters["sts/credentials"]
+    });
 
     const params: ListQueuesRequest = {};
 

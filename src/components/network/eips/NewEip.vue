@@ -65,7 +65,7 @@ import {
   GlIcon
 } from "@gitlab/ui";
 import { BInputGroupText } from "bootstrap-vue";
-import AWS from "aws-sdk";
+import EC2Client from "aws-sdk/clients/ec2";
 import { Component } from "vue-property-decorator";
 import Notifications from "@/mixins/notifications";
 import { mixins } from "vue-class-component";
@@ -92,7 +92,10 @@ export default class NewEip extends mixins(Notifications, Formatters) {
   }
 
   createEip() {
-    const EC2 = new AWS.EC2({ region: this.selectedRegion });
+    const EC2 = new EC2Client({
+      region: this.selectedRegion,
+      credentials: this.$store.getters["sts/credentials"]
+    });
 
     EC2.allocateAddress({ Domain: "vpc" }, (err, data) => {
       if (err) {

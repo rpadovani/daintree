@@ -108,7 +108,7 @@
 </template>
 
 <script lang="ts">
-import AWS from "aws-sdk";
+import EC2Client from "aws-sdk/clients/ec2";
 
 import Header from "@/components/Header/Header.vue";
 import Igw from "./Igw.vue";
@@ -204,12 +204,19 @@ export default class IgwList extends mixins(Formatters, Notifications) {
     this.regionsEnabled.forEach(region => this.getIgwForRegion(region));
   }
 
+  get credentials() {
+    return this.$store.getters["sts/credentials"];
+  }
+
   getIgwForRegion(region: string, filterByIgwsId?: string[]) {
     //While polling we do not set the loading state 'cause it is annoying
     if (!filterByIgwsId) {
       this.loadingCount++;
     }
-    const EC2 = new AWS.EC2({ region });
+    const EC2 = new EC2Client({
+      region,
+      credentials: this.credentials
+    });
     const params: DescribeInternetGatewaysRequest = {};
     if (filterByIgwsId) {
       params.Filters = [

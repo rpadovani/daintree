@@ -113,9 +113,9 @@
 </template>
 
 <script lang="ts">
+import EC2Client from "aws-sdk/clients/ec2";
 import Header from "../../Header/Header.vue";
 import Instance from "./Instance.vue";
-import AWS from "aws-sdk";
 import {
   GlTable,
   GlDrawer,
@@ -232,7 +232,10 @@ export default class Instances extends mixins(Formatters, Notifications) {
       this.loadingCount++;
     }
 
-    const EC2 = new AWS.EC2({ region });
+    const EC2 = new EC2Client({
+      region,
+      credentials: this.$store.getters["sts/credentials"]
+    });
     const params: DescribeInstancesRequest = {};
     if (filterByInstanceIds) {
       params.Filters = [

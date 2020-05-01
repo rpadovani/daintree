@@ -113,7 +113,7 @@
 </template>
 
 <script lang="ts">
-import AWS from "aws-sdk";
+import SNSClient from "aws-sdk/clients/sns";
 
 import Header from "@/components/Header/Header.vue";
 import RegionText from "@/components/common/RegionText.vue";
@@ -228,7 +228,10 @@ export default class SNSSubscriptionsList extends mixins(
   getSubscriptionForRegion(region: string) {
     this.loadingCount++;
 
-    const SNS = new AWS.SNS({ region });
+    const SNS = new SNSClient({
+      region,
+      credentials: this.$store.getters["sts/credentials"]
+    });
 
     SNS.listSubscriptions({}, (err, data) => {
       this.loadingCount--;

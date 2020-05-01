@@ -16,4 +16,4 @@ Daintree does not aim to replace the original console, but would like to improve
 
 Thanks for being interested in contributing :-)
 
-Read [CONTRIBUTING.md] for more information!
+Read [CONTRIBUTING.md](https://gitlab.com/rpadovani/daintree/-/blob/master/CONTRIBUTING.md) for more information!

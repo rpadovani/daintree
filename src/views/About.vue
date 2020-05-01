@@ -29,14 +29,14 @@
           </p>
 
           <div class="row mt-2 p-2">
-            <div class="col-6">
+            <div class="col-9">
               <img
                 class="col-12"
                 src="/assets/features/multiple-regions.gif"
                 alt="Regions selector"
               />
             </div>
-            <div class="col-6">
+            <div class="col-3">
               <h5>Multiple region support</h5>
               <p>
                 The main reason Daintree exists is to display resources from
@@ -53,7 +53,7 @@
           </div>
 
           <div class="row mt-2 p-2">
-            <div class="col-6">
+            <div class="col-3">
               <h5>Fast role switching</h5>
               <p>
                 If you belong to an AWS organization, and you have multiple
@@ -68,7 +68,7 @@
                 page reload!
               </p>
             </div>
-            <div class="col-6">
+            <div class="col-9">
               <img
                 class="col-12"
                 src="/assets/features/switch-role.gif"

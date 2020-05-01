@@ -1,5 +1,6 @@
 {
   "extends": [
-    "config:base"
+    "config:base",
+    ":githubComToken(rM7BkKvkzCKLt/3emMOZB3rL+EPaBIzUzIF5qKk9hlFk/4E2q+SndqzxDcpwIiWjmgk21XhRCQewaht10HiwrWSw9hW1eOpTM2R727ZUUaoEhSYFZxOYWiAO7GQv1KmHgO+F6oBC/+nhHDrroC+y9ZPY4cPIZgZEBYNChKIIIUBQREhouG2sZ8rP1+Tbvb4GjS6HsJUvPXbeacYey06zxb8rRGPXsWA513DlouNWjEQRuelxdFCQek2D1S6FA8kG30cwmEsND1+llKZ5gxc6zHWPrnxH/MZw3y55hCJCCG2B2vGNrddBfLt8Uc7Xym4jhn1vdlAO3tsmjKb8CQu6jQ==)"
   ]
 }

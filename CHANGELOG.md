@@ -9,6 +9,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Fixed
 
 - Fix how Changelog page renders multiple contents
+- Show the region selector on login, if no regions were previously selected
 
 ## [0.1.1]
 

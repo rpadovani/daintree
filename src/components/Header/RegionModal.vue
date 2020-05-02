@@ -1,6 +1,7 @@
 <template>
   <gl-modal
     modal-id="region-modal-id"
+    ref="regionModal"
     title="Select enabled regions"
     no-fade
     :action-primary="primaryProps"
@@ -47,7 +48,7 @@
     ></i>
 
     <i v-if="errorLoading" class="pt-2 mt-2 mb-0 pb-0">
-      <small style="color:red">
+      <small style="color: red;">
         We weren't able to determine which regions you have access to, so we
         show you all of them.
       </small></i
@@ -60,10 +61,10 @@ import {
   GlModal,
   GlModalDirective,
   GlFormCheckboxGroup,
-  GlIcon
+  GlIcon,
 } from "@gitlab/ui";
-import { Component, Vue, Watch } from "vue-property-decorator";
-import { BFormCheckbox } from "bootstrap-vue";
+import { Component, Ref, Vue, Watch } from "vue-property-decorator";
+import { BFormCheckbox, BvModal } from "bootstrap-vue";
 import RegionText from "@/components/common/RegionText.vue";
 import EC2Client from "aws-sdk/clients/ec2";
 import { isString } from "@/utils/isString";
@@ -74,9 +75,9 @@ import { isString } from "@/utils/isString";
     RegionText,
     GlFormCheckboxGroup,
     BFormCheckbox,
-    GlIcon
+    GlIcon,
   },
-  directives: { modal: GlModalDirective }
+  directives: { modal: GlModalDirective },
 })
 export default class RegionModal extends Vue {
   enabledRegions: string[] = [];
@@ -115,7 +116,7 @@ export default class RegionModal extends Vue {
     { text: "South America (São Paulo)", value: "sa-east-1" },
 
     { text: "GovCloud (US-East) - us-gov-east-1", value: "us-gov-east-1" },
-    { text: "GovCloud (US-West) - us-gov-west-1", value: "us-gov-west-1" }
+    { text: "GovCloud (US-West) - us-gov-west-1", value: "us-gov-west-1" },
   ];
 
   get regionsOptions() {
@@ -123,7 +124,7 @@ export default class RegionModal extends Vue {
     if (this.enabledRegions.length < 1) {
       return this.allRegionsOptions;
     }
-    return this.allRegionsOptions.filter(r =>
+    return this.allRegionsOptions.filter((r) =>
       this.enabledRegions.includes(r.value)
     );
   }
@@ -133,15 +134,15 @@ export default class RegionModal extends Vue {
       text: "Save regions",
       attributes: [
         { disabled: this.selectedRegions.length === 0 },
-        { variant: "success" }
-      ] //Cannot save if no regions have been selected
+        { variant: "success" },
+      ], //Cannot save if no regions have been selected
     };
   }
 
   get cancelProps() {
     return {
       text: "Close without saving",
-      attributes: [{ disabled: this.regions.length === 0 }] //Cannot cancel without regions enabled beforehand
+      attributes: [{ disabled: this.regions.length === 0 }], //Cannot cancel without regions enabled beforehand
     };
   }
 
@@ -169,14 +170,14 @@ export default class RegionModal extends Vue {
     //The region doesn't really matter here, but it is mandatory
     const EC2 = new EC2Client({
       region: "us-east-1",
-      credentials: this.$store.getters["sts/credentials"]
+      credentials: this.$store.getters["sts/credentials"],
     });
     EC2.describeRegions({}, (err, data) => {
       if (err) {
         this.errorLoading = true;
       } else if (data.Regions) {
         this.errorLoading = false;
-        this.enabledRegions = data.Regions.map(r => r.RegionName).filter(
+        this.enabledRegions = data.Regions.map((r) => r.RegionName).filter(
           isString
         );
       }
@@ -197,12 +198,14 @@ export default class RegionModal extends Vue {
     }
   }
 
+  @Ref("regionModal") readonly regionModal!: BvModal;
+
   @Watch("showModal")
   onShowModalUpdated(newValue: boolean) {
     //When the user logs in, prompt regions if they have not been selected yet
     if (newValue && this.isLoggedIn && this.regions.length === 0) {
       this.$nextTick().then(() => {
-        this.$bvModal.show("region-modal-id");
+        this.regionModal.show("region-modal-id");
         //This re-enables the guard for another route change
         this.$store.commit("sts/showRegionsModal", false);
       });

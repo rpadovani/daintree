@@ -8,6 +8,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Fixed
 
+- Fix features and homepage rendering on mobile phones
 - Fix how Changelog page renders multiple contents
 
 ## [0.1.1]

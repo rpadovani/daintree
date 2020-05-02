@@ -7,7 +7,7 @@
         src="/assets/undraw_japan_ubgk.svg"
         alt="Daintree"
         role="presentation"
-        class="col-5"
+        class="col-5 d-sm-none d-md-block"
       />
       <div class="gl-banner-content">
         <h1>Welcome to Daintree!</h1>

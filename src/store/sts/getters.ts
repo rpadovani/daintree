@@ -2,22 +2,22 @@ import { GetterTree } from "vuex";
 import { STSState } from "@/store/sts/state";
 
 export const STSGetters = {
-  isLoggedIn: function(state) {
+  isLoggedIn: function (state) {
     return state.loginMethod !== undefined;
   },
-  credentials: function(state) {
+  credentials: function (state) {
     return state.currentCredentials || state.credentials;
   },
-  userArn: function(state) {
+  userArn: function (state) {
     return state.userArn;
   },
-  account: function(state) {
+  account: function (state) {
     return state.accountID;
   },
-  regions: function(state) {
+  regions: function (state) {
     return state.regionsEnabled;
   },
-  currentPrettyCredentials: function(state) {
+  currentPrettyCredentials: function (state) {
     if (state.currentRole === -1) {
       let credential = "";
 
@@ -44,13 +44,13 @@ export const STSGetters = {
       state.roles[state.currentRole].accountId
     }`;
   },
-  roles: function(state) {
+  roles: function (state) {
     return state.roles;
   },
-  currentRoleIndex: function(state) {
+  currentRoleIndex: function (state) {
     return state.currentRole;
   },
-  mainAccountUsername: function(state) {
+  mainAccountUsername: function (state) {
     const elements = state?.userArn?.split("/");
     if (elements && elements.length > 0) {
       return elements[elements.length - 1];
@@ -58,10 +58,10 @@ export const STSGetters = {
 
     return "";
   },
-  routeAfterLogin: function(state) {
+  routeAfterLogin: function (state) {
     return state.routeAfterLogin || "/home";
   },
-  showRegionsModal: function(state) {
+  showRegionsModal: function (state) {
     return state.showRegionsModal;
-  }
+  },
 } as GetterTree<STSState, any>;

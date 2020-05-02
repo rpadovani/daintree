@@ -5,7 +5,7 @@
     <gl-tabs
       theme="blue"
       class="mx-auto mt-5"
-      style="max-width: 600px; width: 99%"
+      style="max-width: 600px; width: 99%;"
     >
       <gl-tab title="Login with Access Key">
         <gl-form-group
@@ -115,7 +115,7 @@ import {
   GlEmptyState,
   GlIcon,
   GlFormCheckbox,
-  GlLoadingIcon
+  GlLoadingIcon,
 } from "@gitlab/ui";
 import Component from "vue-class-component";
 import Notifications from "@/mixins/notifications";
@@ -132,8 +132,8 @@ import Notifications from "@/mixins/notifications";
     GlEmptyState,
     GlIcon,
     GlFormCheckbox,
-    GlLoadingIcon
-  }
+    GlLoadingIcon,
+  },
 })
 export default class Login extends Notifications {
   accessKey = "";
@@ -164,7 +164,7 @@ export default class Login extends Notifications {
     this.$store
       .dispatch("sts/loginWithAccessKey", {
         accessKeyId: this.accessKey,
-        secretAccessKey: this.secretKey
+        secretAccessKey: this.secretKey,
       })
       .then(() => {
         this.$router.push(this.$store.getters["sts/routeAfterLogin"]);

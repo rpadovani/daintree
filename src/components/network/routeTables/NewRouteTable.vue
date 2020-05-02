@@ -74,7 +74,7 @@ import {
   GlFormGroup,
   GlFormInputGroup,
   GlFormSelect,
-  GlButton
+  GlButton,
 } from "@gitlab/ui";
 import { BInputGroupText } from "bootstrap-vue";
 import EC2Client from "aws-sdk/clients/ec2";
@@ -92,8 +92,8 @@ import { mixins } from "vue-class-component";
     GlAlert,
     GlFormInputGroup,
     BInputGroupText,
-    GlButton
-  }
+    GlButton,
+  },
 })
 export default class NewRouteTable extends mixins(Notifications, Formatters) {
   selectedRegion = "";
@@ -109,7 +109,7 @@ export default class NewRouteTable extends mixins(Notifications, Formatters) {
 
   get vpcsOptions(): string[] {
     const options: string[] = [];
-    this.vpcs.forEach(s => {
+    this.vpcs.forEach((s) => {
       let option = "";
       if (s.VpcId) option += s.VpcId;
       const name = this.extractNameFromTags(s.Tags || []);
@@ -131,7 +131,7 @@ export default class NewRouteTable extends mixins(Notifications, Formatters) {
   createRouteTable() {
     const EC2 = new EC2Client({
       region: this.selectedRegion,
-      credentials: this.credentials
+      credentials: this.credentials,
     });
     EC2.createRouteTable(
       { VpcId: this.selectedVpc.split(" ")[0] },
@@ -149,9 +149,9 @@ export default class NewRouteTable extends mixins(Notifications, Formatters) {
           ) {
             const params = {
               Resources: [data.RouteTable.RouteTableId],
-              Tags: [{ Key: "Name", Value: this.routeTableName }]
+              Tags: [{ Key: "Name", Value: this.routeTableName }],
             };
-            EC2.createTags(params, err => {
+            EC2.createTags(params, (err) => {
               if (err) {
                 this.showError(err.message, "createRouteTable");
               } else {
@@ -177,7 +177,7 @@ export default class NewRouteTable extends mixins(Notifications, Formatters) {
     } else {
       const EC2 = new EC2Client({
         region: this.selectedRegion,
-        credentials: this.credentials
+        credentials: this.credentials,
       });
 
       this.loadingCount++;

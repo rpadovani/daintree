@@ -54,8 +54,8 @@ import Header from "@/components/Header/Header.vue";
   components: {
     Header,
     GlAvatarLabeled,
-    GlAvatarLink
-  }
+    GlAvatarLink,
+  },
 })
 export default class MessagesMain extends Vue {
   @Prop(Boolean) readonly onlyContent: boolean | undefined;

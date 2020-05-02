@@ -83,7 +83,7 @@ import {
   GlNewDropdown,
   GlSearchBoxByType,
   GlIcon,
-  GlLoadingIcon
+  GlLoadingIcon,
 } from "@gitlab/ui";
 
 import { BBreadcrumbItem, BBreadcrumb } from "bootstrap-vue";
@@ -96,8 +96,8 @@ import { Component, Emit, Prop, Vue } from "vue-property-decorator";
     GlSearchBoxByType,
     GlNewDropdownItem,
     GlIcon,
-    GlLoadingIcon
-  }
+    GlLoadingIcon,
+  },
 })
 export default class SubHeader extends Vue {
   @Prop(Boolean) hideRefresh: boolean | undefined;
@@ -105,7 +105,7 @@ export default class SubHeader extends Vue {
 
   get selectedSection(): "Network" | "EC2" | undefined {
     const found = this.sections.find(
-      s => s.link.split("/")[1] === this.$route.path.split("/")[1]
+      (s) => s.link.split("/")[1] === this.$route.path.split("/")[1]
     );
 
     return found ? (found.name as "Network" | "EC2") : undefined;
@@ -116,7 +116,7 @@ export default class SubHeader extends Vue {
       return undefined;
     }
 
-    const found = this.subsections[this.selectedSection].find(s => {
+    const found = this.subsections[this.selectedSection].find((s) => {
       return `#${this.$route.fullPath}`.startsWith(s.link);
     });
 
@@ -132,7 +132,7 @@ export default class SubHeader extends Vue {
   sections = [
     { name: "Network", link: "#/network" },
     { name: "EC2", link: "#/ec2" },
-    { name: "Messages", link: "#/messages" }
+    { name: "Messages", link: "#/messages" },
   ];
 
   subsectionSearchTerm = "";
@@ -144,19 +144,19 @@ export default class SubHeader extends Vue {
       { name: "Nat Gateways", link: "#/network/nats" },
       { name: "Route Tables", link: "#/network/routeTables" },
       { name: "Elastic IPs", link: "#/network/eips" },
-      { name: "Security Groups", link: "#/network/securityGroups" }
+      { name: "Security Groups", link: "#/network/securityGroups" },
     ],
     EC2: [{ name: "Instances", link: "#/ec2/instances" }],
     Messages: [
       { name: "SNS Topics", link: "#/messages/sns_topics" },
       { name: "SNS Subscriptions", link: "#/messages/sns_subscriptions" },
-      { name: "SQS", link: "#/messages/sqs" }
-    ]
+      { name: "SQS", link: "#/messages/sqs" },
+    ],
   };
 
   get filteredSections() {
     const lowerCasedSearchTerm = this.sectionSearchTerm.toLowerCase();
-    return this.sections.filter(resultString =>
+    return this.sections.filter((resultString) =>
       resultString["name"].toLowerCase().includes(lowerCasedSearchTerm)
     );
   }
@@ -164,7 +164,7 @@ export default class SubHeader extends Vue {
   get filteredSubsections() {
     const lowerCasedSearchTerm = this.subsectionSearchTerm.toLowerCase();
     if (this.selectedSection) {
-      return this.subsections[this.selectedSection].filter(resultString =>
+      return this.subsections[this.selectedSection].filter((resultString) =>
         resultString["name"].toLowerCase().includes(lowerCasedSearchTerm)
       );
     }

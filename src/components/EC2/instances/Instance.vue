@@ -102,9 +102,7 @@
                 <ul>
                   <li v-for="s in eni.Groups" :key="s.GroupId">
                     <router-link
-                      :to="
-                        `/network/securityGroups?securityGroupId=${s.GroupId}`
-                      "
+                      :to="`/network/securityGroups?securityGroupId=${s.GroupId}`"
                       >{{ s.GroupId }} {{ s.GroupName }}</router-link
                     >
                   </li>
@@ -179,32 +177,32 @@ import RegionText from "@/components/common/RegionText.vue";
     GlTab,
     GlTable,
     GlCard,
-    RegionText
-  }
+    RegionText,
+  },
 })
 export default class Instance extends Vue {
   @Prop(Object) readonly instance!: InstanceWithRegion;
 
   storageFields = [
     {
-      key: "DeviceName"
+      key: "DeviceName",
     },
     {
       key: "AttachTime",
-      label: "Attach Time"
+      label: "Attach Time",
     },
     {
       key: "Delete",
-      label: "Delete on termination?"
+      label: "Delete on termination?",
     },
     {
       key: "Status",
-      label: "Status"
+      label: "Status",
     },
     {
       key: "ID",
-      label: "Volume ID"
-    }
+      label: "Volume ID",
+    },
   ];
 
   get badgeVariant() {

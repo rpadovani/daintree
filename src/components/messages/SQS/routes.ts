@@ -7,11 +7,11 @@ export const sqsRoutes = [
   {
     path: "/messages/sqs/new",
     component: NewSQS,
-    meta: { title: "New queue", requiresLogin: true }
+    meta: { title: "New queue", requiresLogin: true },
   },
   {
     path: "/messages/sqs",
     component: SQSList,
-    meta: { title: "SQS", requiresLogin: true }
-  }
+    meta: { title: "SQS", requiresLogin: true },
+  },
 ];

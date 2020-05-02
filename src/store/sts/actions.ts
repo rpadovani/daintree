@@ -12,7 +12,7 @@ export const STSActions = {
     return new Promise((resolve, reject) => {
       const credentials = {
         accessKeyId: payload.accessKeyId,
-        secretAccessKey: payload.secretAccessKey
+        secretAccessKey: payload.secretAccessKey,
       };
 
       const STS = new STSClient({ credentials });
@@ -24,7 +24,7 @@ export const STSActions = {
           const notification: AppNotification = {
             key: "login",
             text: err.message,
-            variant: "danger"
+            variant: "danger",
           };
           context.commit("notifications/show", notification, { root: true });
           return reject();
@@ -32,7 +32,7 @@ export const STSActions = {
           context.commit("login", {
             arn: data.Arn,
             account: data.Account,
-            credentials
+            credentials,
           });
 
           return resolve();
@@ -50,7 +50,7 @@ export const STSActions = {
     }
   ) {
     context.commit("notifications/dismissByKey", "cognitoCallback", {
-      root: true
+      root: true,
     });
 
     return new Promise((resolve, reject) => {
@@ -76,7 +76,7 @@ export const STSActions = {
 
           const credentials = {
             IdentityId: data.IdentityId,
-            Logins
+            Logins,
           };
 
           cognitoIdentityClient.getCredentialsForIdentity(
@@ -86,10 +86,10 @@ export const STSActions = {
                 const notification: AppNotification = {
                   key: "cognitoCallback",
                   text: err.message,
-                  variant: "danger"
+                  variant: "danger",
                 };
                 context.commit("notifications/show", notification, {
-                  root: true
+                  root: true,
                 });
                 return reject();
               }
@@ -97,7 +97,7 @@ export const STSActions = {
                 accessKeyId: data.Credentials?.AccessKeyId || "",
                 secretAccessKey: data.Credentials?.SecretKey || "",
                 sessionToken: data.Credentials?.SessionToken,
-                expiration: data.Credentials?.Expiration
+                expiration: data.Credentials?.Expiration,
               };
               const STS = new STSClient({ credentials, region });
 
@@ -106,17 +106,17 @@ export const STSActions = {
                   const notification: AppNotification = {
                     key: "cognitoCallback",
                     text: err.message,
-                    variant: "danger"
+                    variant: "danger",
                   };
                   context.commit("notifications/show", notification, {
-                    root: true
+                    root: true,
                   });
                   return reject();
                 } else {
                   context.commit("loginWithCognito", {
                     credentials,
                     userArn: data.Arn,
-                    accountId: data.Account
+                    accountId: data.Account,
                   });
                   return resolve();
                 }
@@ -149,14 +149,14 @@ export const STSActions = {
       STS.assumeRole(
         {
           RoleArn: `arn:aws:iam::${payload.accountId}:role/${payload.role}`,
-          RoleSessionName: "daintree"
+          RoleSessionName: "daintree",
         },
         (err, data) => {
           if (err) {
             const notification: AppNotification = {
               key: "assumeRole",
               text: err.message,
-              variant: "danger"
+              variant: "danger",
             };
             context.commit("notifications/show", notification, { root: true });
             return reject();
@@ -165,7 +165,7 @@ export const STSActions = {
               accessKeyId: data.Credentials?.AccessKeyId || "",
               secretAccessKey: data.Credentials?.SecretAccessKey || "",
               sessionToken: data.Credentials?.SessionToken,
-              expiration: data.Credentials?.Expiration
+              expiration: data.Credentials?.Expiration,
             };
 
             if (payload.newRole) {
@@ -173,16 +173,16 @@ export const STSActions = {
                 accountId: payload.accountId,
                 nickname: payload.nickname,
                 role: payload.role,
-                credentials
+                credentials,
               };
               context.commit("addRole", role);
             } else {
               context.commit("switchRole", {
                 roleIndex: context.state.roles.findIndex(
-                  r =>
+                  (r) =>
                     r.accountId === payload.accountId && r.role === payload.role
                 ),
-                credentials
+                credentials,
               });
             }
             return resolve();
@@ -190,5 +190,5 @@ export const STSActions = {
         }
       );
     });
-  }
+  },
 };

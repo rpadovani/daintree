@@ -15,7 +15,7 @@
         <b>{{ nat.State }}</b>
       </gl-alert>
       <gl-button
-        style="height: 100%"
+        style="height: 100%;"
         class="mt-2 col-2"
         variant="danger"
         category="secondary"
@@ -44,9 +44,7 @@
     <div class="row mt-2 justify-content-around">
       <gl-card class="col-3" title="Public IP">
         <router-link
-          :to="
-            `/network/eips?allocationId=${nat.NatGatewayAddresses[0].AllocationId}`
-          "
+          :to="`/network/eips?allocationId=${nat.NatGatewayAddresses[0].AllocationId}`"
         >
           {{ nat.NatGatewayAddresses[0].PublicIp }}
         </router-link>
@@ -54,9 +52,7 @@
 
       <gl-card class="col-3" title="Private Ip">
         <router-link
-          :to="
-            `/network/eips?allocationId=${nat.NatGatewayAddresses[0].AllocationId}`
-          "
+          :to="`/network/eips?allocationId=${nat.NatGatewayAddresses[0].AllocationId}`"
         >
           {{ nat.NatGatewayAddresses[0].PrivateIp }}
         </router-link>
@@ -64,9 +60,7 @@
 
       <gl-card class="col-3" title="Network Interface ID">
         <router-link
-          :to="
-            `/network/interfaces?interfaceId=${nat.NatGatewayAddresses[0].NetworkInterfaceId}`
-          "
+          :to="`/network/interfaces?interfaceId=${nat.NatGatewayAddresses[0].NetworkInterfaceId}`"
         >
           {{ nat.NatGatewayAddresses[0].NetworkInterfaceId }}
         </router-link>
@@ -89,7 +83,7 @@ import {
   GlAlert,
   GlButton,
   GlModal,
-  GlModalDirective
+  GlModalDirective,
 } from "@gitlab/ui";
 import { Formatters } from "@/mixins/formatters";
 import { Prop, Component } from "vue-property-decorator";
@@ -107,19 +101,19 @@ import Notifications from "@/mixins/notifications";
     GlCard,
     GlAlert,
     GlButton,
-    GlModal
+    GlModal,
   },
-  directives: { "gl-modal-directive": GlModalDirective }
+  directives: { "gl-modal-directive": GlModalDirective },
 })
 export default class Nat extends mixins(Formatters, Notifications) {
   @Prop(Object) readonly nat!: NatWithRegion;
 
   deleteNatButtonProps = {
-    text: "Delete NAT Gateway"
+    text: "Delete NAT Gateway",
   };
 
   cancelProps = {
-    text: "Cancel"
+    text: "Cancel",
   };
 
   get alertVariant() {
@@ -149,7 +143,7 @@ export default class Nat extends mixins(Formatters, Notifications) {
 
     const EC2 = new EC2Client({
       region: this.nat.region,
-      credentials: this.credentials
+      credentials: this.credentials,
     });
     EC2.deleteNatGateway(
       { NatGatewayId: this.nat.NatGatewayId },
@@ -162,7 +156,7 @@ export default class Nat extends mixins(Formatters, Notifications) {
             variant: "info",
             text: "Deleting Nat Gateway with ID " + data.NatGatewayId,
             key: "deletingNat",
-            resourceId: data.NatGatewayId
+            resourceId: data.NatGatewayId,
           });
           this.$emit("deleted");
         }

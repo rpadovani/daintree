@@ -8,7 +8,7 @@ const mainRoute = {
   component: EC2Main,
   meta: {
     title: "EC2",
-    requiresLogin: true
-  }
+    requiresLogin: true,
+  },
 };
 export const EC2Routes = [mainRoute, ...instancesRoutes];

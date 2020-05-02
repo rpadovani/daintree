@@ -5,7 +5,7 @@
     <gl-drawer
       :open="drawerOpened && selectedRouteTable !== {}"
       @close="close"
-      style="width:80%"
+      style="width: 80%;"
     >
       <template #header>{{ selectedRouteTableTitle }}</template>
 
@@ -69,12 +69,12 @@
         </template>
         <template v-slot:cell(Main)="data">
           <gl-icon
-            v-if="data.item.Associations.filter(a => a.Main).length > 0"
+            v-if="data.item.Associations.filter((a) => a.Main).length > 0"
             name="check-circle"
           />
         </template>
         <template v-slot:cell(associations)="data">
-          {{ data.item.Associations.filter(a => a.SubnetId).length }}
+          {{ data.item.Associations.filter((a) => a.SubnetId).length }}
         </template>
       </gl-table>
 
@@ -126,7 +126,7 @@ import {
   GlTable,
   GlEmptyState,
   GlSkeletonLoading,
-  GlModalDirective
+  GlModalDirective,
 } from "@gitlab/ui";
 import { Formatters } from "@/mixins/formatters";
 import Component, { mixins } from "vue-class-component";
@@ -150,11 +150,11 @@ import RouteTable from "@/components/network/routeTables/RouteTable.vue";
     GlButton,
     GlFormInput,
     GlSkeletonLoading,
-    GlEmptyState
+    GlEmptyState,
   },
   directives: {
-    "gl-modal-directive": GlModalDirective
-  }
+    "gl-modal-directive": GlModalDirective,
+  },
 })
 export default class RouteTableList extends mixins(Formatters, Notifications) {
   routeTables: { [key: string]: RouteTableWithRegion } = {};
@@ -170,7 +170,7 @@ export default class RouteTableList extends mixins(Formatters, Notifications) {
       key: "Tags",
       label: "Name",
       sortable: true,
-      formatter: this.extractNameFromTags
+      formatter: this.extractNameFromTags,
     },
     { key: "RouteTableId", sortable: true },
     { key: "region", sortable: true },
@@ -180,8 +180,8 @@ export default class RouteTableList extends mixins(Formatters, Notifications) {
     {
       key: "Main",
       label: "Main?",
-      class: "text-center"
-    }
+      class: "text-center",
+    },
   ];
 
   get routeTablesAsList(): RouteTableWithRegion[] {
@@ -206,7 +206,7 @@ export default class RouteTableList extends mixins(Formatters, Notifications) {
 
   get selectedRouteTableTitle() {
     const nameTag = this.selectedRouteTable?.Tags?.filter(
-      v => v.Key === "Name"
+      (v) => v.Key === "Name"
     );
 
     if (nameTag && nameTag.length > 0) {
@@ -222,18 +222,18 @@ export default class RouteTableList extends mixins(Formatters, Notifications) {
     }
 
     const mainTables = this.routeTablesAsList.filter(
-      r =>
+      (r) =>
         r.VpcId === this.selectedRouteTable.VpcId &&
         r.Associations &&
-        r.Associations.filter(a => a.Main).length > 0
+        r.Associations.filter((a) => a.Main).length > 0
     );
     if (mainTables.length < 1 || !mainTables[0].Associations) {
       return "";
     }
 
     return (
-      mainTables[0].Associations.filter(a => a.Main).map(
-        a => a.RouteTableAssociationId
+      mainTables[0].Associations.filter((a) => a.Main).map(
+        (a) => a.RouteTableAssociationId
       )[0] || ""
     );
   }
@@ -243,7 +243,9 @@ export default class RouteTableList extends mixins(Formatters, Notifications) {
   }
 
   getAllRouteTables() {
-    this.regionsEnabled.forEach(region => this.getRouteTableForRegion(region));
+    this.regionsEnabled.forEach((region) =>
+      this.getRouteTableForRegion(region)
+    );
   }
 
   getRouteTableForRegion(region: string) {
@@ -251,7 +253,7 @@ export default class RouteTableList extends mixins(Formatters, Notifications) {
 
     const EC2 = new EC2Client({
       region,
-      credentials: this.credentials
+      credentials: this.credentials,
     });
     const params: DescribeRouteTablesRequest = {};
 
@@ -263,25 +265,25 @@ export default class RouteTableList extends mixins(Formatters, Notifications) {
         return;
       }
 
-      Object.keys(this.routeTables).forEach(key => {
+      Object.keys(this.routeTables).forEach((key) => {
         //Keep track if the routeTables of this region are still available
         if (this.routeTables[key].region === region) {
           this.routeTables[key].stillPresent = false;
         }
       });
 
-      data.RouteTables?.forEach(routeTable => {
+      data.RouteTables?.forEach((routeTable) => {
         if (routeTable.RouteTableId) {
           this.$set(this.routeTables, routeTable.RouteTableId, {
             ...routeTable,
             region,
-            stillPresent: true
+            stillPresent: true,
           });
         }
       });
 
       //Remove RouteTables we don't find anymore
-      Object.keys(this.routeTables).forEach(key => {
+      Object.keys(this.routeTables).forEach((key) => {
         if (
           this.routeTables[key].region === region &&
           !this.routeTables[key].stillPresent
@@ -296,14 +298,14 @@ export default class RouteTableList extends mixins(Formatters, Notifications) {
       if (this.$route.query.routeTableId && this.loadingCount === 0) {
         this.$nextTick().then(() => {
           const filteredRouteTables = this.routeTablesAsList.filter(
-            routeTable =>
+            (routeTable) =>
               routeTable.RouteTableId === this.$route.query.routeTableId
           );
           if (filteredRouteTables && filteredRouteTables.length > 0) {
             this.selectedRouteTable = filteredRouteTables[0];
             this.drawerOpened = true;
             const index = this.routeTablesAsList.findIndex(
-              routeTable =>
+              (routeTable) =>
                 routeTable.RouteTableId === this.$route.query.routeTableId
             );
             // eslint-disable-next-line @typescript-eslint/ban-ts-ignore
@@ -346,7 +348,7 @@ export default class RouteTableList extends mixins(Formatters, Notifications) {
       this.$router
         .push({
           path: "/network/routeTables",
-          query: { routeTableId: routeTables[0].RouteTableId }
+          query: { routeTableId: routeTables[0].RouteTableId },
         })
         // eslint-disable-next-line @typescript-eslint/no-empty-function
         .catch(() => {});
@@ -363,14 +365,14 @@ export default class RouteTableList extends mixins(Formatters, Notifications) {
     ) {
       const EC2 = new EC2Client({
         region: this.selectedRouteTable.region,
-        credentials: this.credentials
+        credentials: this.credentials,
       });
       const params: DescribeRouteTablesRequest = {};
       params.Filters = [
         {
           Name: "route-table-id",
-          Values: [this.selectedRouteTable.RouteTableId]
-        }
+          Values: [this.selectedRouteTable.RouteTableId],
+        },
       ];
       EC2.describeRouteTables(params, (err, data) => {
         if (err) {
@@ -381,11 +383,11 @@ export default class RouteTableList extends mixins(Formatters, Notifications) {
           return;
         }
 
-        data.RouteTables?.forEach(r => {
+        data.RouteTables?.forEach((r) => {
           if (r.RouteTableId === this.selectedRouteTable.RouteTableId) {
             this.selectedRouteTable = {
               ...r,
-              region: this.selectedRouteTable.region
+              region: this.selectedRouteTable.region,
             };
           }
         });
@@ -395,11 +397,11 @@ export default class RouteTableList extends mixins(Formatters, Notifications) {
 
   @Watch("regionsEnabled")
   onRegionsEnabledChanged(newValue: string[], oldValue: string[]) {
-    const addedRegions = [...newValue.filter(d => !oldValue.includes(d))];
-    const removedRegions = [...oldValue.filter(d => !newValue.includes(d))];
+    const addedRegions = [...newValue.filter((d) => !oldValue.includes(d))];
+    const removedRegions = [...oldValue.filter((d) => !newValue.includes(d))];
 
     if (removedRegions.length > 0) {
-      this.routeTablesAsList.forEach(routeTable => {
+      this.routeTablesAsList.forEach((routeTable) => {
         if (
           routeTable.region &&
           removedRegions.includes(routeTable.region) &&
@@ -410,7 +412,7 @@ export default class RouteTableList extends mixins(Formatters, Notifications) {
       });
     }
 
-    addedRegions.forEach(region => this.getRouteTableForRegion(region));
+    addedRegions.forEach((region) => this.getRouteTableForRegion(region));
   }
 
   @Watch("currentRoleIndex")

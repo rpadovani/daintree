@@ -129,7 +129,7 @@ import {
   GlModal,
   GlModalDirective,
   GlButtonGroup,
-  GlIcon
+  GlIcon,
 } from "@gitlab/ui";
 import { Component, Prop, Watch } from "vue-property-decorator";
 import { Formatters } from "@/mixins/formatters";
@@ -156,19 +156,19 @@ hljs.registerLanguage("json", json);
     GlButton,
     GlModal,
     GlButtonGroup,
-    GlIcon
+    GlIcon,
   },
-  directives: { "gl-modal-directive": GlModalDirective }
+  directives: { "gl-modal-directive": GlModalDirective },
 })
 export default class SNSTopic extends mixins(Formatters, Notifications) {
   @Prop(Object) readonly sns!: TopicWithRegion;
 
   deleteSnsButtonProps = {
-    text: "Delete topic"
+    text: "Delete topic",
   };
 
   cancelProps = {
-    text: "Cancel"
+    text: "Cancel",
   };
 
   get highlightedAccessPolicy() {
@@ -205,17 +205,17 @@ export default class SNSTopic extends mixins(Formatters, Notifications) {
       label: "ID",
       formatter: (value: string) =>
         value.split(":")[value.split(":").length - 1],
-      sortable: true
+      sortable: true,
     },
     {
       key: "Protocol",
-      sortable: true
+      sortable: true,
     },
     {
       key: "Endpoint",
-      sortable: true
+      sortable: true,
     },
-    "Owner"
+    "Owner",
   ];
 
   get credentials() {
@@ -233,7 +233,7 @@ export default class SNSTopic extends mixins(Formatters, Notifications) {
 
     const SNS = new SNSClient({
       region: this.sns.region,
-      credentials: this.credentials
+      credentials: this.credentials,
     });
 
     SNS.listSubscriptionsByTopic(
@@ -261,10 +261,10 @@ export default class SNSTopic extends mixins(Formatters, Notifications) {
 
     const SNS = new SNSClient({
       region: this.sns.region,
-      credentials: this.credentials
+      credentials: this.credentials,
     });
 
-    SNS.deleteTopic({ TopicArn: this.sns.topicArn }, err => {
+    SNS.deleteTopic({ TopicArn: this.sns.topicArn }, (err) => {
       if (err) {
         this.showError(err.message, "deleteSns");
       } else {
@@ -273,7 +273,7 @@ export default class SNSTopic extends mixins(Formatters, Notifications) {
           variant: "info",
           text: "Deleted topic with ARN " + this.sns.topicArn,
           key: "deletingSns",
-          resourceId: this.sns.topicArn
+          resourceId: this.sns.topicArn,
         });
         this.$emit("deleted");
       }

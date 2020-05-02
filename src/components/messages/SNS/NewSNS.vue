@@ -54,7 +54,7 @@ import {
   GlFormGroup,
   GlFormInputGroup,
   GlFormSelect,
-  GlButton
+  GlButton,
 } from "@gitlab/ui";
 import { BInputGroupText } from "bootstrap-vue";
 import SNSClient from "aws-sdk/clients/sns";
@@ -70,8 +70,8 @@ import { CreateTopicInput } from "aws-sdk/clients/sns";
     GlAlert,
     GlFormInputGroup,
     BInputGroupText,
-    GlButton
-  }
+    GlButton,
+  },
 })
 export default class NewSNS extends Notifications {
   selectedRegion = "";
@@ -81,7 +81,7 @@ export default class NewSNS extends Notifications {
   createSns() {
     const SNS = new SNSClient({
       region: this.selectedRegion,
-      credentials: this.$store.getters["sts/credentials"]
+      credentials: this.$store.getters["sts/credentials"],
     });
 
     const params: CreateTopicInput = { Name: this.snsName };

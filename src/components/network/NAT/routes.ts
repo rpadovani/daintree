@@ -7,11 +7,11 @@ export const natRoutes = [
   {
     path: "/network/nats/new",
     component: NewNat,
-    meta: { title: "New Nat", requiresLogin: true }
+    meta: { title: "New Nat", requiresLogin: true },
   },
   {
     path: "/network/nats",
     component: NatList,
-    meta: { title: "Nat Gateways", requiresLogin: true }
-  }
+    meta: { title: "Nat Gateways", requiresLogin: true },
+  },
 ];

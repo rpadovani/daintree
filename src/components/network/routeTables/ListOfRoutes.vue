@@ -3,8 +3,8 @@
     <template v-slot:cell(destination)="data">
       {{
         data.item.DestinationCidrBlock ||
-          data.item.DestinationPrefixListId ||
-          data.item.DestinationIpv6CidrBlock
+        data.item.DestinationPrefixListId ||
+        data.item.DestinationIpv6CidrBlock
       }}
     </template>
 

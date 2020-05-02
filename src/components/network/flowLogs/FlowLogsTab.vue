@@ -27,8 +27,8 @@ import { GlAlert, GlSkeletonLoading, GlEmptyState, GlTable } from "@gitlab/ui";
     GlAlert,
     GlSkeletonLoading,
     GlEmptyState,
-    GlTable
-  }
+    GlTable,
+  },
 })
 export default class FlowLogsTab extends Vue {
   @Prop(String) readonly resourceId!: string;
@@ -43,16 +43,16 @@ export default class FlowLogsTab extends Vue {
     this.tabState = "loading";
     const EC2 = new EC2Client({
       region: this.region,
-      credentials: this.$store.getters["sts/credentials"]
+      credentials: this.$store.getters["sts/credentials"],
     });
     EC2.describeFlowLogs(
       {
         Filter: [
           {
             Name: "resource-id",
-            Values: [this.resourceId]
-          }
-        ]
+            Values: [this.resourceId],
+          },
+        ],
       },
       (err, data) => {
         if (err) {

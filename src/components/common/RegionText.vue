@@ -16,8 +16,8 @@ import { Component, Prop, Vue } from "vue-property-decorator";
 
 @Component({
   directives: {
-    "gl-tooltip": GlTooltipDirective
-  }
+    "gl-tooltip": GlTooltipDirective,
+  },
 })
 export default class RegionText extends Vue {
   @Prop(String) readonly region!: string;

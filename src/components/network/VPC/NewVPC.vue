@@ -67,7 +67,7 @@ import {
   GlFormGroup,
   GlFormInputGroup,
   GlFormSelect,
-  GlButton
+  GlButton,
 } from "@gitlab/ui";
 import { BInputGroupText } from "bootstrap-vue";
 import EC2Client from "aws-sdk/clients/ec2";
@@ -82,8 +82,8 @@ import Notifications from "@/mixins/notifications";
     GlAlert,
     GlFormInputGroup,
     BInputGroupText,
-    GlButton
-  }
+    GlButton,
+  },
 })
 export default class NewVPC extends Notifications {
   selectedRegion = "";
@@ -97,7 +97,7 @@ export default class NewVPC extends Notifications {
   createVpc() {
     const EC2 = new EC2Client({
       region: this.selectedRegion,
-      credentials: this.credentials
+      credentials: this.credentials,
     });
     EC2.createVpc({ CidrBlock: this.cidrBlock }, (err, data) => {
       if (err) {
@@ -109,9 +109,9 @@ export default class NewVPC extends Notifications {
         if (this.vpcName && data.Vpc && data.Vpc.VpcId) {
           const params = {
             Resources: [data.Vpc.VpcId],
-            Tags: [{ Key: "Name", Value: this.vpcName }]
+            Tags: [{ Key: "Name", Value: this.vpcName }],
           };
-          EC2.createTags(params, err => {
+          EC2.createTags(params, (err) => {
             if (err) {
               this.showError(err.message, "createVpc");
             } else {

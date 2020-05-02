@@ -10,6 +10,6 @@ export const instancesRoutes = [
   {
     path: "/ec2/instances",
     component: InstancesList,
-    meta: { title: "EC2 Instances", requiresLogin: true }
-  }
+    meta: { title: "EC2 Instances", requiresLogin: true },
+  },
 ];

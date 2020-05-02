@@ -16,8 +16,8 @@ import { InstanceStateName } from "aws-sdk/clients/ec2";
 
 @Component({
   components: {
-    GlLoadingIcon
-  }
+    GlLoadingIcon,
+  },
 })
 export default class StateText extends Vue {
   @Prop(String) state!:
@@ -37,7 +37,7 @@ export default class StateText extends Vue {
       "deleting",
       "shutting-down",
       "stopping",
-      "deleting"
+      "deleting",
     ].includes(this.state);
   }
 

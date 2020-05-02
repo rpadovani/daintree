@@ -78,7 +78,7 @@ import {
   GlButton,
   GlModal,
   GlModalDirective,
-  GlButtonGroup
+  GlButtonGroup,
 } from "@gitlab/ui";
 import EC2Client from "aws-sdk/clients/ec2";
 import { Component, Prop } from "vue-property-decorator";
@@ -107,9 +107,9 @@ import ListOfRules from "@/components/network/securityGroups/ListOfRules.vue";
     GlModal,
     FlowLogsTab,
     GlButtonGroup,
-    SubnetTab
+    SubnetTab,
   },
-  directives: { "gl-modal-directive": GlModalDirective }
+  directives: { "gl-modal-directive": GlModalDirective },
 })
 export default class SecurityGroup extends mixins(Formatters, Notifications) {
   @Prop(Object) readonly securityGroup!: SecurityGroupWithRegion;
@@ -120,17 +120,17 @@ export default class SecurityGroup extends mixins(Formatters, Notifications) {
 
   deleteSecurityGroupButtonProps = {
     text: "Delete security group",
-    attributes: [{ variant: "danger" }]
+    attributes: [{ variant: "danger" }],
   };
 
   cancelProps = {
-    text: "Cancel"
+    text: "Cancel",
   };
 
   get EC2() {
     return new EC2Client({
       region: this.securityGroup.region,
-      credentials: this.$store.getters["sts/credentials"]
+      credentials: this.$store.getters["sts/credentials"],
     });
   }
 
@@ -141,7 +141,7 @@ export default class SecurityGroup extends mixins(Formatters, Notifications) {
 
     this.EC2.deleteSecurityGroup(
       { GroupId: this.securityGroup.GroupId },
-      err => {
+      (err) => {
         if (err) {
           this.showError(err.message, "deleteSecurityGroup");
         } else {
@@ -151,7 +151,7 @@ export default class SecurityGroup extends mixins(Formatters, Notifications) {
             text:
               "Deleted security group with ID " + this.securityGroup.GroupId,
             key: "deletingSecurityGroup",
-            resourceId: this.securityGroup.GroupId
+            resourceId: this.securityGroup.GroupId,
           });
           this.$emit("deleted");
         }

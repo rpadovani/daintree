@@ -1,6 +1,6 @@
 import {
   AppNotification,
-  NotificationState
+  NotificationState,
 } from "@/store/notifications/state";
 import { ActionContext } from "vuex";
 
@@ -22,5 +22,5 @@ export const NotificationActions = {
     resourceID: string
   ) {
     context.commit("dismissByResourceID", resourceID);
-  }
+  },
 };

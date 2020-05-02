@@ -53,7 +53,7 @@
             development: feel free to share this website with your friends! If
             you are on Twitter, you can follow the main developer,
             <a href="https://twitter.com/rpadovani93"
-              >@rpadovani93<gl-icon name="external-link"/></a
+              >@rpadovani93<gl-icon name="external-link" /></a
             >.
           </p>
 

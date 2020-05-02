@@ -101,7 +101,7 @@ import {
   GlModalDirective,
   GlButtonGroup,
   GlFormGroup,
-  GlFormSelect
+  GlFormSelect,
 } from "@gitlab/ui";
 import { Prop, Component } from "vue-property-decorator";
 import TagsTable from "@/components/common/TagsTable.vue";
@@ -126,9 +126,9 @@ import { VpcList } from "aws-sdk/clients/ec2";
     GlModal,
     GlButtonGroup,
     GlFormGroup,
-    GlFormSelect
+    GlFormSelect,
   },
-  directives: { "gl-modal-directive": GlModalDirective }
+  directives: { "gl-modal-directive": GlModalDirective },
 })
 export default class Igw extends mixins(Notifications, Formatters) {
   @Prop(Object) readonly igw!: IgwWithRegion;
@@ -140,11 +140,11 @@ export default class Igw extends mixins(Notifications, Formatters) {
   vpcs: VpcList = [];
 
   deleteIgwButtonProps = {
-    text: "Delete Internet Gateway"
+    text: "Delete Internet Gateway",
   };
 
   cancelProps = {
-    text: "Cancel"
+    text: "Cancel",
   };
 
   get attachIgwButtonProps() {
@@ -152,14 +152,14 @@ export default class Igw extends mixins(Notifications, Formatters) {
       text: "Attach Internet Gateway",
       attributes: [
         { disabled: this.selectedVpc === "" },
-        { variant: "success" }
-      ]
+        { variant: "success" },
+      ],
     };
   }
 
   get vpcsOptions(): string[] {
     const options: string[] = [];
-    this.vpcs.forEach(s => {
+    this.vpcs.forEach((s) => {
       if (!this.vpcsWithGateway.includes(s.VpcId || "")) {
         let option = "";
         if (s.VpcId) option += s.VpcId;
@@ -193,16 +193,16 @@ export default class Igw extends mixins(Notifications, Formatters) {
   attachIgw() {
     const EC2 = new EC2Client({
       region: this.igw.region,
-      credentials: this.credentials
+      credentials: this.credentials,
     });
 
     if (this.selectedVpc && this.igw.InternetGatewayId) {
       EC2.attachInternetGateway(
         {
           InternetGatewayId: this.igw.InternetGatewayId,
-          VpcId: this.selectedVpc.split(" ")[0]
+          VpcId: this.selectedVpc.split(" ")[0],
         },
-        err => {
+        (err) => {
           if (err) {
             this.alertMessage = err.message;
             this.alertVariant = "danger";
@@ -212,8 +212,8 @@ export default class Igw extends mixins(Notifications, Formatters) {
             this.igw.Attachments = [
               {
                 VpcId: this.selectedVpc.split(" ")[0],
-                State: "attached"
-              }
+                State: "attached",
+              },
             ];
           }
         }
@@ -233,14 +233,14 @@ export default class Igw extends mixins(Notifications, Formatters) {
 
     const EC2 = new EC2Client({
       region: this.igw.region,
-      credentials: this.credentials
+      credentials: this.credentials,
     });
     EC2.detachInternetGateway(
       {
         InternetGatewayId: this.igw.InternetGatewayId,
-        VpcId: this.igw.Attachments[0].VpcId
+        VpcId: this.igw.Attachments[0].VpcId,
       },
-      err => {
+      (err) => {
         if (err) {
           this.alertMessage = err.message;
           this.alertVariant = "danger";
@@ -261,11 +261,11 @@ export default class Igw extends mixins(Notifications, Formatters) {
 
     const EC2 = new EC2Client({
       region: this.igw.region,
-      credentials: this.credentials
+      credentials: this.credentials,
     });
     EC2.deleteInternetGateway(
       { InternetGatewayId: this.igw.InternetGatewayId },
-      err => {
+      (err) => {
         if (err) {
           this.alertMessage = err.message;
           this.alertVariant = "danger";
@@ -277,7 +277,7 @@ export default class Igw extends mixins(Notifications, Formatters) {
             text:
               "Deleted Internet Gateway with ID " + this.igw.InternetGatewayId,
             key: "deletingIgw",
-            resourceId: this.igw.InternetGatewayId
+            resourceId: this.igw.InternetGatewayId,
           });
           this.$emit("deleted");
         }
@@ -292,7 +292,7 @@ export default class Igw extends mixins(Notifications, Formatters) {
   getVpcsForCurrentRegion() {
     const EC2 = new EC2Client({
       region: this.igw.region,
-      credentials: this.credentials
+      credentials: this.credentials,
     });
 
     EC2.describeVpcs(
@@ -314,9 +314,9 @@ export default class Igw extends mixins(Notifications, Formatters) {
         Filters: [
           {
             Name: "attachment.state",
-            Values: ["available"]
-          }
-        ]
+            Values: ["available"],
+          },
+        ],
       },
       (err, data) => {
         if (err) {
@@ -324,7 +324,7 @@ export default class Igw extends mixins(Notifications, Formatters) {
           this.alertVariant = "danger";
         } else if (data.InternetGateways) {
           this.vpcsWithGateway = [];
-          data.InternetGateways.forEach(i => {
+          data.InternetGateways.forEach((i) => {
             if (i.Attachments && i.Attachments.length > 0) {
               this.vpcsWithGateway.push(i.Attachments[0].VpcId || "");
             }

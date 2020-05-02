@@ -47,5 +47,5 @@ export const STSMutations = {
 
   showRegionsModal(state: STSState, enabled) {
     state.showRegionsModal = enabled;
-  }
+  },
 } as MutationTree<STSState>;

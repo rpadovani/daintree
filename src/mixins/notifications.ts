@@ -6,8 +6,8 @@ import { AppNotification } from "@/store/notifications/state";
   methods: mapActions("notifications", [
     "showAlert",
     "dismissAlertByKey",
-    "dismissAlertByResourceID"
-  ])
+    "dismissAlertByResourceID",
+  ]),
 })
 export default class Notifications extends Vue {
   showAlert!: (notification: AppNotification) => void;
@@ -18,7 +18,7 @@ export default class Notifications extends Vue {
     this.showAlert({
       key: key,
       text: msg,
-      variant: "danger"
+      variant: "danger",
     });
   }
 

@@ -5,7 +5,7 @@
     <gl-drawer
       :open="drawerOpened && selectedEip !== {}"
       @close="close"
-      style="width:80%"
+      style="width: 80%;"
     >
       <template #header>{{ selectedEipTitle }}</template>
 
@@ -109,7 +109,7 @@ import {
   GlModalDirective,
   GlButton,
   GlSkeletonLoading,
-  GlTable
+  GlTable,
 } from "@gitlab/ui";
 import { Component, Watch } from "vue-property-decorator";
 import { Formatters } from "@/mixins/formatters";
@@ -131,11 +131,11 @@ import EipWithRegion = eips.EipWithRegion;
     GlFormInput,
     Eip,
     GlSkeletonLoading,
-    GlEmptyState
+    GlEmptyState,
   },
   directives: {
-    "gl-modal-directive": GlModalDirective
-  }
+    "gl-modal-directive": GlModalDirective,
+  },
 })
 export default class EipList extends mixins(Formatters, Notifications) {
   eips: { [key: string]: EipWithRegion } = {};
@@ -155,7 +155,7 @@ export default class EipList extends mixins(Formatters, Notifications) {
       key: "Tags",
       label: "Name",
       sortable: true,
-      formatter: this.extractNameFromTags
+      formatter: this.extractNameFromTags,
     },
     { key: "AllocationId", sortable: true },
     { key: "PublicIp", sortable: true },
@@ -163,7 +163,7 @@ export default class EipList extends mixins(Formatters, Notifications) {
     { key: "region", sortable: true },
     { key: "NetworkInterfaceId", sortable: true },
     { key: "InstanceId", sortable: true },
-    { key: "AssociationId", sortable: true }
+    { key: "AssociationId", sortable: true },
   ];
 
   get eipsAsList(): EipWithRegion[] {
@@ -187,7 +187,7 @@ export default class EipList extends mixins(Formatters, Notifications) {
   }
 
   get selectedEipTitle() {
-    const nameTag = this.selectedEip?.Tags?.filter(v => v.Key === "Name");
+    const nameTag = this.selectedEip?.Tags?.filter((v) => v.Key === "Name");
 
     if (nameTag && nameTag.length > 0) {
       return `${nameTag[0].Value} (${this.selectedEip.AllocationId})`;
@@ -196,14 +196,14 @@ export default class EipList extends mixins(Formatters, Notifications) {
   }
 
   getAllEips() {
-    this.regionsEnabled.forEach(region => this.getEipForRegion(region));
+    this.regionsEnabled.forEach((region) => this.getEipForRegion(region));
   }
 
   //When the selected EIP is disassociated, we refresh its state, and it will be propagated down to the tab
   disassociated() {
     if (this.selectedEip.region && this.selectedEip.AllocationId) {
       this.getEipForRegion(this.selectedEip.region, [
-        this.selectedEip.AllocationId
+        this.selectedEip.AllocationId,
       ]);
     }
   }
@@ -215,22 +215,22 @@ export default class EipList extends mixins(Formatters, Notifications) {
     }
     const EC2 = new EC2Client({
       region,
-      credentials: this.$store.getters["sts/credentials"]
+      credentials: this.$store.getters["sts/credentials"],
     });
     const params: DescribeAddressesRequest = {};
     if (filterByEipsId) {
       params.Filters = [
         {
           Name: "allocation-id",
-          Values: filterByEipsId
-        }
+          Values: filterByEipsId,
+        },
       ];
     }
 
     EC2.describeAddresses(params, (err, data) => {
       if (!filterByEipsId) {
         this.loadingCount--;
-        Object.keys(this.eips).forEach(key => {
+        Object.keys(this.eips).forEach((key) => {
           //Keep track if the eips of this region are still available
           if (this.eips[key].region === region) {
             this.eips[key].stillPresent = false;
@@ -244,21 +244,21 @@ export default class EipList extends mixins(Formatters, Notifications) {
 
       //When we retrieve only some EIPs, if we don't retrieve them it means they have been deleted
       if (filterByEipsId) {
-        const retrievedIds = data.Addresses?.map(n => n.AllocationId);
+        const retrievedIds = data.Addresses?.map((n) => n.AllocationId);
 
-        filterByEipsId.forEach(idFiltered => {
+        filterByEipsId.forEach((idFiltered) => {
           if (!retrievedIds || !retrievedIds.includes(idFiltered)) {
             this.$delete(this.eips, idFiltered);
           }
         });
       }
 
-      data.Addresses?.forEach(eip => {
+      data.Addresses?.forEach((eip) => {
         if (eip.AllocationId) {
           this.$set(this.eips, eip.AllocationId, {
             ...eip,
             region,
-            stillPresent: true
+            stillPresent: true,
           });
         }
 
@@ -270,7 +270,7 @@ export default class EipList extends mixins(Formatters, Notifications) {
 
       //Remove eip we don't find anymore
       if (!filterByEipsId) {
-        Object.keys(this.eips).forEach(key => {
+        Object.keys(this.eips).forEach((key) => {
           if (
             this.eips[key].region === region &&
             !this.eips[key].stillPresent
@@ -286,13 +286,13 @@ export default class EipList extends mixins(Formatters, Notifications) {
       if (this.$route.query.allocationId && this.loadingCount === 0) {
         this.$nextTick().then(() => {
           const filteredEips = this.eipsAsList.filter(
-            eip => eip.AllocationId === this.$route.query.allocationId
+            (eip) => eip.AllocationId === this.$route.query.allocationId
           );
           if (filteredEips && filteredEips.length > 0) {
             this.selectedEip = filteredEips[0];
             this.drawerOpened = true;
             const index = this.eipsAsList.findIndex(
-              eip => eip.AllocationId === this.$route.query.allocationId
+              (eip) => eip.AllocationId === this.$route.query.allocationId
             );
             // eslint-disable-next-line @typescript-eslint/ban-ts-ignore
             //@ts-ignore
@@ -308,7 +308,7 @@ export default class EipList extends mixins(Formatters, Notifications) {
 
     if (update && this.selectedEip.region && this.selectedEip.AllocationId) {
       this.getEipForRegion(this.selectedEip.region, [
-        this.selectedEip.AllocationId
+        this.selectedEip.AllocationId,
       ]);
     }
 
@@ -330,7 +330,7 @@ export default class EipList extends mixins(Formatters, Notifications) {
       this.$router
         .push({
           path: "/network/eips",
-          query: { allocationId: eips[0].AllocationId }
+          query: { allocationId: eips[0].AllocationId },
         })
         // eslint-disable-next-line @typescript-eslint/no-empty-function
         .catch(() => {});
@@ -341,11 +341,11 @@ export default class EipList extends mixins(Formatters, Notifications) {
 
   @Watch("regionsEnabled")
   onRegionsEnabledChanged(newValue: string[], oldValue: string[]) {
-    const addedRegions = [...newValue.filter(d => !oldValue.includes(d))];
-    const removedRegions = [...oldValue.filter(d => !newValue.includes(d))];
+    const addedRegions = [...newValue.filter((d) => !oldValue.includes(d))];
+    const removedRegions = [...oldValue.filter((d) => !newValue.includes(d))];
 
     if (removedRegions.length > 0) {
-      this.eipsAsList.forEach(eip => {
+      this.eipsAsList.forEach((eip) => {
         if (
           eip.region &&
           removedRegions.includes(eip.region) &&
@@ -356,7 +356,7 @@ export default class EipList extends mixins(Formatters, Notifications) {
       });
     }
 
-    addedRegions.forEach(region => this.getEipForRegion(region));
+    addedRegions.forEach((region) => this.getEipForRegion(region));
   }
 
   startPolling() {
@@ -368,7 +368,7 @@ export default class EipList extends mixins(Formatters, Notifications) {
     window.setTimeout(() => {
       this.isPolling = false;
 
-      Object.keys(this.wipEips).forEach(region => {
+      Object.keys(this.wipEips).forEach((region) => {
         if (this.wipEips[region].length > 0) {
           this.getEipForRegion(region, this.wipEips[region]);
         }

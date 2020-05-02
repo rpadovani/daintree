@@ -70,7 +70,7 @@ import {
   GlFormInputGroup,
   GlIcon,
   GlAlert,
-  GlButton
+  GlButton,
 } from "@gitlab/ui";
 import { Component, Vue } from "vue-property-decorator";
 import { BInputGroupText } from "bootstrap-vue";
@@ -83,8 +83,8 @@ import { Role } from "@/store/sts/state";
     GlFormInputGroup,
     GlIcon,
     GlAlert,
-    GlButton
-  }
+    GlButton,
+  },
 })
 export default class AssumeRoleModal extends Vue {
   accountID = "";
@@ -101,7 +101,7 @@ export default class AssumeRoleModal extends Vue {
     const role: Role = {
       accountId: this.accountID,
       nickname: this.nickname,
-      role: this.role
+      role: this.role,
     };
 
     this.$store

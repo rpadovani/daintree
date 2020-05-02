@@ -99,7 +99,7 @@ import {
   GlFormGroup,
   GlFormInputGroup,
   GlFormSelect,
-  GlButton
+  GlButton,
 } from "@gitlab/ui";
 import { BInputGroupText } from "bootstrap-vue";
 import EC2Client from "aws-sdk/clients/ec2";
@@ -108,7 +108,7 @@ import Notifications from "@/mixins/notifications";
 import {
   AvailabilityZoneList,
   CreateSubnetRequest,
-  VpcList
+  VpcList,
 } from "aws-sdk/clients/ec2";
 import { mixins } from "vue-class-component";
 import { Formatters } from "@/mixins/formatters";
@@ -121,8 +121,8 @@ import { Formatters } from "@/mixins/formatters";
     GlAlert,
     GlFormInputGroup,
     BInputGroupText,
-    GlButton
-  }
+    GlButton,
+  },
 })
 export default class NewSubnet extends mixins(Notifications, Formatters) {
   selectedRegion = "";
@@ -142,7 +142,7 @@ export default class NewSubnet extends mixins(Notifications, Formatters) {
 
   get vpcsOptions(): string[] {
     const options: string[] = [];
-    this.vpcs.forEach(s => {
+    this.vpcs.forEach((s) => {
       let option = "";
       if (s.VpcId) option += s.VpcId;
       const name = this.extractNameFromTags(s.Tags || []);
@@ -158,7 +158,7 @@ export default class NewSubnet extends mixins(Notifications, Formatters) {
 
   get azOptions(): string[] {
     const options: string[] = [];
-    this.az.forEach(az => {
+    this.az.forEach((az) => {
       if (az.ZoneName) options.push(az.ZoneName);
     });
 
@@ -169,14 +169,14 @@ export default class NewSubnet extends mixins(Notifications, Formatters) {
   get EC2() {
     return new EC2Client({
       region: this.selectedRegion,
-      credentials: this.$store.getters["sts/credentials"]
+      credentials: this.$store.getters["sts/credentials"],
     });
   }
 
   createSubnet() {
     const params: CreateSubnetRequest = {
       CidrBlock: this.cidrBlock,
-      VpcId: this.selectedVpc.split(" ")[0]
+      VpcId: this.selectedVpc.split(" ")[0],
     };
 
     if (this.selectedAz !== "No preference") {
@@ -192,9 +192,9 @@ export default class NewSubnet extends mixins(Notifications, Formatters) {
         if (this.subnetName && data.Subnet && data.Subnet.SubnetId) {
           const params = {
             Resources: [data.Subnet.SubnetId],
-            Tags: [{ Key: "Name", Value: this.subnetName }]
+            Tags: [{ Key: "Name", Value: this.subnetName }],
           };
-          this.EC2.createTags(params, err => {
+          this.EC2.createTags(params, (err) => {
             if (err) {
               this.showError(err.message, "createSubnet");
             } else {

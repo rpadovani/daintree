@@ -5,7 +5,7 @@
     <gl-drawer
       :open="drawerOpened && selectedSecurityGroup !== {}"
       @close="close"
-      style="width:80%"
+      style="width: 80%;"
     >
       <template #header>{{ selectedSecurityGroupTitle }}</template>
 
@@ -115,14 +115,14 @@ import {
   GlTable,
   GlEmptyState,
   GlSkeletonLoading,
-  GlModalDirective
+  GlModalDirective,
 } from "@gitlab/ui";
 import { Formatters } from "@/mixins/formatters";
 import Component, { mixins } from "vue-class-component";
 import StateText from "@/components/common/StateText.vue";
 import {
   DescribeSecurityGroupsRequest,
-  IpPermission
+  IpPermission,
 } from "aws-sdk/clients/ec2";
 import Notifications from "@/mixins/notifications";
 import { Watch } from "vue-property-decorator";
@@ -143,11 +143,11 @@ import { Route } from "vue-router";
     GlButton,
     GlFormInput,
     GlSkeletonLoading,
-    GlEmptyState
+    GlEmptyState,
   },
   directives: {
-    "gl-modal-directive": GlModalDirective
-  }
+    "gl-modal-directive": GlModalDirective,
+  },
 })
 export default class SecurityGroupList extends mixins(
   Formatters,
@@ -165,7 +165,7 @@ export default class SecurityGroupList extends mixins(
     {
       key: "GroupName",
       label: "Name",
-      sortable: true
+      sortable: true,
     },
     { key: "GroupId", label: "Security group ID", sortable: true },
     { key: "region", sortable: true },
@@ -173,13 +173,13 @@ export default class SecurityGroupList extends mixins(
     {
       key: "IpPermissions",
       label: "# inbound rules",
-      formatter: (value: IpPermission[]) => value.length
+      formatter: (value: IpPermission[]) => value.length,
     },
     {
       key: "IpPermissionsEgress",
       label: "# outbound rules",
-      formatter: (value: IpPermission[]) => value.length
-    }
+      formatter: (value: IpPermission[]) => value.length,
+    },
   ];
 
   get securityGroupsAsList(): SecurityGroupWithRegion[] {
@@ -215,7 +215,7 @@ export default class SecurityGroupList extends mixins(
   }
 
   getAllSecurityGroups() {
-    this.regionsEnabled.forEach(region =>
+    this.regionsEnabled.forEach((region) =>
       this.getSecurityGroupForRegion(region)
     );
   }
@@ -234,25 +234,25 @@ export default class SecurityGroupList extends mixins(
         return;
       }
 
-      Object.keys(this.securityGroups).forEach(key => {
+      Object.keys(this.securityGroups).forEach((key) => {
         //Keep track if the securityGroups of this region are still available
         if (this.securityGroups[key].region === region) {
           this.securityGroups[key].stillPresent = false;
         }
       });
 
-      data.SecurityGroups?.forEach(securityGroup => {
+      data.SecurityGroups?.forEach((securityGroup) => {
         if (securityGroup.GroupId) {
           this.$set(this.securityGroups, securityGroup.GroupId, {
             ...securityGroup,
             region,
-            stillPresent: true
+            stillPresent: true,
           });
         }
       });
 
       //Remove SecurityGroups we don't find anymore
-      Object.keys(this.securityGroups).forEach(key => {
+      Object.keys(this.securityGroups).forEach((key) => {
         if (
           this.securityGroups[key].region === region &&
           !this.securityGroups[key].stillPresent
@@ -278,7 +278,7 @@ export default class SecurityGroupList extends mixins(
     }
 
     const filteredSecurityGroups = this.securityGroupsAsList.filter(
-      securityGroup =>
+      (securityGroup) =>
         securityGroup.GroupId === this.$route.query.securityGroupId
     );
     if (
@@ -289,7 +289,7 @@ export default class SecurityGroupList extends mixins(
       this.selectedSecurityGroup = filteredSecurityGroups[0];
       this.drawerOpened = true;
       const index = this.securityGroupsAsList.findIndex(
-        securityGroup =>
+        (securityGroup) =>
           securityGroup.GroupId === this.$route.query.securityGroupId
       );
       // eslint-disable-next-line @typescript-eslint/ban-ts-ignore
@@ -328,7 +328,7 @@ export default class SecurityGroupList extends mixins(
       this.$router
         .push({
           path: "/network/securityGroups",
-          query: { securityGroupId: securityGroups[0].GroupId }
+          query: { securityGroupId: securityGroups[0].GroupId },
         })
         // eslint-disable-next-line @typescript-eslint/no-empty-function
         .catch(() => {});
@@ -339,11 +339,11 @@ export default class SecurityGroupList extends mixins(
 
   @Watch("regionsEnabled")
   onRegionsEnabledChanged(newValue: string[], oldValue: string[]) {
-    const addedRegions = [...newValue.filter(d => !oldValue.includes(d))];
-    const removedRegions = [...oldValue.filter(d => !newValue.includes(d))];
+    const addedRegions = [...newValue.filter((d) => !oldValue.includes(d))];
+    const removedRegions = [...oldValue.filter((d) => !newValue.includes(d))];
 
     if (removedRegions.length > 0) {
-      this.securityGroupsAsList.forEach(securityGroup => {
+      this.securityGroupsAsList.forEach((securityGroup) => {
         if (
           securityGroup.region &&
           removedRegions.includes(securityGroup.region) &&
@@ -354,7 +354,7 @@ export default class SecurityGroupList extends mixins(
       });
     }
 
-    addedRegions.forEach(region => this.getSecurityGroupForRegion(region));
+    addedRegions.forEach((region) => this.getSecurityGroupForRegion(region));
   }
 
   @Watch("currentRoleIndex")

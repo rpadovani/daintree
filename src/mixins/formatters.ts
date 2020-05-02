@@ -13,8 +13,8 @@ import { Component, Vue } from "vue-property-decorator";
       const toNumber = parseInt(unix, 10);
       moment.locale();
       return moment(toNumber * 1000).format("lll");
-    }
-  }
+    },
+  },
 })
 export class Formatters extends Vue {
   standardDate(date: Date): string {
@@ -23,7 +23,7 @@ export class Formatters extends Vue {
   }
 
   extractNameFromTags(tags: TagList): string | undefined {
-    const nameTag = tags.filter(v => v.Key === "Name");
+    const nameTag = tags.filter((v) => v.Key === "Name");
 
     if (nameTag.length > 0) {
       return nameTag[0].Value;

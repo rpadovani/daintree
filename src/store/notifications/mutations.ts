@@ -1,7 +1,7 @@
 import { MutationTree } from "vuex";
 import {
   AppNotification,
-  NotificationState
+  NotificationState,
 } from "@/store/notifications/state";
 
 export const NotificationMutations = {
@@ -14,12 +14,12 @@ export const NotificationMutations = {
   },
 
   dismissByKey(state: NotificationState, key: string) {
-    state.notifications = state.notifications.filter(n => n.key != key);
+    state.notifications = state.notifications.filter((n) => n.key != key);
   },
 
   dismissByResourceID(state: NotificationState, resourceID: string) {
     state.notifications = state.notifications.filter(
-      n => n.resourceId != resourceID
+      (n) => n.resourceId != resourceID
     );
-  }
+  },
 } as MutationTree<NotificationState>;

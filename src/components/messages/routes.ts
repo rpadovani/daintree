@@ -9,7 +9,7 @@ const mainRoute = {
   component: MessagesMain,
   meta: {
     title: "Messages",
-    requiresLogin: true
-  }
+    requiresLogin: true,
+  },
 };
 export const MessagesRoutes = [mainRoute, ...sqsRoutes, ...snsRoutes];

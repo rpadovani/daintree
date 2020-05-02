@@ -20,13 +20,13 @@ import { GlAlert } from "@gitlab/ui";
 export default {
   name: "Notifier",
   components: {
-    GlAlert
+    GlAlert,
   },
   methods: {
     dismiss(index) {
       this.$store.commit("notifications/dismiss", index);
-    }
-  }
+    },
+  },
 };
 </script>
 

@@ -26,7 +26,7 @@ import { Component } from "vue-property-decorator";
 import Notifications from "@/mixins/notifications";
 import { GlEmptyState } from "@gitlab/ui";
 @Component({
-  components: { Header, GlEmptyState }
+  components: { Header, GlEmptyState },
 })
 export default class CognitoCallback extends Notifications {
   failedLogin = false;
@@ -86,7 +86,7 @@ export default class CognitoCallback extends Notifications {
       .dispatch("sts/loginWithCognito", {
         issuer,
         idToken,
-        cognitoIdentityPoolId
+        cognitoIdentityPoolId,
       })
       .then(() => {
         let routeAfterLogin = localStorage.getItem("routeAfterLogin");
@@ -98,7 +98,7 @@ export default class CognitoCallback extends Notifications {
         this.failedLogin = false;
         localStorage.removeItem("routeAfterLogin"); // Clean for next time
       })
-      .catch(err => {
+      .catch((err) => {
         this.showError(err, "cognitoCallback");
         this.failedLogin = true;
       });

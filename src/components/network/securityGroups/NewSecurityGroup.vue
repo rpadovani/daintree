@@ -85,7 +85,7 @@ import {
   GlFormGroup,
   GlFormInputGroup,
   GlFormSelect,
-  GlButton
+  GlButton,
 } from "@gitlab/ui";
 import { BInputGroupText } from "bootstrap-vue";
 import EC2Client from "aws-sdk/clients/ec2";
@@ -103,8 +103,8 @@ import { mixins } from "vue-class-component";
     GlAlert,
     GlFormInputGroup,
     BInputGroupText,
-    GlButton
-  }
+    GlButton,
+  },
 })
 export default class NewSecurityGroup extends mixins(
   Notifications,
@@ -124,7 +124,7 @@ export default class NewSecurityGroup extends mixins(
 
   get vpcsOptions(): string[] {
     const options: string[] = [];
-    this.vpcs.forEach(s => {
+    this.vpcs.forEach((s) => {
       let option = "";
       if (s.VpcId) option += s.VpcId;
       const name = this.extractNameFromTags(s.Tags || []);
@@ -146,13 +146,13 @@ export default class NewSecurityGroup extends mixins(
   createSecurityGroup() {
     const EC2 = new EC2Client({
       region: this.selectedRegion,
-      credentials: this.credentials
+      credentials: this.credentials,
     });
     EC2.createSecurityGroup(
       {
         VpcId: this.selectedVpc.split(" ")[0],
         GroupName: this.securityGroupName,
-        Description: this.securityGroupDescription
+        Description: this.securityGroupDescription,
       },
       (err, data) => {
         if (err) {
@@ -174,7 +174,7 @@ export default class NewSecurityGroup extends mixins(
     } else {
       const EC2 = new EC2Client({
         region: this.selectedRegion,
-        credentials: this.credentials
+        credentials: this.credentials,
       });
 
       this.loadingCount++;

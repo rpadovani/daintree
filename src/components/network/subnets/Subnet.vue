@@ -16,7 +16,7 @@
           <b>{{ subnet.State }}</b>
         </gl-alert>
         <gl-button
-          style="height: 100%"
+          style="height: 100%;"
           class="mt-2 col-2"
           variant="danger"
           category="secondary"
@@ -165,7 +165,7 @@ import {
   GlAlert,
   GlButton,
   GlModal,
-  GlModalDirective
+  GlModalDirective,
 } from "@gitlab/ui";
 import EC2Client from "aws-sdk/clients/ec2";
 import { Component, Prop, Watch } from "vue-property-decorator";
@@ -194,25 +194,25 @@ import ListOfRoutes from "@/components/network/routeTables/ListOfRoutes.vue";
     GlAlert,
     GlButton,
     GlModal,
-    StateText
+    StateText,
   },
-  directives: { "gl-modal-directive": GlModalDirective }
+  directives: { "gl-modal-directive": GlModalDirective },
 })
 export default class Subnet extends mixins(Formatters, Notifications) {
   @Prop(Object) readonly subnet!: SubnetWithRegion;
 
   deleteSubnetButtonProps = {
-    text: "Delete subnet"
+    text: "Delete subnet",
   };
 
   cancelProps = {
-    text: "Cancel"
+    text: "Cancel",
   };
 
   get EC2() {
     return new EC2Client({
       region: this.subnet.region,
-      credentials: this.$store.getters["sts/credentials"]
+      credentials: this.$store.getters["sts/credentials"],
     });
   }
 
@@ -226,8 +226,8 @@ export default class Subnet extends mixins(Formatters, Notifications) {
   describeRouteTable() {
     const params = {
       Filters: [
-        { Name: "association.subnet-id", Values: [this.subnet.SubnetId || ""] }
-      ]
+        { Name: "association.subnet-id", Values: [this.subnet.SubnetId || ""] },
+      ],
     };
     this.routeTableState = "loading";
     this.routeTable = {};
@@ -257,21 +257,21 @@ export default class Subnet extends mixins(Formatters, Notifications) {
     {
       key: "RuleNumber",
       label: "# Rule",
-      sortable: true
+      sortable: true,
     },
     { key: "Protocol", label: "Protocol" },
     { key: "CidrBlock", label: "Source" },
-    { key: "RuleAction", sortable: true }
+    { key: "RuleAction", sortable: true },
   ];
   outboundFields = [
     {
       key: "RuleNumber",
       label: "# Rule",
-      sortable: true
+      sortable: true,
     },
     { key: "Protocol", label: "Protocol" },
     { key: "CidrBlock", label: "Target" },
-    { key: "RuleAction", sortable: true }
+    { key: "RuleAction", sortable: true },
   ];
 
   describeAcls() {
@@ -283,9 +283,9 @@ export default class Subnet extends mixins(Formatters, Notifications) {
         Filters: [
           {
             Name: "association.subnet-id",
-            Values: [this.subnet.SubnetId || ""]
-          }
-        ]
+            Values: [this.subnet.SubnetId || ""],
+          },
+        ],
       },
       (err, data) => {
         if (err) {
@@ -305,14 +305,14 @@ export default class Subnet extends mixins(Formatters, Notifications) {
 
   get inboundRules(): NetworkAclEntry[] {
     if (this.acls && this.acls.length > 0) {
-      return this.acls[0].Entries?.filter(e => e.Egress === false) || [];
+      return this.acls[0].Entries?.filter((e) => e.Egress === false) || [];
     }
     return [];
   }
 
   get outboundRules(): NetworkAclEntry[] {
     if (this.acls && this.acls.length > 0) {
-      return this.acls[0].Entries?.filter(e => e.Egress === true) || [];
+      return this.acls[0].Entries?.filter((e) => e.Egress === true) || [];
     }
     return [];
   }
@@ -333,7 +333,7 @@ export default class Subnet extends mixins(Formatters, Notifications) {
       return;
     }
 
-    this.EC2.deleteSubnet({ SubnetId: this.subnet.SubnetId }, err => {
+    this.EC2.deleteSubnet({ SubnetId: this.subnet.SubnetId }, (err) => {
       if (err) {
         this.showError(err.message, "deleteSubnet");
       } else {
@@ -342,7 +342,7 @@ export default class Subnet extends mixins(Formatters, Notifications) {
           variant: "info",
           text: "Deleted subnet with ID " + this.subnet.SubnetId,
           key: "deletingSubnet",
-          resourceId: this.subnet.SubnetId
+          resourceId: this.subnet.SubnetId,
         });
         this.$emit("deleted");
       }

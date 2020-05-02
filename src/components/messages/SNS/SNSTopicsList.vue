@@ -5,7 +5,7 @@
     <gl-drawer
       :open="drawerOpened && selectedSns !== {}"
       @close="close"
-      style="width:80%"
+      style="width: 80%;"
     >
       <template #header>{{ selectedSnsTitle }}</template>
 
@@ -120,7 +120,7 @@ import {
   GlEmptyState,
   GlSkeletonLoading,
   GlModalDirective,
-  GlLoadingIcon
+  GlLoadingIcon,
 } from "@gitlab/ui";
 import { Formatters } from "@/mixins/formatters";
 import Component, { mixins } from "vue-class-component";
@@ -143,11 +143,11 @@ import { TopicWithRegion } from "@/components/messages/SNS/sns";
     GlFormInput,
     GlSkeletonLoading,
     GlEmptyState,
-    GlLoadingIcon
+    GlLoadingIcon,
   },
   directives: {
-    "gl-modal-directive": GlModalDirective
-  }
+    "gl-modal-directive": GlModalDirective,
+  },
 })
 export default class SNSTopicsList extends mixins(Formatters, Notifications) {
   sns: { [key: string]: TopicWithRegion } = {};
@@ -163,21 +163,21 @@ export default class SNSTopicsList extends mixins(Formatters, Notifications) {
       key: "topicArn",
       label: "Topic Name",
       sortable: true,
-      formatter: this.getTopicNameFromArn
+      formatter: this.getTopicNameFromArn,
     },
     { key: "region", sortable: true },
     {
       key: "SubscriptionsConfirmed",
       label: "Confirmed subscriptions",
       sortable: true,
-      class: "text-center"
+      class: "text-center",
     },
     {
       key: "SubscriptionsPending",
       label: "Pending subscriptions",
       sortable: true,
-      class: "text-center"
-    }
+      class: "text-center",
+    },
   ];
 
   get snsAsList(): TopicWithRegion[] {
@@ -212,7 +212,7 @@ export default class SNSTopicsList extends mixins(Formatters, Notifications) {
   }
 
   getAllTopics() {
-    this.regionsEnabled.forEach(region => this.getTopicForRegion(region));
+    this.regionsEnabled.forEach((region) => this.getTopicForRegion(region));
   }
 
   getTopicForRegion(region: string) {
@@ -222,7 +222,7 @@ export default class SNSTopicsList extends mixins(Formatters, Notifications) {
 
     SNS.listTopics({}, (err, data) => {
       this.loadingCount--;
-      Object.keys(this.sns).forEach(key => {
+      Object.keys(this.sns).forEach((key) => {
         //Keep track if the sns of this region are still available
         if (this.sns[key].region === region) {
           this.sns[key].stillPresent = false;
@@ -234,12 +234,12 @@ export default class SNSTopicsList extends mixins(Formatters, Notifications) {
         return;
       }
 
-      data.Topics?.map(t => t.TopicArn).forEach(topicArn => {
+      data.Topics?.map((t) => t.TopicArn).forEach((topicArn) => {
         if (topicArn) {
           this.$set(this.sns, topicArn, {
             topicArn,
             region,
-            stillPresent: true
+            stillPresent: true,
           });
 
           SNS.getTopicAttributes({ TopicArn: topicArn }, (err, data) => {
@@ -250,7 +250,7 @@ export default class SNSTopicsList extends mixins(Formatters, Notifications) {
                 topicArn,
                 region,
                 stillPresent: true,
-                ...data.Attributes
+                ...data.Attributes,
               });
             }
           });
@@ -258,7 +258,7 @@ export default class SNSTopicsList extends mixins(Formatters, Notifications) {
       });
 
       //Remove Sns we don't find anymore
-      Object.keys(this.sns).forEach(key => {
+      Object.keys(this.sns).forEach((key) => {
         if (this.sns[key].region === region && !this.sns[key].stillPresent) {
           this.$delete(this.sns, key);
         }
@@ -270,7 +270,7 @@ export default class SNSTopicsList extends mixins(Formatters, Notifications) {
       if (this.$route.query.topic && this.loadingCount === 0) {
         this.$nextTick().then(() => {
           const filteredSns = this.snsAsList.filter(
-            sns =>
+            (sns) =>
               sns.topicArn &&
               this.getTopicNameFromArn(sns.topicArn) === this.$route.query.topic
           );
@@ -278,7 +278,7 @@ export default class SNSTopicsList extends mixins(Formatters, Notifications) {
             this.selectedSns = filteredSns[0];
             this.drawerOpened = true;
             const index = this.snsAsList.findIndex(
-              sns =>
+              (sns) =>
                 sns.topicArn &&
                 this.getTopicNameFromArn(sns.topicArn) ===
                   this.$route.query.topic
@@ -327,7 +327,7 @@ export default class SNSTopicsList extends mixins(Formatters, Notifications) {
       this.$router
         .push({
           path: "/messages/sns_topics",
-          query: { topic: this.getTopicNameFromArn(sns[0].topicArn) }
+          query: { topic: this.getTopicNameFromArn(sns[0].topicArn) },
         })
         // eslint-disable-next-line @typescript-eslint/no-empty-function
         .catch(() => {});
@@ -338,18 +338,18 @@ export default class SNSTopicsList extends mixins(Formatters, Notifications) {
 
   @Watch("regionsEnabled")
   onRegionsEnabledChanged(newValue: string[], oldValue: string[]) {
-    const addedRegions = [...newValue.filter(d => !oldValue.includes(d))];
-    const removedRegions = [...oldValue.filter(d => !newValue.includes(d))];
+    const addedRegions = [...newValue.filter((d) => !oldValue.includes(d))];
+    const removedRegions = [...oldValue.filter((d) => !newValue.includes(d))];
 
     if (removedRegions.length > 0) {
-      this.snsAsList.forEach(sns => {
+      this.snsAsList.forEach((sns) => {
         if (sns.region && removedRegions.includes(sns.region) && sns.topicArn) {
           this.$delete(this.sns, sns.topicArn);
         }
       });
     }
 
-    addedRegions.forEach(region => this.getTopicForRegion(region));
+    addedRegions.forEach((region) => this.getTopicForRegion(region));
   }
 
   @Watch("currentRoleIndex")

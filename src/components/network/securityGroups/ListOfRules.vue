@@ -16,7 +16,7 @@
       <span
         v-if="
           data.item.fromPort === data.item.toPort &&
-            data.item.fromPort === undefined
+          data.item.fromPort === undefined
         "
         >All traffic</span
       >
@@ -50,35 +50,35 @@ export default class ListOfRules extends Vue {
     { key: "Source", label: this.isOutbound ? "Destination" : "Source" },
 
     { key: "sourceDescription", label: "Description" },
-    "protocol"
+    "protocol",
   ];
 
   get flattenRules(): FlattenRule[] {
     const flattenRules: FlattenRule[] = [];
-    this.rules?.forEach(r => {
-      r.IpRanges?.forEach(i => {
+    this.rules?.forEach((r) => {
+      r.IpRanges?.forEach((i) => {
         flattenRules.push({
           cidr: i.CidrIp,
           sourceDescription: i.Description,
 
           fromPort: r.FromPort,
           toPort: r.ToPort,
-          protocol: r.IpProtocol
+          protocol: r.IpProtocol,
         });
       });
 
-      r.Ipv6Ranges?.forEach(i => {
+      r.Ipv6Ranges?.forEach((i) => {
         flattenRules.push({
           cidr: i.CidrIpv6,
           sourceDescription: i.Description,
 
           fromPort: r.FromPort,
           toPort: r.ToPort,
-          protocol: r.IpProtocol
+          protocol: r.IpProtocol,
         });
       });
 
-      r.UserIdGroupPairs?.forEach(g => {
+      r.UserIdGroupPairs?.forEach((g) => {
         flattenRules.push({
           sourceDescription: g.Description,
           groupId: g.GroupId,
@@ -86,7 +86,7 @@ export default class ListOfRules extends Vue {
 
           fromPort: r.FromPort,
           toPort: r.ToPort,
-          protocol: r.IpProtocol
+          protocol: r.IpProtocol,
         });
       });
     });

@@ -36,7 +36,7 @@
               />
             </div>
           </div>
-          <b-nav-item-dropdown style="color: white" right size="lg">
+          <b-nav-item-dropdown style="color: white;" right size="lg">
             <template v-slot:button-content>
               {{ prettyCredentials }}
             </template>
@@ -96,7 +96,7 @@ import {
   BNavbarBrand,
   BNavbarNav,
   BNavbarToggle,
-  BNavItemDropdown
+  BNavItemDropdown,
 } from "bootstrap-vue";
 import RegionText from "@/components/common/RegionText.vue";
 import RegionModal from "@/components/Header/RegionModal.vue";
@@ -119,9 +119,9 @@ import { Role } from "@/store/sts/state";
     BNavbarNav,
     BCollapse,
     SubHeader,
-    Notifier
+    Notifier,
   },
-  directives: { "gl-modal-directive": GlModalDirective }
+  directives: { "gl-modal-directive": GlModalDirective },
 })
 export default class Header extends Vue {
   @Prop(Boolean) readonly hideSubHeader: boolean | undefined;
@@ -176,7 +176,7 @@ export default class Header extends Vue {
   switchRole(roleIndex: number) {
     this.$store.dispatch("sts/assumeRole", {
       ...this.roles[roleIndex],
-      newRole: false
+      newRole: false,
     });
   }
 }

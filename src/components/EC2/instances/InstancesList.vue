@@ -5,7 +5,7 @@
     <gl-drawer
       :open="drawerOpened && selectedInstance !== {}"
       @close="close"
-      style="width:80%"
+      style="width: 80%;"
     >
       <template #header>{{ selectedInstanceTitle }}</template>
 
@@ -123,7 +123,7 @@ import {
   GlButton,
   GlSkeletonLoading,
   GlEmptyState,
-  GlModalDirective
+  GlModalDirective,
 } from "@gitlab/ui";
 import { Component, Watch } from "vue-property-decorator";
 import { Formatters } from "@/mixins/formatters";
@@ -146,11 +146,11 @@ import Notifications from "@/mixins/notifications";
     StateText,
     RegionText,
     GlSkeletonLoading,
-    GlEmptyState
+    GlEmptyState,
   },
   directives: {
-    "gl-modal-directive": GlModalDirective
-  }
+    "gl-modal-directive": GlModalDirective,
+  },
 })
 export default class Instances extends mixins(Formatters, Notifications) {
   instances: { [key: string]: InstanceWithRegion } = {};
@@ -169,29 +169,29 @@ export default class Instances extends mixins(Formatters, Notifications) {
       key: "Tags",
       label: "Name",
       sortable: true,
-      formatter: this.extractNameFromTags
+      formatter: this.extractNameFromTags,
     },
     {
       key: "InstanceId",
-      sortable: true
+      sortable: true,
     },
 
     {
       key: "InstanceType",
-      sortable: true
+      sortable: true,
     },
     {
       key: "KeyName",
       sortable: true,
-      label: "SSH Key Name"
+      label: "SSH Key Name",
     },
     "State",
     {
       key: "Placement",
-      formatter: (placement: Placement) => placement.AvailabilityZone
+      formatter: (placement: Placement) => placement.AvailabilityZone,
     },
     { key: "VpcId", sortable: true },
-    { key: "SubnetId", sortable: true }
+    { key: "SubnetId", sortable: true },
   ];
 
   get instancesAsList(): InstanceWithRegion[] {
@@ -215,7 +215,9 @@ export default class Instances extends mixins(Formatters, Notifications) {
   }
 
   get selectedInstanceTitle(): string | undefined {
-    const nameTag = this.selectedInstance?.Tags?.filter(v => v.Key === "Name");
+    const nameTag = this.selectedInstance?.Tags?.filter(
+      (v) => v.Key === "Name"
+    );
 
     if (nameTag && nameTag.length > 0) {
       return `${nameTag[0].Value} (${this.selectedInstance.InstanceId})`;
@@ -224,7 +226,7 @@ export default class Instances extends mixins(Formatters, Notifications) {
   }
 
   getAllInstances() {
-    this.regionsEnabled.forEach(region => this.getInstanceForRegion(region));
+    this.regionsEnabled.forEach((region) => this.getInstanceForRegion(region));
   }
   getInstanceForRegion(region: string, filterByInstanceIds?: string[]) {
     //While polling we do not set the loading state 'cause it is annoying
@@ -234,22 +236,22 @@ export default class Instances extends mixins(Formatters, Notifications) {
 
     const EC2 = new EC2Client({
       region,
-      credentials: this.$store.getters["sts/credentials"]
+      credentials: this.$store.getters["sts/credentials"],
     });
     const params: DescribeInstancesRequest = {};
     if (filterByInstanceIds) {
       params.Filters = [
         {
           Name: "instance-id",
-          Values: filterByInstanceIds
-        }
+          Values: filterByInstanceIds,
+        },
       ];
     }
 
     EC2.describeInstances(params, (err, data) => {
       if (!filterByInstanceIds) {
         this.loadingCount--;
-        Object.keys(this.instances).forEach(key => {
+        Object.keys(this.instances).forEach((key) => {
           //Keep track if the instances of this region are still available
           if (this.instances[key].region === region) {
             this.instances[key].stillPresent = false;
@@ -262,13 +264,13 @@ export default class Instances extends mixins(Formatters, Notifications) {
         return;
       }
 
-      data.Reservations?.forEach(r => {
-        r.Instances?.forEach(instance => {
+      data.Reservations?.forEach((r) => {
+        r.Instances?.forEach((instance) => {
           if (instance.InstanceId) {
             this.$set(this.instances, instance.InstanceId, {
               ...instance,
               region,
-              stillPresent: true
+              stillPresent: true,
             });
 
             //If instances are pending or deleting we save them in the wip instances, so we can poll over them
@@ -293,7 +295,7 @@ export default class Instances extends mixins(Formatters, Notifications) {
               this.wipInstances[region].includes(instance.InstanceId)
             ) {
               const instanceIndex = this.wipInstances[region].findIndex(
-                v => v === instance.InstanceId
+                (v) => v === instance.InstanceId
               );
               //If we were creating or deleting a instance on our own, we dismiss the creating / deleting alert
               this.dismissAlertByResourceID(instance.InstanceId);
@@ -305,7 +307,7 @@ export default class Instances extends mixins(Formatters, Notifications) {
 
       //Remove instance we don't find anymore
       if (!filterByInstanceIds) {
-        Object.keys(this.instances).forEach(key => {
+        Object.keys(this.instances).forEach((key) => {
           if (
             this.instances[key].region === region &&
             !this.instances[key].stillPresent
@@ -321,13 +323,13 @@ export default class Instances extends mixins(Formatters, Notifications) {
       if (this.$route.query.instanceId && this.loadingCount === 0) {
         this.$nextTick().then(() => {
           const filteredInstances = this.instancesAsList.filter(
-            instance => instance.InstanceId === this.$route.query.instanceId
+            (instance) => instance.InstanceId === this.$route.query.instanceId
           );
           if (filteredInstances && filteredInstances.length > 0) {
             this.selectedInstance = filteredInstances[0];
             this.drawerOpened = true;
             const index = this.instancesAsList.findIndex(
-              instance => instance.InstanceId === this.$route.query.instanceId
+              (instance) => instance.InstanceId === this.$route.query.instanceId
             );
             // eslint-disable-next-line @typescript-eslint/ban-ts-ignore
             //@ts-ignore
@@ -347,7 +349,7 @@ export default class Instances extends mixins(Formatters, Notifications) {
       this.selectedInstance.InstanceId
     ) {
       this.getInstanceForRegion(this.selectedInstance.region, [
-        this.selectedInstance.InstanceId
+        this.selectedInstance.InstanceId,
       ]);
     }
 
@@ -369,7 +371,7 @@ export default class Instances extends mixins(Formatters, Notifications) {
       this.$router
         .push({
           path: "/ec2/instances",
-          query: { instanceId: instances[0].InstanceId }
+          query: { instanceId: instances[0].InstanceId },
         })
         // eslint-disable-next-line @typescript-eslint/no-empty-function
         .catch(() => {});
@@ -380,11 +382,11 @@ export default class Instances extends mixins(Formatters, Notifications) {
 
   @Watch("regionsEnabled")
   onRegionsEnabledChanged(newValue: string[], oldValue: string[]) {
-    const addedRegions = [...newValue.filter(d => !oldValue.includes(d))];
-    const removedRegions = [...oldValue.filter(d => !newValue.includes(d))];
+    const addedRegions = [...newValue.filter((d) => !oldValue.includes(d))];
+    const removedRegions = [...oldValue.filter((d) => !newValue.includes(d))];
 
     if (removedRegions.length > 0) {
-      this.instancesAsList.forEach(instance => {
+      this.instancesAsList.forEach((instance) => {
         if (
           instance.region &&
           removedRegions.includes(instance.region) &&
@@ -395,7 +397,7 @@ export default class Instances extends mixins(Formatters, Notifications) {
       });
     }
 
-    addedRegions.forEach(region => this.getInstanceForRegion(region));
+    addedRegions.forEach((region) => this.getInstanceForRegion(region));
   }
 
   startPolling() {
@@ -407,7 +409,7 @@ export default class Instances extends mixins(Formatters, Notifications) {
     window.setTimeout(() => {
       this.isPolling = false;
 
-      Object.keys(this.wipInstances).forEach(region => {
+      Object.keys(this.wipInstances).forEach((region) => {
         if (this.wipInstances[region].length > 0) {
           this.getInstanceForRegion(region, this.wipInstances[region]);
         }

@@ -62,7 +62,7 @@ import {
   GlFormInputGroup,
   GlFormSelect,
   GlButton,
-  GlIcon
+  GlIcon,
 } from "@gitlab/ui";
 import { BInputGroupText } from "bootstrap-vue";
 import EC2Client from "aws-sdk/clients/ec2";
@@ -80,8 +80,8 @@ import { Formatters } from "@/mixins/formatters";
     GlFormInputGroup,
     BInputGroupText,
     GlButton,
-    GlIcon
-  }
+    GlIcon,
+  },
 })
 export default class NewEip extends mixins(Notifications, Formatters) {
   selectedRegion = "";
@@ -94,7 +94,7 @@ export default class NewEip extends mixins(Notifications, Formatters) {
   createEip() {
     const EC2 = new EC2Client({
       region: this.selectedRegion,
-      credentials: this.$store.getters["sts/credentials"]
+      credentials: this.$store.getters["sts/credentials"],
     });
 
     EC2.allocateAddress({ Domain: "vpc" }, (err, data) => {
@@ -107,20 +107,20 @@ export default class NewEip extends mixins(Notifications, Formatters) {
           variant: "info",
           text: "Allocated Elastic IP with ID " + data.AllocationId,
           key: "creatingEip",
-          resourceId: data.AllocationId
+          resourceId: data.AllocationId,
         });
 
         if (this.eipName && data.AllocationId) {
           const params = {
             Resources: [data.AllocationId],
-            Tags: [{ Key: "Name", Value: this.eipName }]
+            Tags: [{ Key: "Name", Value: this.eipName }],
           };
-          EC2.createTags(params, err => {
+          EC2.createTags(params, (err) => {
             if (err) {
               this.$store.commit("notifications/show", {
                 variant: "danger",
                 text: err,
-                key: "creatingEip"
+                key: "creatingEip",
               });
             }
 

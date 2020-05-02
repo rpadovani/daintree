@@ -146,7 +146,7 @@ import {
   GlModal,
   GlModalDirective,
   GlButtonGroup,
-  GlIcon
+  GlIcon,
 } from "@gitlab/ui";
 import SNSClient from "aws-sdk/clients/sns";
 import { Component, Prop } from "vue-property-decorator";
@@ -171,19 +171,19 @@ hljs.registerLanguage("json", json);
     GlButton,
     GlModal,
     GlButtonGroup,
-    GlIcon
+    GlIcon,
   },
-  directives: { "gl-modal-directive": GlModalDirective }
+  directives: { "gl-modal-directive": GlModalDirective },
 })
 export default class SNSSubscription extends mixins(Formatters, Notifications) {
   @Prop(Object) readonly sns!: SubscriptionWithRegion;
 
   deleteSnsButtonProps = {
-    text: "Delete subscription"
+    text: "Delete subscription",
   };
 
   cancelProps = {
-    text: "Cancel"
+    text: "Cancel",
   };
 
   get highlightedDeliveryPolicy() {
@@ -229,10 +229,10 @@ export default class SNSSubscription extends mixins(Formatters, Notifications) {
 
     const SNS = new SNSClient({
       region: this.sns.region,
-      credentials: this.$store.getters["sts/credentials"]
+      credentials: this.$store.getters["sts/credentials"],
     });
 
-    SNS.unsubscribe({ SubscriptionArn: this.sns.subscriptionArn }, err => {
+    SNS.unsubscribe({ SubscriptionArn: this.sns.subscriptionArn }, (err) => {
       if (err) {
         this.showError(err.message, "deleteSns");
       } else {
@@ -241,7 +241,7 @@ export default class SNSSubscription extends mixins(Formatters, Notifications) {
           variant: "info",
           text: "Deleted subscription with ARN " + this.sns.subscriptionArn,
           key: "deletingSns",
-          resourceId: this.sns.subscriptionArn
+          resourceId: this.sns.subscriptionArn,
         });
         this.$emit("deleted");
       }

@@ -103,7 +103,7 @@ import {
   GlButton,
   GlModal,
   GlModalDirective,
-  GlButtonGroup
+  GlButtonGroup,
 } from "@gitlab/ui";
 import SQSClient from "aws-sdk/clients/sqs";
 import { Component, Prop } from "vue-property-decorator";
@@ -125,23 +125,23 @@ import { QueueWithRegion } from "@/components/messages/SQS/sqs";
     GlAlert,
     GlButton,
     GlModal,
-    GlButtonGroup
+    GlButtonGroup,
   },
-  directives: { "gl-modal-directive": GlModalDirective }
+  directives: { "gl-modal-directive": GlModalDirective },
 })
 export default class SQS extends mixins(Formatters, Notifications) {
   @Prop(Object) readonly sqs!: QueueWithRegion;
 
   deleteSqsButtonProps = {
-    text: "Delete queue"
+    text: "Delete queue",
   };
 
   purgeSqsButtonProps = {
-    text: "Purge queue"
+    text: "Purge queue",
   };
 
   cancelProps = {
-    text: "Cancel"
+    text: "Cancel",
   };
 
   deleteSqs() {
@@ -151,10 +151,10 @@ export default class SQS extends mixins(Formatters, Notifications) {
 
     const SQS = new SQSClient({
       region: this.sqs.region,
-      credentials: this.$store.getters["sts/credentials"]
+      credentials: this.$store.getters["sts/credentials"],
     });
 
-    SQS.deleteQueue({ QueueUrl: this.sqs.queueUrl }, err => {
+    SQS.deleteQueue({ QueueUrl: this.sqs.queueUrl }, (err) => {
       if (err) {
         this.showError(err.message, "deleteSqs");
       } else {
@@ -163,7 +163,7 @@ export default class SQS extends mixins(Formatters, Notifications) {
           variant: "info",
           text: "Deleted queue with URL " + this.sqs.queueUrl,
           key: "deletingSqs",
-          resourceId: this.sqs.queueUrl
+          resourceId: this.sqs.queueUrl,
         });
         this.$emit("deleted");
       }
@@ -177,10 +177,10 @@ export default class SQS extends mixins(Formatters, Notifications) {
 
     const SQS = new SQSClient({
       region: this.sqs.region,
-      credentials: this.$store.getters["sts/credentials"]
+      credentials: this.$store.getters["sts/credentials"],
     });
 
-    SQS.purgeQueue({ QueueUrl: this.sqs.queueUrl }, err => {
+    SQS.purgeQueue({ QueueUrl: this.sqs.queueUrl }, (err) => {
       if (err) {
         this.showError(err.message, "purgeSqs");
       } else {
@@ -189,7 +189,7 @@ export default class SQS extends mixins(Formatters, Notifications) {
           variant: "info",
           text: "Deleted queue with URL " + this.sqs.queueUrl,
           key: "purgingSqs",
-          resourceId: this.sqs.queueUrl
+          resourceId: this.sqs.queueUrl,
         });
       }
     });

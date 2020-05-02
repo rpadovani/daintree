@@ -55,7 +55,7 @@ import {
   GlFormGroup,
   GlFormInputGroup,
   GlFormSelect,
-  GlButton
+  GlButton,
 } from "@gitlab/ui";
 import { BInputGroupText } from "bootstrap-vue";
 import { Component } from "vue-property-decorator";
@@ -70,8 +70,8 @@ import SQSClient, { CreateQueueRequest } from "aws-sdk/clients/sqs";
     GlAlert,
     GlFormInputGroup,
     BInputGroupText,
-    GlButton
-  }
+    GlButton,
+  },
 })
 export default class NewSQS extends Notifications {
   selectedRegion = "";
@@ -80,7 +80,7 @@ export default class NewSQS extends Notifications {
   createSqs() {
     const SQS = new SQSClient({
       region: this.selectedRegion,
-      credentials: this.$store.getters["sts/credentials"]
+      credentials: this.$store.getters["sts/credentials"],
     });
 
     const params: CreateQueueRequest = { QueueName: this.sqsName };

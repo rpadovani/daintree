@@ -5,7 +5,7 @@
     <gl-drawer
       :open="drawerOpened && selectedSubnet !== {}"
       @close="close"
-      style="width:80%"
+      style="width: 80%;"
     >
       <template #header>{{ selectedSubnetTitle }}</template>
 
@@ -116,7 +116,7 @@ import {
   GlTable,
   GlEmptyState,
   GlSkeletonLoading,
-  GlModalDirective
+  GlModalDirective,
 } from "@gitlab/ui";
 import { Formatters } from "@/mixins/formatters";
 import Component, { mixins } from "vue-class-component";
@@ -140,11 +140,11 @@ import SubnetWithRegion = Subnets.SubnetWithRegion;
     GlButton,
     GlFormInput,
     GlSkeletonLoading,
-    GlEmptyState
+    GlEmptyState,
   },
   directives: {
-    "gl-modal-directive": GlModalDirective
-  }
+    "gl-modal-directive": GlModalDirective,
+  },
 })
 export default class SubnetList extends mixins(Formatters, Notifications) {
   subnets: { [key: string]: SubnetWithRegion } = {};
@@ -164,7 +164,7 @@ export default class SubnetList extends mixins(Formatters, Notifications) {
       key: "Tags",
       label: "Name",
       sortable: true,
-      formatter: this.extractNameFromTags
+      formatter: this.extractNameFromTags,
     },
     { key: "SubnetId", sortable: true },
     "State",
@@ -173,9 +173,9 @@ export default class SubnetList extends mixins(Formatters, Notifications) {
     {
       key: "DefaultForAz",
       label: "Default?",
-      class: "text-center"
+      class: "text-center",
     },
-    { key: "VpcId", sortable: true }
+    { key: "VpcId", sortable: true },
   ];
 
   get credentials() {
@@ -203,7 +203,7 @@ export default class SubnetList extends mixins(Formatters, Notifications) {
   }
 
   get selectedSubnetTitle() {
-    const nameTag = this.selectedSubnet?.Tags?.filter(v => v.Key === "Name");
+    const nameTag = this.selectedSubnet?.Tags?.filter((v) => v.Key === "Name");
 
     if (nameTag && nameTag.length > 0) {
       return `${nameTag[0].Value} (${this.selectedSubnet?.SubnetId})`;
@@ -213,7 +213,7 @@ export default class SubnetList extends mixins(Formatters, Notifications) {
   }
 
   getAllSubnets() {
-    this.regionsEnabled.forEach(region => this.getSubnetForRegion(region));
+    this.regionsEnabled.forEach((region) => this.getSubnetForRegion(region));
   }
 
   getSubnetForRegion(region: string, filterBySubnetsId?: string[]) {
@@ -224,21 +224,21 @@ export default class SubnetList extends mixins(Formatters, Notifications) {
 
     const EC2 = new EC2Client({
       region,
-      credentials: this.credentials
+      credentials: this.credentials,
     });
     const params: DescribeSubnetsRequest = {};
     if (filterBySubnetsId) {
       params.Filters = [
         {
           Name: "subnet-id",
-          Values: filterBySubnetsId
-        }
+          Values: filterBySubnetsId,
+        },
       ];
     }
     EC2.describeSubnets(params, (err, data) => {
       if (!filterBySubnetsId) {
         this.loadingCount--;
-        Object.keys(this.subnets).forEach(key => {
+        Object.keys(this.subnets).forEach((key) => {
           //Keep track if the subnets of this region are still available
           if (this.subnets[key].region === region) {
             this.subnets[key].stillPresent = false;
@@ -253,21 +253,21 @@ export default class SubnetList extends mixins(Formatters, Notifications) {
 
       //When we retrieve only some subnets, if we don't retrieve them it means they have been deleted
       if (filterBySubnetsId) {
-        const retrievedIds = data.Subnets?.map(v => v.SubnetId);
+        const retrievedIds = data.Subnets?.map((v) => v.SubnetId);
 
-        filterBySubnetsId.forEach(idFiltered => {
+        filterBySubnetsId.forEach((idFiltered) => {
           if (!retrievedIds || !retrievedIds.includes(idFiltered)) {
             this.$delete(this.subnets, idFiltered);
           }
         });
       }
 
-      data.Subnets?.forEach(subnet => {
+      data.Subnets?.forEach((subnet) => {
         if (subnet.SubnetId) {
           this.$set(this.subnets, subnet.SubnetId, {
             ...subnet,
             region,
-            stillPresent: true
+            stillPresent: true,
           });
 
           //If subnets are pending or deleting we save them in the wip subnets, so we can poll over them
@@ -284,7 +284,7 @@ export default class SubnetList extends mixins(Formatters, Notifications) {
             this.wipSubnets[region].includes(subnet.SubnetId)
           ) {
             const subnetIndex = this.wipSubnets[region].findIndex(
-              v => v === subnet.SubnetId
+              (v) => v === subnet.SubnetId
             );
             //If we were creating or deleting a subnet gateway on our own, we dismiss the creating / deleting
             //NAT alert
@@ -296,7 +296,7 @@ export default class SubnetList extends mixins(Formatters, Notifications) {
 
       //Remove subnets we don't find anymore
       if (!filterBySubnetsId) {
-        Object.keys(this.subnets).forEach(key => {
+        Object.keys(this.subnets).forEach((key) => {
           if (
             this.subnets[key].region === region &&
             !this.subnets[key].stillPresent
@@ -312,13 +312,13 @@ export default class SubnetList extends mixins(Formatters, Notifications) {
       if (this.$route.query.subnetId && this.loadingCount === 0) {
         this.$nextTick().then(() => {
           const filteredSubnets = this.subnetsAsList.filter(
-            subnet => subnet.SubnetId === this.$route.query.subnetId
+            (subnet) => subnet.SubnetId === this.$route.query.subnetId
           );
           if (filteredSubnets && filteredSubnets.length > 0) {
             this.selectedSubnet = filteredSubnets[0];
             this.drawerOpened = true;
             const index = this.subnetsAsList.findIndex(
-              subnet => subnet.SubnetId === this.$route.query.subnetId
+              (subnet) => subnet.SubnetId === this.$route.query.subnetId
             );
             // eslint-disable-next-line @typescript-eslint/ban-ts-ignore
             //@ts-ignore
@@ -334,7 +334,7 @@ export default class SubnetList extends mixins(Formatters, Notifications) {
 
     if (this.selectedSubnet.region && this.selectedSubnet.SubnetId) {
       this.getSubnetForRegion(this.selectedSubnet.region, [
-        this.selectedSubnet.SubnetId
+        this.selectedSubnet.SubnetId,
       ]);
     }
 
@@ -355,7 +355,7 @@ export default class SubnetList extends mixins(Formatters, Notifications) {
       this.$router
         .push({
           path: "/network/subnets",
-          query: { subnetId: subnets[0].SubnetId }
+          query: { subnetId: subnets[0].SubnetId },
         })
         // eslint-disable-next-line @typescript-eslint/no-empty-function
         .catch(() => {});
@@ -366,11 +366,11 @@ export default class SubnetList extends mixins(Formatters, Notifications) {
 
   @Watch("regionsEnabled")
   onRegionsEnabledChanged(newValue: string[], oldValue: string[]) {
-    const addedRegions = [...newValue.filter(d => !oldValue.includes(d))];
-    const removedRegions = [...oldValue.filter(d => !newValue.includes(d))];
+    const addedRegions = [...newValue.filter((d) => !oldValue.includes(d))];
+    const removedRegions = [...oldValue.filter((d) => !newValue.includes(d))];
 
     if (removedRegions.length > 0) {
-      this.subnetsAsList.forEach(subnet => {
+      this.subnetsAsList.forEach((subnet) => {
         if (
           subnet.region &&
           removedRegions.includes(subnet.region) &&
@@ -381,7 +381,7 @@ export default class SubnetList extends mixins(Formatters, Notifications) {
       });
     }
 
-    addedRegions.forEach(region => this.getSubnetForRegion(region));
+    addedRegions.forEach((region) => this.getSubnetForRegion(region));
   }
 
   startPolling() {
@@ -393,7 +393,7 @@ export default class SubnetList extends mixins(Formatters, Notifications) {
     window.setTimeout(() => {
       this.isPolling = false;
 
-      Object.keys(this.wipSubnets).forEach(region => {
+      Object.keys(this.wipSubnets).forEach((region) => {
         if (this.wipSubnets[region].length > 0) {
           this.getSubnetForRegion(region, this.wipSubnets[region]);
         }

@@ -4,7 +4,7 @@
 
     <div class="container">
       <section class="gl-banner mt-1" v-for="news in data" :key="news.tagName">
-        <div class="gl-banner-content ">
+        <div class="gl-banner-content">
           <h1 class="gl-banner-title">
             {{ news.name }}
             <gl-badge variant="info">{{
@@ -30,8 +30,8 @@ import moment from "moment";
     standardDate(date: Date): string {
       moment.locale();
       return moment(date).format("ll");
-    }
-  }
+    },
+  },
 })
 export default class NotFound extends Vue {
   data = [];

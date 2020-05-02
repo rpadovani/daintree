@@ -5,7 +5,7 @@
     <gl-drawer
       :open="drawerOpened && selectedIgw !== {}"
       @close="() => close()"
-      style="width:80%"
+      style="width: 80%;"
     >
       <template #header>{{ selectedIgwTitle }}</template>
 
@@ -120,7 +120,7 @@ import {
   GlModalDirective,
   GlButton,
   GlSkeletonLoading,
-  GlTable
+  GlTable,
 } from "@gitlab/ui";
 import { Component, Watch } from "vue-property-decorator";
 import { Formatters } from "@/mixins/formatters";
@@ -142,11 +142,11 @@ import IgwWithRegion = igws.IgwWithRegion;
     GlFormInput,
     Igw,
     GlSkeletonLoading,
-    GlEmptyState
+    GlEmptyState,
   },
   directives: {
-    "gl-modal-directive": GlModalDirective
-  }
+    "gl-modal-directive": GlModalDirective,
+  },
 })
 export default class IgwList extends mixins(Formatters, Notifications) {
   igws: { [key: string]: IgwWithRegion } = {};
@@ -162,13 +162,13 @@ export default class IgwList extends mixins(Formatters, Notifications) {
       key: "Tags",
       label: "Name",
       sortable: true,
-      formatter: this.extractNameFromTags
+      formatter: this.extractNameFromTags,
     },
     { key: "InternetGatewayId", sortable: true },
     "State",
     { key: "region", sortable: true },
     "VpcId",
-    { key: "OwnerId", sortable: true }
+    { key: "OwnerId", sortable: true },
   ];
 
   get igwsAsList(): IgwWithRegion[] {
@@ -192,7 +192,7 @@ export default class IgwList extends mixins(Formatters, Notifications) {
   }
 
   get selectedIgwTitle() {
-    const nameTag = this.selectedIgw?.Tags?.filter(v => v.Key === "Name");
+    const nameTag = this.selectedIgw?.Tags?.filter((v) => v.Key === "Name");
 
     if (nameTag && nameTag.length > 0) {
       return `${nameTag[0].Value} (${this.selectedIgw.InternetGatewayId})`;
@@ -201,7 +201,7 @@ export default class IgwList extends mixins(Formatters, Notifications) {
   }
 
   getAllIgws() {
-    this.regionsEnabled.forEach(region => this.getIgwForRegion(region));
+    this.regionsEnabled.forEach((region) => this.getIgwForRegion(region));
   }
 
   get credentials() {
@@ -215,22 +215,22 @@ export default class IgwList extends mixins(Formatters, Notifications) {
     }
     const EC2 = new EC2Client({
       region,
-      credentials: this.credentials
+      credentials: this.credentials,
     });
     const params: DescribeInternetGatewaysRequest = {};
     if (filterByIgwsId) {
       params.Filters = [
         {
           Name: "internet-gateway-id",
-          Values: filterByIgwsId
-        }
+          Values: filterByIgwsId,
+        },
       ];
     }
 
     EC2.describeInternetGateways(params, (err, data) => {
       if (!filterByIgwsId) {
         this.loadingCount--;
-        Object.keys(this.igws).forEach(key => {
+        Object.keys(this.igws).forEach((key) => {
           //Keep track if the igws of this region are still available
           if (this.igws[key].region === region) {
             this.igws[key].stillPresent = false;
@@ -245,29 +245,29 @@ export default class IgwList extends mixins(Formatters, Notifications) {
       //When we retrieve only some IGWs, if we don't retrieve them it means they have been deleted
       if (filterByIgwsId) {
         const retrievedIds = data.InternetGateways?.map(
-          i => i.InternetGatewayId
+          (i) => i.InternetGatewayId
         );
 
-        filterByIgwsId.forEach(idFiltered => {
+        filterByIgwsId.forEach((idFiltered) => {
           if (!retrievedIds || !retrievedIds.includes(idFiltered)) {
             this.$delete(this.igws, idFiltered);
           }
         });
       }
 
-      data.InternetGateways?.forEach(igw => {
+      data.InternetGateways?.forEach((igw) => {
         if (igw.InternetGatewayId) {
           this.$set(this.igws, igw.InternetGatewayId, {
             ...igw,
             region,
-            stillPresent: true
+            stillPresent: true,
           });
         }
       });
 
       //Remove nat gateways we don't find anymore
       if (!filterByIgwsId) {
-        Object.keys(this.igws).forEach(key => {
+        Object.keys(this.igws).forEach((key) => {
           if (
             this.igws[key].region === region &&
             !this.igws[key].stillPresent
@@ -283,13 +283,13 @@ export default class IgwList extends mixins(Formatters, Notifications) {
       if (this.$route.query.igwId && this.loadingCount === 0) {
         this.$nextTick().then(() => {
           const filteredIgws = this.igwsAsList.filter(
-            igw => igw.InternetGatewayId === this.$route.query.igwId
+            (igw) => igw.InternetGatewayId === this.$route.query.igwId
           );
           if (filteredIgws && filteredIgws.length > 0) {
             this.selectedIgw = filteredIgws[0];
             this.drawerOpened = true;
             const index = this.igwsAsList.findIndex(
-              igw => igw.InternetGatewayId === this.$route.query.igwId
+              (igw) => igw.InternetGatewayId === this.$route.query.igwId
             );
             // eslint-disable-next-line @typescript-eslint/ban-ts-ignore
             //@ts-ignore
@@ -306,7 +306,7 @@ export default class IgwList extends mixins(Formatters, Notifications) {
     //Check if the user has changed something while working on the Internet Gateway
     if (this.selectedIgw.region && this.selectedIgw.InternetGatewayId) {
       this.getIgwForRegion(this.selectedIgw.region, [
-        this.selectedIgw.InternetGatewayId
+        this.selectedIgw.InternetGatewayId,
       ]);
     }
 
@@ -328,7 +328,7 @@ export default class IgwList extends mixins(Formatters, Notifications) {
       this.$router
         .push({
           path: "/network/igws",
-          query: { igwId: igws[0].InternetGatewayId }
+          query: { igwId: igws[0].InternetGatewayId },
         })
         // eslint-disable-next-line @typescript-eslint/no-empty-function
         .catch(() => {});
@@ -339,11 +339,11 @@ export default class IgwList extends mixins(Formatters, Notifications) {
 
   @Watch("regionsEnabled")
   onRegionsEnabledChanged(newValue: string[], oldValue: string[]) {
-    const addedRegions = [...newValue.filter(d => !oldValue.includes(d))];
-    const removedRegions = [...oldValue.filter(d => !newValue.includes(d))];
+    const addedRegions = [...newValue.filter((d) => !oldValue.includes(d))];
+    const removedRegions = [...oldValue.filter((d) => !newValue.includes(d))];
 
     if (removedRegions.length > 0) {
-      this.igwsAsList.forEach(igw => {
+      this.igwsAsList.forEach((igw) => {
         if (
           igw.region &&
           removedRegions.includes(igw.region) &&
@@ -354,7 +354,7 @@ export default class IgwList extends mixins(Formatters, Notifications) {
       });
     }
 
-    addedRegions.forEach(region => this.getIgwForRegion(region));
+    addedRegions.forEach((region) => this.getIgwForRegion(region));
   }
 
   beforeMount() {

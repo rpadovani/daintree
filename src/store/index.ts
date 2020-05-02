@@ -17,14 +17,14 @@ export default new Vuex.Store({
       state: new STSState(),
       mutations: STSMutations,
       getters: STSGetters,
-      actions: STSActions
+      actions: STSActions,
     },
     notifications: {
       namespaced: true,
       state: new NotificationState(),
       mutations: NotificationMutations,
       getters: NotificationGetters,
-      actions: NotificationActions
-    }
-  }
+      actions: NotificationActions,
+    },
+  },
 });

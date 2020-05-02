@@ -14,8 +14,8 @@ const mainRoute = {
   component: NetworkMain,
   meta: {
     title: "Network",
-    requiresLogin: true
-  }
+    requiresLogin: true,
+  },
 };
 export const NetworkRoutes = [
   mainRoute,
@@ -25,5 +25,5 @@ export const NetworkRoutes = [
   ...subnetRoutes,
   ...eipRoutes,
   ...routeTableRoutes,
-  ...securityGroupRoutes
+  ...securityGroupRoutes,
 ];

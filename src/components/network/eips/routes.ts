@@ -7,11 +7,11 @@ export const eipRoutes = [
   {
     path: "/network/eips/new",
     component: NewEip,
-    meta: { title: "New Elastic Ip", requiresLogin: true }
+    meta: { title: "New Elastic Ip", requiresLogin: true },
   },
   {
     path: "/network/eips",
     component: EipList,
-    meta: { title: "Elastic IPs", requiresLogin: true }
-  }
+    meta: { title: "Elastic IPs", requiresLogin: true },
+  },
 ];

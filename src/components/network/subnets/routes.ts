@@ -7,11 +7,11 @@ export const subnetRoutes = [
   {
     path: "/network/subnets/new",
     component: NewSubnet,
-    meta: { title: "New subnet", requiresLogin: true }
+    meta: { title: "New subnet", requiresLogin: true },
   },
   {
     path: "/network/subnets",
     component: SubnetList,
-    meta: { title: "Subnets", requiresLogin: true }
-  }
+    meta: { title: "Subnets", requiresLogin: true },
+  },
 ];

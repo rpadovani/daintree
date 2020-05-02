@@ -36,8 +36,8 @@ import { GlEmptyState, GlTable, GlAlert, GlSkeletonLoading } from "@gitlab/ui";
     GlEmptyState,
     GlTable,
     GlAlert,
-    GlSkeletonLoading
-  }
+    GlSkeletonLoading,
+  },
 })
 export default class SubnetTab extends Formatters {
   @Prop(String) readonly region: string | undefined;
@@ -54,20 +54,20 @@ export default class SubnetTab extends Formatters {
       key: "Tags",
       label: "Name",
       sortable: true,
-      formatter: this.extractNameFromTags
+      formatter: this.extractNameFromTags,
     },
     { key: "AvailabilityZone", sortable: true },
     { key: "CidrBlock", sortable: true },
     {
       key: "AvailableIpAddressCount",
       label: "# available IPs",
-      class: "text-center"
+      class: "text-center",
     },
     {
       key: "MapPublicIpOnLaunch",
       label: "Assign public IP on launch?",
-      class: "text-center"
-    }
+      class: "text-center",
+    },
   ];
 
   get credentials() {
@@ -81,11 +81,11 @@ export default class SubnetTab extends Formatters {
     }
 
     const params = {
-      Filters: [{ Name: this.filterName, Values: this.filterValues }]
+      Filters: [{ Name: this.filterName, Values: this.filterValues }],
     };
     const EC2 = new EC2Client({
       region: this.region,
-      credentials: this.credentials
+      credentials: this.credentials,
     });
 
     EC2.describeSubnets(params, (err, data) => {

@@ -5,7 +5,7 @@
     <gl-drawer
       :open="drawerOpened && selectedSqs !== {}"
       @close="close"
-      style="width:80%"
+      style="width: 80%;"
     >
       <template #header>{{ selectedSqsTitle }}</template>
 
@@ -120,7 +120,7 @@ import {
   GlEmptyState,
   GlSkeletonLoading,
   GlModalDirective,
-  GlLoadingIcon
+  GlLoadingIcon,
 } from "@gitlab/ui";
 import { Formatters } from "@/mixins/formatters";
 import Component, { mixins } from "vue-class-component";
@@ -144,11 +144,11 @@ import { ListQueuesRequest } from "aws-sdk/clients/sqs";
     GlFormInput,
     GlSkeletonLoading,
     GlEmptyState,
-    GlLoadingIcon
+    GlLoadingIcon,
   },
   directives: {
-    "gl-modal-directive": GlModalDirective
-  }
+    "gl-modal-directive": GlModalDirective,
+  },
 })
 export default class SQSList extends mixins(Formatters, Notifications) {
   sqs: { [key: string]: QueueWithRegion } = {};
@@ -164,27 +164,27 @@ export default class SQSList extends mixins(Formatters, Notifications) {
       key: "queueUrl",
       label: "Queue Name",
       sortable: true,
-      formatter: this.getQueueNameFromUrl
+      formatter: this.getQueueNameFromUrl,
     },
     {
       key: "fifo",
       label: "Queue Type",
       formatter: (value: never, key: never, item: QueueWithRegion) =>
-        item.queueUrl?.endsWith(".fifo") ? "FIFO" : "Standard"
+        item.queueUrl?.endsWith(".fifo") ? "FIFO" : "Standard",
     },
     { key: "region", sortable: true },
     {
       key: "ApproximateNumberOfMessages",
       label: "Messages Available",
       sortable: true,
-      class: "text-center"
+      class: "text-center",
     },
     {
       key: "ApproximateNumberOfMessagesNotVisible",
       label: "Messages in Flight",
       sortable: true,
-      class: "text-center"
-    }
+      class: "text-center",
+    },
   ];
 
   get sqsAsList(): QueueWithRegion[] {
@@ -215,7 +215,7 @@ export default class SQSList extends mixins(Formatters, Notifications) {
   }
 
   getAllQueues() {
-    this.regionsEnabled.forEach(region => this.getQueueForRegion(region));
+    this.regionsEnabled.forEach((region) => this.getQueueForRegion(region));
   }
 
   getQueueForRegion(region: string, filterBySqsURL?: string) {
@@ -226,7 +226,7 @@ export default class SQSList extends mixins(Formatters, Notifications) {
 
     const SQS = new SQSClient({
       region,
-      credentials: this.$store.getters["sts/credentials"]
+      credentials: this.$store.getters["sts/credentials"],
     });
 
     const params: ListQueuesRequest = {};
@@ -238,7 +238,7 @@ export default class SQSList extends mixins(Formatters, Notifications) {
     SQS.listQueues(params, (err, data) => {
       if (!filterBySqsURL) {
         this.loadingCount--;
-        Object.keys(this.sqs).forEach(key => {
+        Object.keys(this.sqs).forEach((key) => {
           //Keep track if the sqs of this region are still available
           if (this.sqs[key].region === region) {
             this.sqs[key].stillPresent = false;
@@ -258,12 +258,12 @@ export default class SQSList extends mixins(Formatters, Notifications) {
         }
       }
 
-      data.QueueUrls?.forEach(queueUrl => {
+      data.QueueUrls?.forEach((queueUrl) => {
         if (queueUrl) {
           this.$set(this.sqs, queueUrl, {
             queueUrl,
             region,
-            stillPresent: true
+            stillPresent: true,
           });
 
           SQS.getQueueAttributes(
@@ -276,7 +276,7 @@ export default class SQSList extends mixins(Formatters, Notifications) {
                   queueUrl,
                   region,
                   stillPresent: true,
-                  ...data.Attributes
+                  ...data.Attributes,
                 });
               }
             }
@@ -286,7 +286,7 @@ export default class SQSList extends mixins(Formatters, Notifications) {
 
       //Remove Sqs we don't find anymore
       if (!filterBySqsURL) {
-        Object.keys(this.sqs).forEach(key => {
+        Object.keys(this.sqs).forEach((key) => {
           if (this.sqs[key].region === region && !this.sqs[key].stillPresent) {
             this.$delete(this.sqs, key);
           }
@@ -303,7 +303,7 @@ export default class SQSList extends mixins(Formatters, Notifications) {
       ) {
         this.$nextTick().then(() => {
           const filteredSqs = this.sqsAsList.filter(
-            sqs =>
+            (sqs) =>
               sqs.queueUrl === this.$route.query.queueUrl ||
               sqs.QueueArn === this.$route.query.arn
           );
@@ -311,7 +311,7 @@ export default class SQSList extends mixins(Formatters, Notifications) {
             this.selectedSqs = filteredSqs[0];
             this.drawerOpened = true;
             const index = this.sqsAsList.findIndex(
-              sqs =>
+              (sqs) =>
                 sqs.queueUrl === this.$route.query.queueUrl ||
                 sqs.QueueArn === this.$route.query.arn
             );
@@ -356,7 +356,7 @@ export default class SQSList extends mixins(Formatters, Notifications) {
       this.$router
         .push({
           path: "/messages/sqs",
-          query: { queueUrl: sqs[0].queueUrl }
+          query: { queueUrl: sqs[0].queueUrl },
         })
         // eslint-disable-next-line @typescript-eslint/no-empty-function
         .catch(() => {});
@@ -367,18 +367,18 @@ export default class SQSList extends mixins(Formatters, Notifications) {
 
   @Watch("regionsEnabled")
   onRegionsEnabledChanged(newValue: string[], oldValue: string[]) {
-    const addedRegions = [...newValue.filter(d => !oldValue.includes(d))];
-    const removedRegions = [...oldValue.filter(d => !newValue.includes(d))];
+    const addedRegions = [...newValue.filter((d) => !oldValue.includes(d))];
+    const removedRegions = [...oldValue.filter((d) => !newValue.includes(d))];
 
     if (removedRegions.length > 0) {
-      this.sqsAsList.forEach(sqs => {
+      this.sqsAsList.forEach((sqs) => {
         if (sqs.region && removedRegions.includes(sqs.region) && sqs.queueUrl) {
           this.$delete(this.sqs, sqs.queueUrl);
         }
       });
     }
 
-    addedRegions.forEach(region => this.getQueueForRegion(region));
+    addedRegions.forEach((region) => this.getQueueForRegion(region));
   }
 
   @Watch("currentRoleIndex")

@@ -14,16 +14,16 @@ export const snsRoutes = [
   {
     path: "/messages/sns/new",
     component: NewSNS,
-    meta: { title: "New topic", requiresLogin: true }
+    meta: { title: "New topic", requiresLogin: true },
   },
   {
     path: "/messages/sns_topics",
     component: SNSTopicsList,
-    meta: { title: "SNS topics", requiresLogin: true }
+    meta: { title: "SNS topics", requiresLogin: true },
   },
   {
     path: "/messages/sns_subscriptions",
     component: SNSSubscriptionsList,
-    meta: { title: "SNS subscriptions", requiresLogin: true }
-  }
+    meta: { title: "SNS subscriptions", requiresLogin: true },
+  },
 ];

@@ -16,7 +16,7 @@
           <b>{{ vpc.State }}</b>
         </gl-alert>
         <gl-button
-          style="height: 100%"
+          style="height: 100%;"
           class="mt-2 col-2"
           variant="danger"
           category="secondary"
@@ -178,7 +178,7 @@ import {
   GlAlert,
   GlButton,
   GlModal,
-  GlModalDirective
+  GlModalDirective,
 } from "@gitlab/ui";
 import EC2Client from "aws-sdk/clients/ec2";
 import { Component, Prop, Watch } from "vue-property-decorator";
@@ -186,7 +186,7 @@ import {
   FilterList,
   InternetGatewayList,
   RouteTableList,
-  NatGatewayList
+  NatGatewayList,
 } from "aws-sdk/clients/ec2";
 import { vpcs } from "@/components/network/VPC/vpc";
 import VpcWithRegion = vpcs.VpcWithRegion;
@@ -210,19 +210,19 @@ import SubnetTab from "@/components/network/subnets/SubnetTab.vue";
     GlButton,
     GlModal,
     FlowLogsTab,
-    SubnetTab
+    SubnetTab,
   },
-  directives: { "gl-modal-directive": GlModalDirective }
+  directives: { "gl-modal-directive": GlModalDirective },
 })
 export default class VPC extends mixins(Formatters, Notifications) {
   @Prop(Object) readonly vpc!: VpcWithRegion;
 
   deleteVpcButtonProps = {
-    text: "Delete VPC"
+    text: "Delete VPC",
   };
 
   cancelProps = {
-    text: "Cancel"
+    text: "Cancel",
   };
 
   get filterByVPC(): FilterList {
@@ -232,7 +232,7 @@ export default class VPC extends mixins(Formatters, Notifications) {
   get EC2() {
     return new EC2Client({
       region: this.vpc.region,
-      credentials: this.$store.getters["sts/credentials"]
+      credentials: this.$store.getters["sts/credentials"],
     });
   }
 
@@ -246,14 +246,14 @@ export default class VPC extends mixins(Formatters, Notifications) {
       key: "Tags",
       label: "Name",
       sortable: true,
-      formatter: this.extractNameFromTags
+      formatter: this.extractNameFromTags,
     },
-    "OwnerId"
+    "OwnerId",
   ];
 
   describeIgws() {
     const params = {
-      Filters: [{ Name: "attachment.vpc-id", Values: [this.vpc.VpcId || ""] }]
+      Filters: [{ Name: "attachment.vpc-id", Values: [this.vpc.VpcId || ""] }],
     };
     this.igwsState = "loading";
     this.igws = [];
@@ -284,14 +284,14 @@ export default class VPC extends mixins(Formatters, Notifications) {
       key: "Tags",
       label: "Name",
       sortable: true,
-      formatter: this.extractNameFromTags
+      formatter: this.extractNameFromTags,
     },
     "SubnetId",
     {
       key: "CreateTime",
-      formatter: this.standardDate
+      formatter: this.standardDate,
     },
-    "State"
+    "State",
   ];
 
   describeNats() {
@@ -324,9 +324,9 @@ export default class VPC extends mixins(Formatters, Notifications) {
       key: "Tags",
       label: "Name",
       sortable: true,
-      formatter: this.extractNameFromTags
+      formatter: this.extractNameFromTags,
     },
-    "OwnerId"
+    "OwnerId",
   ];
 
   describeRoutesTables() {
@@ -366,7 +366,7 @@ export default class VPC extends mixins(Formatters, Notifications) {
       return;
     }
 
-    this.EC2.deleteVpc({ VpcId: this.vpc.VpcId }, err => {
+    this.EC2.deleteVpc({ VpcId: this.vpc.VpcId }, (err) => {
       if (err) {
         this.showError(err.message, "deleteVpc");
       } else {
@@ -375,7 +375,7 @@ export default class VPC extends mixins(Formatters, Notifications) {
           variant: "info",
           text: "Deleted VPC with ID " + this.vpc.VpcId,
           key: "deletingVpc",
-          resourceId: this.vpc.VpcId
+          resourceId: this.vpc.VpcId,
         });
         this.$emit("deleted");
       }

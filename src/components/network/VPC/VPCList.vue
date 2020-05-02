@@ -5,7 +5,7 @@
     <gl-drawer
       :open="drawerOpened && selectedVpc !== {}"
       @close="close"
-      style="width:80%"
+      style="width: 80%;"
     >
       <template #header>{{ selectedVpcTitle }}</template>
 
@@ -110,7 +110,7 @@ import {
   GlTable,
   GlEmptyState,
   GlSkeletonLoading,
-  GlModalDirective
+  GlModalDirective,
 } from "@gitlab/ui";
 import { Formatters } from "@/mixins/formatters";
 import Component, { mixins } from "vue-class-component";
@@ -134,11 +134,11 @@ import { Watch } from "vue-property-decorator";
     GlButton,
     GlFormInput,
     GlSkeletonLoading,
-    GlEmptyState
+    GlEmptyState,
   },
   directives: {
-    "gl-modal-directive": GlModalDirective
-  }
+    "gl-modal-directive": GlModalDirective,
+  },
 })
 export default class VPCList extends mixins(Formatters, Notifications) {
   vpcs: { [key: string]: VpcWithRegion } = {};
@@ -158,7 +158,7 @@ export default class VPCList extends mixins(Formatters, Notifications) {
       key: "Tags",
       label: "Name",
       sortable: true,
-      formatter: this.extractNameFromTags
+      formatter: this.extractNameFromTags,
     },
     { key: "VpcId", sortable: true },
     "State",
@@ -167,9 +167,9 @@ export default class VPCList extends mixins(Formatters, Notifications) {
     {
       key: "IsDefault",
       label: "Default?",
-      class: "text-center"
+      class: "text-center",
     },
-    { key: "DhcpOptionsId", sortable: true }
+    { key: "DhcpOptionsId", sortable: true },
   ];
 
   get vpcsAsList(): VpcWithRegion[] {
@@ -197,7 +197,7 @@ export default class VPCList extends mixins(Formatters, Notifications) {
   }
 
   get selectedVpcTitle() {
-    const nameTag = this.selectedVpc?.Tags?.filter(v => v.Key === "Name");
+    const nameTag = this.selectedVpc?.Tags?.filter((v) => v.Key === "Name");
 
     if (nameTag && nameTag.length > 0) {
       return `${nameTag[0].Value} (${this.selectedVpc?.VpcId})`;
@@ -206,7 +206,7 @@ export default class VPCList extends mixins(Formatters, Notifications) {
     return this.selectedVpc?.VpcId;
   }
   getAllVPCs() {
-    this.regionsEnabled.forEach(region => this.getVpcForRegion(region));
+    this.regionsEnabled.forEach((region) => this.getVpcForRegion(region));
   }
 
   getVpcForRegion(region: string, filterByVpcsId?: string[]) {
@@ -221,14 +221,14 @@ export default class VPCList extends mixins(Formatters, Notifications) {
       params.Filters = [
         {
           Name: "vpc-id",
-          Values: filterByVpcsId
-        }
+          Values: filterByVpcsId,
+        },
       ];
     }
     EC2.describeVpcs(params, (err, data) => {
       if (!filterByVpcsId) {
         this.loadingCount--;
-        Object.keys(this.vpcs).forEach(key => {
+        Object.keys(this.vpcs).forEach((key) => {
           //Keep track if the vpcs of this region are still available
           if (this.vpcs[key].region === region) {
             this.vpcs[key].stillPresent = false;
@@ -243,21 +243,21 @@ export default class VPCList extends mixins(Formatters, Notifications) {
 
       //When we retrieve only some VPCs, if we don't retrieve them it means they have been deleted
       if (filterByVpcsId) {
-        const retrievedIds = data.Vpcs?.map(v => v.VpcId);
+        const retrievedIds = data.Vpcs?.map((v) => v.VpcId);
 
-        filterByVpcsId.forEach(idFiltered => {
+        filterByVpcsId.forEach((idFiltered) => {
           if (!retrievedIds || !retrievedIds.includes(idFiltered)) {
             this.$delete(this.vpcs, idFiltered);
           }
         });
       }
 
-      data.Vpcs?.forEach(vpc => {
+      data.Vpcs?.forEach((vpc) => {
         if (vpc.VpcId) {
           this.$set(this.vpcs, vpc.VpcId, {
             ...vpc,
             region,
-            stillPresent: true
+            stillPresent: true,
           });
 
           //If vpcs are pending or deleting we save them in the wip vpcs, so we can poll over them
@@ -274,7 +274,7 @@ export default class VPCList extends mixins(Formatters, Notifications) {
             this.wipVpcs[region].includes(vpc.VpcId)
           ) {
             const vpcIndex = this.wipVpcs[region].findIndex(
-              v => v === vpc.VpcId
+              (v) => v === vpc.VpcId
             );
             //If we were creating or deleting a vpc gateway on our own, we dismiss the creating / deleting
             //NAT alert
@@ -286,7 +286,7 @@ export default class VPCList extends mixins(Formatters, Notifications) {
 
       //Remove VPCs we don't find anymore
       if (!filterByVpcsId) {
-        Object.keys(this.vpcs).forEach(key => {
+        Object.keys(this.vpcs).forEach((key) => {
           if (
             this.vpcs[key].region === region &&
             !this.vpcs[key].stillPresent
@@ -302,13 +302,13 @@ export default class VPCList extends mixins(Formatters, Notifications) {
       if (this.$route.query.vpcId && this.loadingCount === 0) {
         this.$nextTick().then(() => {
           const filteredVpcs = this.vpcsAsList.filter(
-            vpc => vpc.VpcId === this.$route.query.vpcId
+            (vpc) => vpc.VpcId === this.$route.query.vpcId
           );
           if (filteredVpcs && filteredVpcs.length > 0) {
             this.selectedVpc = filteredVpcs[0];
             this.drawerOpened = true;
             const index = this.vpcsAsList.findIndex(
-              vpc => vpc.VpcId === this.$route.query.vpcId
+              (vpc) => vpc.VpcId === this.$route.query.vpcId
             );
             // eslint-disable-next-line @typescript-eslint/ban-ts-ignore
             //@ts-ignore
@@ -343,7 +343,7 @@ export default class VPCList extends mixins(Formatters, Notifications) {
       this.$router
         .push({
           path: "/network/vpcs",
-          query: { vpcId: vpcs[0].VpcId }
+          query: { vpcId: vpcs[0].VpcId },
         })
         // eslint-disable-next-line @typescript-eslint/no-empty-function
         .catch(() => {});
@@ -354,18 +354,18 @@ export default class VPCList extends mixins(Formatters, Notifications) {
 
   @Watch("regionsEnabled")
   onRegionsEnabledChanged(newValue: string[], oldValue: string[]) {
-    const addedRegions = [...newValue.filter(d => !oldValue.includes(d))];
-    const removedRegions = [...oldValue.filter(d => !newValue.includes(d))];
+    const addedRegions = [...newValue.filter((d) => !oldValue.includes(d))];
+    const removedRegions = [...oldValue.filter((d) => !newValue.includes(d))];
 
     if (removedRegions.length > 0) {
-      this.vpcsAsList.forEach(vpc => {
+      this.vpcsAsList.forEach((vpc) => {
         if (vpc.region && removedRegions.includes(vpc.region) && vpc.VpcId) {
           this.$delete(this.vpcs, vpc.VpcId);
         }
       });
     }
 
-    addedRegions.forEach(region => this.getVpcForRegion(region));
+    addedRegions.forEach((region) => this.getVpcForRegion(region));
   }
 
   startPolling() {
@@ -377,7 +377,7 @@ export default class VPCList extends mixins(Formatters, Notifications) {
     window.setTimeout(() => {
       this.isPolling = false;
 
-      Object.keys(this.wipVpcs).forEach(region => {
+      Object.keys(this.wipVpcs).forEach((region) => {
         if (this.wipVpcs[region].length > 0) {
           this.getVpcForRegion(region, this.wipVpcs[region]);
         }

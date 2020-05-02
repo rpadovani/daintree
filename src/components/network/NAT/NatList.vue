@@ -5,7 +5,7 @@
     <gl-drawer
       :open="drawerOpened && selectedNat !== {}"
       @close="close"
-      style="width:80%"
+      style="width: 80%;"
     >
       <template #header>{{ selectedNatTitle }}</template>
 
@@ -61,10 +61,14 @@
           <RegionText :region="data.value" />
         </template>
         <template v-slot:cell(publicIp)="data">
-          {{ data.item.NatGatewayAddresses.map(el => el.PublicIp).join(", ") }}
+          {{
+            data.item.NatGatewayAddresses.map((el) => el.PublicIp).join(", ")
+          }}
         </template>
         <template v-slot:cell(privateIp)="data">
-          {{ data.item.NatGatewayAddresses.map(el => el.PrivateIp).join(", ") }}
+          {{
+            data.item.NatGatewayAddresses.map((el) => el.PrivateIp).join(", ")
+          }}
         </template>
         <template v-slot:cell(VpcId)="data">
           <router-link :to="`/network/vpcs?vpcId=${data.value}`">
@@ -123,7 +127,7 @@ import {
   GlModalDirective,
   GlButton,
   GlSkeletonLoading,
-  GlTable
+  GlTable,
 } from "@gitlab/ui";
 import { Component, Watch } from "vue-property-decorator";
 import { Formatters } from "@/mixins/formatters";
@@ -145,11 +149,11 @@ import { mixins } from "vue-class-component";
     GlFormInput,
     Nat,
     GlSkeletonLoading,
-    GlEmptyState
+    GlEmptyState,
   },
   directives: {
-    "gl-modal-directive": GlModalDirective
-  }
+    "gl-modal-directive": GlModalDirective,
+  },
 })
 export default class NatList extends mixins(Formatters, Notifications) {
   nats: { [key: string]: NatWithRegion } = {};
@@ -169,7 +173,7 @@ export default class NatList extends mixins(Formatters, Notifications) {
       key: "Tags",
       label: "Name",
       sortable: true,
-      formatter: this.extractNameFromTags
+      formatter: this.extractNameFromTags,
     },
     { key: "NatGatewayId", sortable: true },
     "State",
@@ -177,7 +181,7 @@ export default class NatList extends mixins(Formatters, Notifications) {
     { key: "privateIp", sortable: true },
     { key: "region", sortable: true },
     { key: "VpcId", sortable: true },
-    { key: "SubnetId", sortable: true }
+    { key: "SubnetId", sortable: true },
   ];
 
   get natsAsList(): NatWithRegion[] {
@@ -201,7 +205,7 @@ export default class NatList extends mixins(Formatters, Notifications) {
   }
 
   get selectedNatTitle() {
-    const nameTag = this.selectedNat?.Tags?.filter(v => v.Key === "Name");
+    const nameTag = this.selectedNat?.Tags?.filter((v) => v.Key === "Name");
 
     if (nameTag && nameTag.length > 0) {
       return `${nameTag[0].Value} (${this.selectedNat.NatGatewayId})`;
@@ -210,7 +214,7 @@ export default class NatList extends mixins(Formatters, Notifications) {
   }
 
   getAllNats() {
-    this.regionsEnabled.forEach(region => this.getNatForRegion(region));
+    this.regionsEnabled.forEach((region) => this.getNatForRegion(region));
   }
   get credentials() {
     return this.$store.getters["sts/credentials"];
@@ -224,22 +228,22 @@ export default class NatList extends mixins(Formatters, Notifications) {
 
     const EC2 = new EC2Client({
       region,
-      credentials: this.credentials
+      credentials: this.credentials,
     });
     const params: DescribeNatGatewaysRequest = {};
     if (filterByNatsId) {
       params.Filter = [
         {
           Name: "nat-gateway-id",
-          Values: filterByNatsId
-        }
+          Values: filterByNatsId,
+        },
       ];
     }
 
     EC2.describeNatGateways(params, (err, data) => {
       if (!filterByNatsId) {
         this.loadingCount--;
-        Object.keys(this.nats).forEach(key => {
+        Object.keys(this.nats).forEach((key) => {
           //Keep track if the nats of this region are still available
           if (this.nats[key].region === region) {
             this.nats[key].stillPresent = false;
@@ -253,21 +257,21 @@ export default class NatList extends mixins(Formatters, Notifications) {
 
       //When we retrieve only some NATs, if we don't retrieve them it means they have been deleted
       if (filterByNatsId) {
-        const retrievedIds = data.NatGateways?.map(n => n.NatGatewayId);
+        const retrievedIds = data.NatGateways?.map((n) => n.NatGatewayId);
 
-        filterByNatsId.forEach(idFiltered => {
+        filterByNatsId.forEach((idFiltered) => {
           if (!retrievedIds || !retrievedIds.includes(idFiltered)) {
             this.$delete(this.nats, idFiltered);
           }
         });
       }
 
-      data.NatGateways?.forEach(nat => {
+      data.NatGateways?.forEach((nat) => {
         if (nat.NatGatewayId) {
           this.$set(this.nats, nat.NatGatewayId, {
             ...nat,
             region,
-            stillPresent: true
+            stillPresent: true,
           });
 
           //If nats are pending or deleting we save them in the wip nats, so we can poll over them
@@ -284,7 +288,7 @@ export default class NatList extends mixins(Formatters, Notifications) {
             this.wipNats[region].includes(nat.NatGatewayId)
           ) {
             const natIndex = this.wipNats[region].findIndex(
-              v => v === nat.NatGatewayId
+              (v) => v === nat.NatGatewayId
             );
             //If we were creating or deleting a nat gateway on our own, we dismiss the creating / deleting
             //NAT alert
@@ -296,7 +300,7 @@ export default class NatList extends mixins(Formatters, Notifications) {
 
       //Remove nat gateways we don't find anymore
       if (!filterByNatsId) {
-        Object.keys(this.nats).forEach(key => {
+        Object.keys(this.nats).forEach((key) => {
           if (
             this.nats[key].region === region &&
             !this.nats[key].stillPresent
@@ -312,13 +316,13 @@ export default class NatList extends mixins(Formatters, Notifications) {
       if (this.$route.query.natId && this.loadingCount === 0) {
         this.$nextTick().then(() => {
           const filteredNats = this.natsAsList.filter(
-            nat => nat.NatGatewayId === this.$route.query.natId
+            (nat) => nat.NatGatewayId === this.$route.query.natId
           );
           if (filteredNats && filteredNats.length > 0) {
             this.selectedNat = filteredNats[0];
             this.drawerOpened = true;
             const index = this.natsAsList.findIndex(
-              nat => nat.NatGatewayId === this.$route.query.natId
+              (nat) => nat.NatGatewayId === this.$route.query.natId
             );
             // eslint-disable-next-line @typescript-eslint/ban-ts-ignore
             //@ts-ignore
@@ -334,7 +338,7 @@ export default class NatList extends mixins(Formatters, Notifications) {
 
     if (update && this.selectedNat.region && this.selectedNat.NatGatewayId) {
       this.getNatForRegion(this.selectedNat.region, [
-        this.selectedNat.NatGatewayId
+        this.selectedNat.NatGatewayId,
       ]);
     }
 
@@ -356,7 +360,7 @@ export default class NatList extends mixins(Formatters, Notifications) {
       this.$router
         .push({
           path: "/network/nats",
-          query: { natId: nats[0].NatGatewayId }
+          query: { natId: nats[0].NatGatewayId },
         })
         // eslint-disable-next-line @typescript-eslint/no-empty-function
         .catch(() => {});
@@ -367,11 +371,11 @@ export default class NatList extends mixins(Formatters, Notifications) {
 
   @Watch("regionsEnabled")
   onRegionsEnabledChanged(newValue: string[], oldValue: string[]) {
-    const addedRegions = [...newValue.filter(d => !oldValue.includes(d))];
-    const removedRegions = [...oldValue.filter(d => !newValue.includes(d))];
+    const addedRegions = [...newValue.filter((d) => !oldValue.includes(d))];
+    const removedRegions = [...oldValue.filter((d) => !newValue.includes(d))];
 
     if (removedRegions.length > 0) {
-      this.natsAsList.forEach(nat => {
+      this.natsAsList.forEach((nat) => {
         if (
           nat.region &&
           removedRegions.includes(nat.region) &&
@@ -382,7 +386,7 @@ export default class NatList extends mixins(Formatters, Notifications) {
       });
     }
 
-    addedRegions.forEach(region => this.getNatForRegion(region));
+    addedRegions.forEach((region) => this.getNatForRegion(region));
   }
 
   startPolling() {
@@ -394,7 +398,7 @@ export default class NatList extends mixins(Formatters, Notifications) {
     window.setTimeout(() => {
       this.isPolling = false;
 
-      Object.keys(this.wipNats).forEach(region => {
+      Object.keys(this.wipNats).forEach((region) => {
         if (this.wipNats[region].length > 0) {
           this.getNatForRegion(region, this.wipNats[region]);
         }

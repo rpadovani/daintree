@@ -7,11 +7,11 @@ export const vpcRoutes = [
   {
     path: "/network/vpcs/new",
     component: NewVPC,
-    meta: { title: "New VPC", requiresLogin: true }
+    meta: { title: "New VPC", requiresLogin: true },
   },
   {
     path: "/network/vpcs",
     component: VPCList,
-    meta: { title: "VPCs", requiresLogin: true }
-  }
+    meta: { title: "VPCs", requiresLogin: true },
+  },
 ];

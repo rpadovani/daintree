@@ -7,11 +7,11 @@ export const igwRoutes = [
   {
     path: "/network/igws/new",
     component: NewIgw,
-    meta: { title: "New Internet Gateway", requiresLogin: true }
+    meta: { title: "New Internet Gateway", requiresLogin: true },
   },
   {
     path: "/network/igws",
     component: IgwList,
-    meta: { title: "Internet Gateways", requiresLogin: true }
-  }
+    meta: { title: "Internet Gateways", requiresLogin: true },
+  },
 ];

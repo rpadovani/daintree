@@ -76,7 +76,7 @@
           variant="success"
           size="medium"
           class="mt-4"
-          style="height: 100%"
+          style="height: 100%;"
           :disabled="selectedRegion === ''"
           @click="newIp"
           :loading="allocateLoading"
@@ -108,7 +108,7 @@ import {
   GlFormGroup,
   GlFormInputGroup,
   GlFormSelect,
-  GlButton
+  GlButton,
 } from "@gitlab/ui";
 import { BInputGroupText } from "bootstrap-vue";
 import EC2Client from "aws-sdk/clients/ec2";
@@ -117,7 +117,7 @@ import Notifications from "@/mixins/notifications";
 import {
   AddressList,
   CreateNatGatewayRequest,
-  SubnetList
+  SubnetList,
 } from "aws-sdk/clients/ec2";
 import { mixins } from "vue-class-component";
 import { Formatters } from "@/mixins/formatters";
@@ -130,8 +130,8 @@ import { Formatters } from "@/mixins/formatters";
     GlAlert,
     GlFormInputGroup,
     BInputGroupText,
-    GlButton
-  }
+    GlButton,
+  },
 })
 export default class NewNat extends mixins(Notifications, Formatters) {
   selectedRegion = "";
@@ -153,7 +153,7 @@ export default class NewNat extends mixins(Notifications, Formatters) {
 
   get subnetsOptions(): string[] {
     const options: string[] = [];
-    this.subnets.forEach(s => {
+    this.subnets.forEach((s) => {
       let option = "";
       if (s.SubnetId) option += s.SubnetId;
       const name = this.extractNameFromTags(s.Tags || []);
@@ -166,7 +166,7 @@ export default class NewNat extends mixins(Notifications, Formatters) {
 
   get eipOptions(): string[] {
     const options: string[] = [];
-    this.eips.forEach(e => {
+    this.eips.forEach((e) => {
       //We need only IPs not associated to anything yet
       if (!e.AssociationId) {
         let option = "";
@@ -196,7 +196,7 @@ export default class NewNat extends mixins(Notifications, Formatters) {
     } else {
       const EC2 = new EC2Client({
         region: this.selectedRegion,
-        credentials: this.credentials
+        credentials: this.credentials,
       });
 
       this.loadingCount++;
@@ -219,7 +219,7 @@ export default class NewNat extends mixins(Notifications, Formatters) {
     } else {
       const EC2 = new EC2Client({
         region: this.selectedRegion,
-        credentials: this.credentials
+        credentials: this.credentials,
       });
 
       this.loadingCount++;
@@ -237,10 +237,10 @@ export default class NewNat extends mixins(Notifications, Formatters) {
   createNat() {
     const EC2 = new EC2Client({
       region: this.selectedRegion,
-      credentials: this.credentials
+      credentials: this.credentials,
     });
     const AllocationId = this.eips.find(
-      eip => eip.PublicIp === this.selectedEip.split(" ")[0]
+      (eip) => eip.PublicIp === this.selectedEip.split(" ")[0]
     )?.AllocationId;
 
     if (!AllocationId) {
@@ -251,15 +251,15 @@ export default class NewNat extends mixins(Notifications, Formatters) {
 
     const params: CreateNatGatewayRequest = {
       AllocationId,
-      SubnetId: this.selectedSubnet.split(" ")[0]
+      SubnetId: this.selectedSubnet.split(" ")[0],
     };
 
     if (this.natName) {
       params.TagSpecifications = [
         {
           ResourceType: "natgateway",
-          Tags: [{ Key: "Name", Value: this.natName }]
-        }
+          Tags: [{ Key: "Name", Value: this.natName }],
+        },
       ];
     }
     EC2.createNatGateway(params, (err, data) => {
@@ -271,7 +271,7 @@ export default class NewNat extends mixins(Notifications, Formatters) {
           variant: "info",
           text: "Creating Nat Gateway with ID " + data.NatGateway?.NatGatewayId,
           key: "creatingNat",
-          resourceId: data.NatGateway?.NatGatewayId
+          resourceId: data.NatGateway?.NatGatewayId,
         });
         this.$router.push("/network/nats");
       }
@@ -282,7 +282,7 @@ export default class NewNat extends mixins(Notifications, Formatters) {
     this.allocateLoading = true;
     const EC2 = new EC2Client({
       region: this.selectedRegion,
-      credentials: this.credentials
+      credentials: this.credentials,
     });
     EC2.allocateAddress({ Domain: "vpc" }, (err, data) => {
       this.allocateLoading = false;

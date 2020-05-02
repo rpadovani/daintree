@@ -71,7 +71,7 @@ import {
   GlFormGroup,
   GlFormInputGroup,
   GlFormSelect,
-  GlButton
+  GlButton,
 } from "@gitlab/ui";
 import { BInputGroupText } from "bootstrap-vue";
 import EC2Client from "aws-sdk/clients/ec2";
@@ -89,8 +89,8 @@ import { Formatters } from "@/mixins/formatters";
     GlAlert,
     GlFormInputGroup,
     BInputGroupText,
-    GlButton
-  }
+    GlButton,
+  },
 })
 export default class NewIgw extends mixins(Notifications, Formatters) {
   selectedRegion = "";
@@ -106,7 +106,7 @@ export default class NewIgw extends mixins(Notifications, Formatters) {
 
   get vpcsOptions(): string[] {
     const options: string[] = [];
-    this.vpcs.forEach(s => {
+    this.vpcs.forEach((s) => {
       if (!this.vpcsWithGateway.includes(s.VpcId || "")) {
         let option = "";
         if (s.VpcId) option += s.VpcId;
@@ -134,7 +134,7 @@ export default class NewIgw extends mixins(Notifications, Formatters) {
     } else {
       const EC2 = new EC2Client({
         region: this.selectedRegion,
-        credentials: this.credentials
+        credentials: this.credentials,
       });
 
       this.loadingCount++;
@@ -158,9 +158,9 @@ export default class NewIgw extends mixins(Notifications, Formatters) {
           Filters: [
             {
               Name: "attachment.state",
-              Values: ["available"]
-            }
-          ]
+              Values: ["available"],
+            },
+          ],
         },
         (err, data) => {
           this.loadingCount--;
@@ -168,7 +168,7 @@ export default class NewIgw extends mixins(Notifications, Formatters) {
             this.showError(err.message, "createIgw");
           } else if (data.InternetGateways) {
             this.vpcsWithGateway = [];
-            data.InternetGateways.forEach(i => {
+            data.InternetGateways.forEach((i) => {
               if (i.Attachments && i.Attachments.length > 0) {
                 this.vpcsWithGateway.push(i.Attachments[0].VpcId || "");
               }
@@ -182,7 +182,7 @@ export default class NewIgw extends mixins(Notifications, Formatters) {
   createIgw() {
     const EC2 = new EC2Client({
       region: this.selectedRegion,
-      credentials: this.credentials
+      credentials: this.credentials,
     });
 
     const params: CreateInternetGatewayRequest = {};
@@ -201,23 +201,23 @@ export default class NewIgw extends mixins(Notifications, Formatters) {
             "Created Internet Gateway with ID " +
             data.InternetGateway?.InternetGatewayId,
           key: "creatingIgw",
-          resourceId: data.InternetGateway?.InternetGatewayId
+          resourceId: data.InternetGateway?.InternetGatewayId,
         });
 
         //Assign a name, if available
         if (this.igwName && data.InternetGateway?.InternetGatewayId) {
           const params = {
             Resources: [data.InternetGateway.InternetGatewayId],
-            Tags: [{ Key: "Name", Value: this.igwName }]
+            Tags: [{ Key: "Name", Value: this.igwName }],
           };
           this.loadingCount++;
-          EC2.createTags(params, err => {
+          EC2.createTags(params, (err) => {
             this.loadingCount--;
             if (err) {
               this.$store.commit("notifications/show", {
                 variant: "danger",
                 text: err,
-                key: "creatingIgw"
+                key: "creatingIgw",
               });
             }
 
@@ -232,15 +232,15 @@ export default class NewIgw extends mixins(Notifications, Formatters) {
           EC2.attachInternetGateway(
             {
               InternetGatewayId: data.InternetGateway.InternetGatewayId,
-              VpcId: this.selectedVpc.split(" ")[0]
+              VpcId: this.selectedVpc.split(" ")[0],
             },
-            err => {
+            (err) => {
               this.loadingCount--;
               if (err) {
                 this.$store.commit("notifications/show", {
                   variant: "danger",
                   text: err,
-                  key: "creatingIgw"
+                  key: "creatingIgw",
                 });
               }
 

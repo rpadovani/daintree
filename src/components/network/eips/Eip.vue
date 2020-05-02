@@ -36,7 +36,7 @@
         If you associate an Elastic IP address with your instance, your current
         public IP address is released.
         <a href="https://docs.aws.amazon.com/console/ec2/elastic-ips/public-ip"
-          >Learn more in the AWS Guide<gl-icon name="external-link"/></a
+          >Learn more in the AWS Guide<gl-icon name="external-link" /></a
         >.</gl-alert
       >
       Select the instance or the network interface to which you want to
@@ -158,7 +158,7 @@ import {
   GlButtonGroup,
   GlFormGroup,
   GlFormSelect,
-  GlIcon
+  GlIcon,
 } from "@gitlab/ui";
 import { Formatters } from "@/mixins/formatters";
 import { Prop, Component } from "vue-property-decorator";
@@ -170,7 +170,7 @@ import { eips } from "@/components/network/eips/eip";
 import EipWithRegion = eips.EipWithRegion;
 import {
   AssociateAddressRequest,
-  DisassociateAddressRequest
+  DisassociateAddressRequest,
 } from "aws-sdk/clients/ec2";
 
 @Component({
@@ -184,9 +184,9 @@ import {
     GlButtonGroup,
     GlFormGroup,
     GlFormSelect,
-    GlIcon
+    GlIcon,
   },
-  directives: { "gl-modal-directive": GlModalDirective }
+  directives: { "gl-modal-directive": GlModalDirective },
 })
 export default class Eip extends mixins(Formatters, Notifications) {
   @Prop(Object) readonly eip!: EipWithRegion;
@@ -200,16 +200,16 @@ export default class Eip extends mixins(Formatters, Notifications) {
   selectedNetworkInterface = "";
 
   disassociateEipButtonProps = {
-    text: "Disassociate IP"
+    text: "Disassociate IP",
   };
 
   releaseEipButtonProps = {
     text: "Release IP",
-    attributes: [{ variant: "danger" }]
+    attributes: [{ variant: "danger" }],
   };
 
   cancelProps = {
-    text: "Cancel"
+    text: "Cancel",
   };
 
   get associateEipButtonProps() {
@@ -218,12 +218,13 @@ export default class Eip extends mixins(Formatters, Notifications) {
       attributes: [
         {
           disabled:
-            this.selectedInstance === "" && this.selectedNetworkInterface === ""
+            this.selectedInstance === "" &&
+            this.selectedNetworkInterface === "",
         },
         {
-          variant: "success"
-        }
-      ]
+          variant: "success",
+        },
+      ],
     };
   }
 
@@ -242,7 +243,7 @@ export default class Eip extends mixins(Formatters, Notifications) {
   get EC2() {
     return new EC2Client({
       region: this.eip.region,
-      credentials: this.$store.getters["sts/credentials"]
+      credentials: this.$store.getters["sts/credentials"],
     });
   }
 
@@ -254,7 +255,7 @@ export default class Eip extends mixins(Formatters, Notifications) {
       params.PublicIp = this.eip.PublicIp;
     }
 
-    this.EC2.disassociateAddress(params, err => {
+    this.EC2.disassociateAddress(params, (err) => {
       if (err) {
         this.showError(err.message, "disassociateEip");
       } else {
@@ -270,7 +271,7 @@ export default class Eip extends mixins(Formatters, Notifications) {
       return;
     }
 
-    this.EC2.releaseAddress({ AllocationId: this.eip.AllocationId }, err => {
+    this.EC2.releaseAddress({ AllocationId: this.eip.AllocationId }, (err) => {
       if (err) {
         this.showError(err.message, "releaseEip");
       } else {
@@ -279,7 +280,7 @@ export default class Eip extends mixins(Formatters, Notifications) {
           variant: "info",
           text: "Released Elastic IP with ID " + this.eip.AllocationId,
           key: "releasedEip",
-          resourceId: this.eip.AllocationId
+          resourceId: this.eip.AllocationId,
         });
         this.$emit("deleted");
       }
@@ -295,9 +296,9 @@ export default class Eip extends mixins(Formatters, Notifications) {
         this.alertMessage = err.message;
         this.alertVariant = "danger";
       } else if (data.Reservations) {
-        data.Reservations.forEach(r => {
+        data.Reservations.forEach((r) => {
           if (r.Instances) {
-            r.Instances?.forEach(i => {
+            r.Instances?.forEach((i) => {
               if (i.InstanceId) {
                 this.instances.push(
                   `${i.InstanceId} - ${this.extractNameFromTags(i.Tags || [])}`
@@ -314,7 +315,7 @@ export default class Eip extends mixins(Formatters, Notifications) {
         this.alertMessage = err.message;
         this.alertVariant = "danger";
       } else if (data.NetworkInterfaces) {
-        data.NetworkInterfaces.forEach(n => {
+        data.NetworkInterfaces.forEach((n) => {
           if (n.NetworkInterfaceId) {
             this.networkInterfaces.push(
               `${n.NetworkInterfaceId} - ${this.extractNameFromTags(
@@ -329,7 +330,7 @@ export default class Eip extends mixins(Formatters, Notifications) {
 
   associateEip() {
     const params: AssociateAddressRequest = {
-      AllocationId: this.eip.AllocationId
+      AllocationId: this.eip.AllocationId,
     };
 
     if (this.selectedInstance) {

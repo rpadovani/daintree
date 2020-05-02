@@ -13,28 +13,28 @@ const routes = [
   {
     path: "/",
     name: "Home",
-    component: Home
+    component: Home,
   },
   {
     path: "/login",
     name: "Login",
     component: () =>
       import(/* webpackChunkName: "login" */ "@/components/Login.vue"),
-    meta: { title: "Login" }
+    meta: { title: "Login" },
   },
   {
     path: "/changelog",
     name: "Changelog",
     component: () =>
       import(/* webpackChunkName: "changelog" */ "@/views/Changelog.vue"),
-    meta: { title: "Changelog" }
+    meta: { title: "Changelog" },
   },
   {
     path: "/security",
     name: "Security",
     component: () =>
       import(/* webpackChunkName: "security" */ "@/views/Security.vue"),
-    meta: { title: "Security" }
+    meta: { title: "Security" },
   },
   {
     path: "/cognito_callback",
@@ -42,34 +42,35 @@ const routes = [
     component: () =>
       import(
         /* webpackChunkName: "cognito_callback" */ "@/components/CognitoCallback.vue"
-      )
+      ),
   },
   {
     path: "/about",
     name: "About",
     meta: { title: "Features" },
-    component: () => import(/* webpackChunkName: "about" */ "@/views/About.vue")
+    component: () =>
+      import(/* webpackChunkName: "about" */ "@/views/About.vue"),
   },
   {
     path: "/oauth_instructions",
     name: "OAuth Instruction",
     component: () =>
       import(/* webpackChunkName: "oauth_instruction" */ "@/views/OAuth.vue"),
-    meta: { title: "OAuth instructions" }
+    meta: { title: "OAuth instructions" },
   },
   {
     path: "/contribute",
     name: "Contribute",
     component: () =>
       import(/* webpackChunkName: "contribute" */ "@/views/Contribute.vue"),
-    meta: { title: "Contribute" }
+    meta: { title: "Contribute" },
   },
   {
     path: "/home",
     name: "Main menu",
     component: () =>
       import(/* webpackChunkName: "main_menu" */ "@/components/MainMenu.vue"),
-    meta: { title: "Main Menu", requiresLogin: true }
+    meta: { title: "Main Menu", requiresLogin: true },
   },
   ...NetworkRoutes,
   ...EC2Routes,
@@ -79,12 +80,12 @@ const routes = [
     name: "Not Found",
     component: () =>
       import(/* webpackChunkName: "notFound" */ "@/views/404.vue"),
-    meta: { title: "404" }
-  }
+    meta: { title: "404" },
+  },
 ];
 
 const router = new VueRouter({
-  routes
+  routes,
 });
 
 router.beforeEach((to, from, next) => {

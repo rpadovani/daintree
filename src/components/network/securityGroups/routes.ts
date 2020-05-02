@@ -11,11 +11,11 @@ export const securityGroupRoutes = [
   {
     path: "/network/securityGroups/new",
     component: NewSecurityGroup,
-    meta: { title: "New security group", requiresLogin: true }
+    meta: { title: "New security group", requiresLogin: true },
   },
   {
     path: "/network/securityGroups",
     component: SecurityGroupList,
-    meta: { title: "Security groups", requiresLogin: true }
-  }
+    meta: { title: "Security groups", requiresLogin: true },
+  },
 ];

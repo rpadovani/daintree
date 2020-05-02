@@ -5,7 +5,7 @@
     <gl-drawer
       :open="drawerOpened && selectedSns !== {}"
       @close="close"
-      style="width:80%"
+      style="width: 80%;"
     >
       <template #header>{{ selectedSnsTitle }}</template>
 
@@ -126,7 +126,7 @@ import {
   GlEmptyState,
   GlSkeletonLoading,
   GlModalDirective,
-  GlLoadingIcon
+  GlLoadingIcon,
 } from "@gitlab/ui";
 import { Formatters } from "@/mixins/formatters";
 import Component, { mixins } from "vue-class-component";
@@ -149,11 +149,11 @@ import { SubscriptionWithRegion } from "@/components/messages/SNS/sns";
     GlFormInput,
     GlSkeletonLoading,
     GlEmptyState,
-    GlLoadingIcon
+    GlLoadingIcon,
   },
   directives: {
-    "gl-modal-directive": GlModalDirective
-  }
+    "gl-modal-directive": GlModalDirective,
+  },
 })
 export default class SNSSubscriptionsList extends mixins(
   Formatters,
@@ -172,24 +172,24 @@ export default class SNSSubscriptionsList extends mixins(
       key: "subscriptionArn",
       label: "Subscription ID",
       sortable: true,
-      formatter: this.getLastElementArn
+      formatter: this.getLastElementArn,
     },
     {
       key: "Protocol",
-      sortable: true
+      sortable: true,
     },
     {
       key: "Endpoint",
-      sortable: true
+      sortable: true,
     },
     {
       key: "TopicArn",
       label: "Topic",
       sortable: true,
-      formatter: this.getLastElementArn
+      formatter: this.getLastElementArn,
     },
     { key: "region", sortable: true },
-    "Owner"
+    "Owner",
   ];
 
   get snsAsList(): SubscriptionWithRegion[] {
@@ -220,7 +220,7 @@ export default class SNSSubscriptionsList extends mixins(
   }
 
   getAllSubscriptions() {
-    this.regionsEnabled.forEach(region =>
+    this.regionsEnabled.forEach((region) =>
       this.getSubscriptionForRegion(region)
     );
   }
@@ -230,12 +230,12 @@ export default class SNSSubscriptionsList extends mixins(
 
     const SNS = new SNSClient({
       region,
-      credentials: this.$store.getters["sts/credentials"]
+      credentials: this.$store.getters["sts/credentials"],
     });
 
     SNS.listSubscriptions({}, (err, data) => {
       this.loadingCount--;
-      Object.keys(this.sns).forEach(key => {
+      Object.keys(this.sns).forEach((key) => {
         //Keep track if the sns of this region are still available
         if (this.sns[key].region === region) {
           this.sns[key].stillPresent = false;
@@ -247,13 +247,13 @@ export default class SNSSubscriptionsList extends mixins(
         return;
       }
 
-      data.Subscriptions?.map(t => t.SubscriptionArn).forEach(
-        subscriptionArn => {
+      data.Subscriptions?.map((t) => t.SubscriptionArn).forEach(
+        (subscriptionArn) => {
           if (subscriptionArn) {
             this.$set(this.sns, subscriptionArn, {
               subscriptionArn,
               region,
-              stillPresent: true
+              stillPresent: true,
             });
 
             SNS.getSubscriptionAttributes(
@@ -269,7 +269,7 @@ export default class SNSSubscriptionsList extends mixins(
                     subscriptionArn,
                     region,
                     stillPresent: true,
-                    ...data.Attributes
+                    ...data.Attributes,
                   });
                 }
               }
@@ -279,7 +279,7 @@ export default class SNSSubscriptionsList extends mixins(
       );
 
       //Remove Sns we don't find anymore
-      Object.keys(this.sns).forEach(key => {
+      Object.keys(this.sns).forEach((key) => {
         if (this.sns[key].region === region && !this.sns[key].stillPresent) {
           this.$delete(this.sns, key);
         }
@@ -291,7 +291,7 @@ export default class SNSSubscriptionsList extends mixins(
       if (this.$route.query.subscriptionId && this.loadingCount === 0) {
         this.$nextTick().then(() => {
           const filteredSns = this.snsAsList.filter(
-            sns =>
+            (sns) =>
               sns.subscriptionArn &&
               this.getLastElementArn(sns.subscriptionArn) ===
                 this.$route.query.subscriptionId
@@ -300,7 +300,7 @@ export default class SNSSubscriptionsList extends mixins(
             this.selectedSns = filteredSns[0];
             this.drawerOpened = true;
             const index = this.snsAsList.findIndex(
-              sns =>
+              (sns) =>
                 sns.subscriptionArn &&
                 this.getLastElementArn(sns.subscriptionArn) ===
                   this.$route.query.subscriptionId
@@ -353,8 +353,8 @@ export default class SNSSubscriptionsList extends mixins(
         .push({
           path: "/messages/sns_subscriptions",
           query: {
-            subscriptionId: this.getLastElementArn(sns[0].subscriptionArn)
-          }
+            subscriptionId: this.getLastElementArn(sns[0].subscriptionArn),
+          },
         })
         // eslint-disable-next-line @typescript-eslint/no-empty-function
         .catch(() => {});
@@ -365,11 +365,11 @@ export default class SNSSubscriptionsList extends mixins(
 
   @Watch("regionsEnabled")
   onRegionsEnabledChanged(newValue: string[], oldValue: string[]) {
-    const addedRegions = [...newValue.filter(d => !oldValue.includes(d))];
-    const removedRegions = [...oldValue.filter(d => !newValue.includes(d))];
+    const addedRegions = [...newValue.filter((d) => !oldValue.includes(d))];
+    const removedRegions = [...oldValue.filter((d) => !newValue.includes(d))];
 
     if (removedRegions.length > 0) {
-      this.snsAsList.forEach(sns => {
+      this.snsAsList.forEach((sns) => {
         if (
           sns.region &&
           removedRegions.includes(sns.region) &&
@@ -380,7 +380,7 @@ export default class SNSSubscriptionsList extends mixins(
       });
     }
 
-    addedRegions.forEach(region => this.getSubscriptionForRegion(region));
+    addedRegions.forEach((region) => this.getSubscriptionForRegion(region));
   }
 
   @Watch("currentRoleIndex")

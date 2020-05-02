@@ -32,7 +32,7 @@
               >Set main route table
             </gl-button>
             <gl-button
-              style="height: 100%"
+              style="height: 100%;"
               variant="danger"
               category="secondary"
               v-gl-modal-directive="'delete-route-table-modal'"
@@ -93,7 +93,7 @@ import {
   GlButton,
   GlModal,
   GlModalDirective,
-  GlButtonGroup
+  GlButtonGroup,
 } from "@gitlab/ui";
 import EC2Client from "aws-sdk/clients/ec2";
 import { Component, Prop } from "vue-property-decorator";
@@ -123,9 +123,9 @@ import ListOfRoutes from "@/components/network/routeTables/ListOfRoutes.vue";
     GlModal,
     FlowLogsTab,
     GlButtonGroup,
-    SubnetTab
+    SubnetTab,
   },
-  directives: { "gl-modal-directive": GlModalDirective }
+  directives: { "gl-modal-directive": GlModalDirective },
 })
 export default class RouteTable extends mixins(Formatters, Notifications) {
   @Prop(Object) readonly routeTable!: RouteTableWithRegion;
@@ -136,17 +136,17 @@ export default class RouteTable extends mixins(Formatters, Notifications) {
 
   deleteRouteTableButtonProps = {
     text: "Delete route table",
-    attributes: [{ variant: "danger" }]
+    attributes: [{ variant: "danger" }],
   };
 
   cancelProps = {
-    text: "Cancel"
+    text: "Cancel",
   };
 
   get EC2() {
     return new EC2Client({
       region: this.routeTable.region,
-      credentials: this.$store.getters["sts/credentials"]
+      credentials: this.$store.getters["sts/credentials"],
     });
   }
 
@@ -154,7 +154,7 @@ export default class RouteTable extends mixins(Formatters, Notifications) {
     if (!this.routeTable || !this.routeTable.Associations) {
       return false;
     }
-    return this.routeTable.Associations.filter(a => a.Main).length > 0;
+    return this.routeTable.Associations.filter((a) => a.Main).length > 0;
   }
 
   get associatedSubnetsIds(): string[] {
@@ -162,7 +162,7 @@ export default class RouteTable extends mixins(Formatters, Notifications) {
       return [];
     }
 
-    return this.routeTable.Associations.map(a => a.SubnetId).filter(isString);
+    return this.routeTable.Associations.map((a) => a.SubnetId).filter(isString);
   }
 
   setAsMain() {
@@ -175,9 +175,9 @@ export default class RouteTable extends mixins(Formatters, Notifications) {
     this.EC2.replaceRouteTableAssociation(
       {
         AssociationId: this.mainRouteAssociationId,
-        RouteTableId: this.routeTable.RouteTableId
+        RouteTableId: this.routeTable.RouteTableId,
       },
-      err => {
+      (err) => {
         if (err) {
           this.alertMessage = err.message;
           this.alertVariant = "danger";
@@ -197,7 +197,7 @@ export default class RouteTable extends mixins(Formatters, Notifications) {
 
     this.EC2.deleteRouteTable(
       { RouteTableId: this.routeTable.RouteTableId },
-      err => {
+      (err) => {
         if (err) {
           this.showError(err.message, "deleteRouteTable");
         } else {
@@ -206,7 +206,7 @@ export default class RouteTable extends mixins(Formatters, Notifications) {
             variant: "info",
             text: "Deleted route table with ID " + this.routeTable.RouteTableId,
             key: "deletingRouteTable",
-            resourceId: this.routeTable.RouteTableId
+            resourceId: this.routeTable.RouteTableId,
           });
           this.$emit("deleted");
         }

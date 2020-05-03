@@ -135,6 +135,7 @@ export const STSActions = {
       ["role"]: string;
       ["nickname"]: string;
       ["newRole"]?: boolean;
+      ["remember"]?: boolean;
     }
   ) {
     return new Promise((resolve, reject) => {
@@ -174,6 +175,7 @@ export const STSActions = {
                 nickname: payload.nickname,
                 role: payload.role,
                 credentials,
+                remember: payload.remember,
               };
               context.commit("addRole", role);
             } else {

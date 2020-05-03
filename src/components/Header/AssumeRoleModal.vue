@@ -4,6 +4,9 @@
     title="Switch role"
     no-fade
     ref="modal"
+    :action-primary="primaryProps"
+    :action-cancel="cancelProps"
+    @primary="save"
   >
     <gl-alert
       variant="danger"
@@ -49,18 +52,9 @@
       </template>
     </gl-form-input-group>
 
-    <template #modal-footer>
-      <gl-button class="js-modal-action-secondary" @click="cancel"
-        >Cancel</gl-button
-      >
-      <gl-button
-        class="js-modal-action-primary"
-        variant="success"
-        :disabled="buttonDisabled"
-        @click="save"
-        >Assume role</gl-button
-      >
-    </template>
+    <gl-form-checkbox class="mt-2" v-model="remember"
+      >Remember this role</gl-form-checkbox
+    >
   </gl-modal>
 </template>
 
@@ -71,6 +65,7 @@ import {
   GlIcon,
   GlAlert,
   GlButton,
+  GlFormCheckbox,
 } from "@gitlab/ui";
 import { Component, Vue } from "vue-property-decorator";
 import { BInputGroupText } from "bootstrap-vue";
@@ -81,6 +76,7 @@ import { Role } from "@/store/sts/state";
     BInputGroupText,
     GlModal,
     GlFormInputGroup,
+    GlFormCheckbox,
     GlIcon,
     GlAlert,
     GlButton,
@@ -90,11 +86,24 @@ export default class AssumeRoleModal extends Vue {
   accountID = "";
   role = "";
   nickname = "";
+  remember = false;
 
   error = "";
 
-  get buttonDisabled(): boolean {
-    return this.accountID === "" || this.role === "";
+  get primaryProps() {
+    return {
+      text: "Assume role",
+      attributes: [
+        { disabled: this.accountID === "" || this.role === "" },
+        { variant: "success" },
+      ],
+    };
+  }
+
+  get cancelProps() {
+    return {
+      text: "Close",
+    };
   }
 
   save() {
@@ -105,22 +114,18 @@ export default class AssumeRoleModal extends Vue {
     };
 
     this.$store
-      .dispatch("sts/assumeRole", { ...role, newRole: true })
+      .dispatch("sts/assumeRole", {
+        ...role,
+        newRole: true,
+        remember: this.remember,
+      })
       .then(() => {
         //Clean for the next time we assume a role:
         this.accountID = this.nickname = this.role = "";
-        // eslint-disable-next-line @typescript-eslint/ban-ts-ignore
-        //@ts-ignore
-        this.$refs.modal.ok();
+        this.remember = false;
       })
       // eslint-disable-next-line @typescript-eslint/no-empty-function
       .catch(() => {});
-  }
-
-  cancel() {
-    // eslint-disable-next-line @typescript-eslint/ban-ts-ignore
-    //@ts-ignore
-    this.$refs.modal.cancel();
   }
 }
 </script>

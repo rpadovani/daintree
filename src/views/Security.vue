@@ -42,20 +42,23 @@
             If you do not trust to give your AWS Access keys to a random website
             (rightly so!) you can use
             <router-link to="/oauth_instructions"
-              >OAuth and AWS Identity pools to login</router-link
-            >
+              >OAuth and AWS Identity pools to login
+            </router-link>
             . Or you can download the source code and run it on your own
             website!
           </p>
 
           <p>
             Moreover, Daintree doesn't store any sensitive data on your browser,
-            nor it caches data received from AWS. It saves some technical
-            cookies, as the list of the regions you have enabled, and it saves
-            your OAuth data if you ask so. It never stores your AWS Access Key
-            or Secret Key - and this is why when you reload the page, you have
-            to login again. And every time you explicitly logout, Daintree
-            deletes all the bits of information stored on your browser.
+            nor it caches data received from AWS. It uses the session storage to
+            keep your data until the tab is open (so you can reload the page),
+            but as soon as you close the tab or the browser your credentials are
+            wiped out by the browser itself. It saves some technical cookies, as
+            the list of the regions you have enabled, and it saves your OAuth
+            data if you ask so. It never stores your AWS Access Key or Secret
+            Key - and this is why when you open a new tab, you have to login
+            again. And every time you explicitly logout, Daintree deletes all
+            the bits of information stored on your browser.
           </p>
 
           <p>

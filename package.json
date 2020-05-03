@@ -25,7 +25,7 @@
   },
   "devDependencies": {
     "@types/node": "13.13.4",
-    "@types/webpack-env": "^1.15.2",
+    "@types/webpack-env": "1.15.2",
     "@typescript-eslint/eslint-plugin": "2.30.0",
     "@typescript-eslint/parser": "2.30.0",
     "@vue/cli-plugin-babel": "4.3.1",

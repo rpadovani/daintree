@@ -33,7 +33,7 @@ export class STSState {
   loginMethod: "cognito" | "accessKey" | undefined =
     sessionData.loginMethod || undefined;
 
-  roles: Role[] = [];
+  roles: Role[] = JSON.parse(localStorage.getItem("roles") || "[]");
 
   currentRole = -1;
 
@@ -45,6 +45,7 @@ export interface Role {
   accountId: string;
   role: string;
   nickname: string | undefined;
+  remember?: boolean | undefined;
   credentials?:
     | {
         accessKeyId: string;

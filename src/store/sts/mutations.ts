@@ -48,6 +48,12 @@ export const STSMutations = {
     const newLength = state.roles.push(payload);
     state.currentRole = newLength - 1;
     state.currentCredentials = payload.credentials;
+
+    if (payload.remember) {
+      const currentRoles = JSON.parse(localStorage.getItem("roles") || "[]");
+      currentRoles.push(payload);
+      localStorage.setItem("roles", JSON.stringify(currentRoles));
+    }
   },
   switchRole(state: STSState, { roleIndex, credentials }) {
     state.currentRole = roleIndex;

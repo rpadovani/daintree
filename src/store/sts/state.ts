@@ -1,8 +1,10 @@
 import { Credentials } from "aws-sdk/lib/credentials";
 
+const sessionData = JSON.parse(sessionStorage.getItem("loginData") || "{}");
+
 export class STSState {
-  userArn: string | null = null;
-  accountID: string | null = null;
+  userArn: string | null = sessionData.userArn || null;
+  accountID: string | null = sessionData.accountID || null;
   regionsEnabled: string[] = JSON.parse(
     localStorage.getItem("regionsEnabled") || "[]"
   );
@@ -16,7 +18,7 @@ export class STSState {
         sessionToken?: string;
         expiration?: Date;
       }
-    | undefined = undefined;
+    | undefined = sessionData.credentials || undefined;
   //Current credentials when a role is assumed
   currentCredentials:
     | Credentials
@@ -28,7 +30,8 @@ export class STSState {
       }
     | undefined = undefined;
 
-  loginMethod: "cognito" | "accessKey" | undefined = undefined;
+  loginMethod: "cognito" | "accessKey" | undefined =
+    sessionData.loginMethod || undefined;
 
   roles: Role[] = [];
 

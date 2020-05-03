@@ -6,6 +6,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Added
+
+- Daintree now uses the session storage to keep your credentials: it means you can reload the page and you are still 
+  logged in! Of course, as soon as you close the tab, the browser will delete everything from the session storage, so 
+  your credentials are perfectly safe!
+
 ## [0.1.2]
 
 ### Fixed

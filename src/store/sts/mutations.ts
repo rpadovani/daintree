@@ -7,12 +7,32 @@ export const STSMutations = {
     state.accountID = account;
     state.credentials = credentials;
     state.loginMethod = "accessKey";
+
+    sessionStorage.setItem(
+      "loginData",
+      JSON.stringify({
+        userArn: arn,
+        accountID: account,
+        credentials,
+        loginMethod: "accessKey",
+      })
+    );
   },
   loginWithCognito(state: STSState, { accountId, userArn, credentials }) {
     state.loginMethod = "cognito";
     state.accountID = accountId;
     state.userArn = userArn;
     state.credentials = credentials;
+
+    sessionStorage.setItem(
+      "loginData",
+      JSON.stringify({
+        userArn,
+        accountID: accountId,
+        credentials,
+        loginMethod: "cognito",
+      })
+    );
   },
   setEnabledRegions(state: STSState, regions) {
     state.regionsEnabled = regions;

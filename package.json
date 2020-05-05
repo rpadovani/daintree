@@ -24,7 +24,7 @@
     "vuex": "3.3.0"
   },
   "devDependencies": {
-    "@types/node": "13.13.4",
+    "@types/node": "13.13.5",
     "@types/webpack-env": "1.15.2",
     "@typescript-eslint/eslint-plugin": "2.31.0",
     "@typescript-eslint/parser": "2.31.0",

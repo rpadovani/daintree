@@ -15,6 +15,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   your credentials are perfectly safe;
 - When you switch role, you can now save it: this way the next time you use Daintree you don't need to insert data 
   about your role anymore! Daintree stores on your browser only metadata about the role, and not the actual credentials.
+  
+### Changed
+
+- The secret access key field during the login is now marked as a password
 
 ## [0.1.2]
 

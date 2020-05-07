@@ -29,14 +29,14 @@
           </p>
 
           <div class="row mt-2 p-2">
-            <div class="col-sm-12 col-lg-9 order-sm-12 order-lg-0">
+            <div class="col-12 col-lg-9 order-12 order-lg-0">
               <img
                 class="col-12"
                 src="/assets/features/multiple-regions.gif"
                 alt="Regions selector"
               />
             </div>
-            <div class="col-sm-12 col-lg-3 order-sm-1 order-lg-12">
+            <div class="col-12 col-lg-3 order-1 order-lg-12">
               <h5>Multiple region support</h5>
               <p>
                 The main reason Daintree exists is to display resources from
@@ -53,7 +53,7 @@
           </div>
 
           <div class="row mt-2 p-2">
-            <div class="col-sm-12 col-lg-3">
+            <div class="col-12 col-lg-3">
               <h5>Fast role switching</h5>
               <p>
                 If you belong to an AWS organization, and you have multiple
@@ -68,7 +68,7 @@
                 page reload!
               </p>
             </div>
-            <div class="col-sm-12 col-lg-9">
+            <div class="col-12 col-lg-9">
               <img
                 class="col-12"
                 src="/assets/features/switch-role.gif"
@@ -78,7 +78,7 @@
           </div>
 
           <div class="row mt-2 p-2">
-            <div class="col-sm-12 col-lg-6 order-sm-12 order-lg-0">
+            <div class="col-12 col-lg-6 order-12 order-lg-0">
               <img
                 style="max-height: 200px;"
                 src="/assets/undraw_visualization_c2ps.svg"
@@ -86,7 +86,7 @@
                 class="mx-auto d-block"
               />
             </div>
-            <div class="col-sm-12 col-lg-6">
+            <div class="col-12 col-lg-6">
               <h5>Coherent interface</h5>
               <p>
                 Beauty is in the eye of the beholder, so claiming Daintree is
@@ -112,7 +112,7 @@
           </div>
 
           <div class="row mt-2 p-2">
-            <div class="col-sm-12 col-lg-6">
+            <div class="col-12 col-lg-6">
               <h5>Free software</h5>
               <p>
                 Daintree is licensed under AGPL-3.0, meaning is truly free
@@ -132,7 +132,7 @@
                 spread the word!
               </p>
             </div>
-            <div class="col-sm-12 col-lg-6">
+            <div class="col-12 col-lg-6">
               <img
                 alt="AGPLv3"
                 src="/assets/agplv3-with-text-162x68.png"
@@ -146,15 +146,15 @@
           <div class="row mt-2 p-2">
             <img
               style="max-height: 200px;"
-              class="col-sm-12 col-lg-6 order-sm-12 order-lg-0"
+              class="col-12 col-lg-6 order-12 order-lg-0"
               src="/assets/undraw_fast_loading_0lbh.svg"
               alt="Fast loading"
             />
-            <div class="col-sm-12 col-lg-6">
+            <div class="col-12 col-lg-6">
               <h5>Fast navigation</h5>
               <p>
                 Daintree heavily uses Javascript (with Vue.js) to do not have to
-                reload the page: also, it tries to perform as less operations as
+                reload the page: also, it tries to perform as few operations as
                 possible to keep always updated on your resources. In this way,
                 you don't waste your precious time waiting for the page to load.
               </p>
@@ -162,7 +162,7 @@
           </div>
 
           <div class="row mt-2 p-2">
-            <div class="col-sm-12 col-lg-6">
+            <div class="col-12 col-lg-6">
               <h5>And much more!</h5>
               <p>
                 While implementing Daintree, new features have been introduced
@@ -178,7 +178,7 @@
                 >!
               </p>
             </div>
-            <div class="col-sm-12 col-lg-6">
+            <div class="col-12 col-lg-6">
               <img
                 style="max-height: 200px;"
                 src="/assets/undraw_To_the_stars_qhyy.svg"

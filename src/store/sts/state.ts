@@ -1,4 +1,9 @@
-import { Credentials } from "aws-sdk/lib/credentials";
+export interface DaintreeCredentials {
+  accessKeyId: string;
+  secretAccessKey: string;
+  sessionToken?: string;
+  expiration?: Date;
+}
 
 const sessionData = JSON.parse(sessionStorage.getItem("loginData") || "{}");
 
@@ -10,25 +15,9 @@ export class STSState {
   );
 
   //The original credentials used to login
-  credentials:
-    | Credentials
-    | {
-        accessKeyId: string;
-        secretAccessKey: string;
-        sessionToken?: string;
-        expiration?: Date;
-      }
-    | undefined = sessionData.credentials || undefined;
+  credentials: DaintreeCredentials | undefined = sessionData.credentials || undefined;
   //Current credentials when a role is assumed
-  currentCredentials:
-    | Credentials
-    | {
-        accessKeyId: string;
-        secretAccessKey: string;
-        sessionToken?: string;
-        expiration?: Date;
-      }
-    | undefined = undefined;
+  currentCredentials: DaintreeCredentials | undefined = undefined;
 
   loginMethod: "cognito" | "accessKey" | undefined =
     sessionData.loginMethod || undefined;
@@ -46,12 +35,5 @@ export interface Role {
   role: string;
   nickname: string | undefined;
   remember?: boolean | undefined;
-  credentials?:
-    | {
-        accessKeyId: string;
-        secretAccessKey: string;
-        sessionToken?: string;
-        expiration?: Date;
-      }
-    | undefined;
+  credentials?: DaintreeCredentials | undefined;
 }

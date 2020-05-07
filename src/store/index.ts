@@ -8,6 +8,9 @@ import { NotificationMutations } from "@/store/notifications/mutations";
 import { NotificationGetters } from "@/store/notifications/getters";
 import { NotificationActions } from "@/store/notifications/actions";
 import { STSActions } from "@/store/sts/actions";
+import { CloudwatchState } from "@/store/cloudwatch/state";
+import { CloudwatchMutations } from "@/store/cloudwatch/mutations";
+import { CloudwatchGetters } from "@/store/cloudwatch/getters";
 
 Vue.use(Vuex);
 export default new Vuex.Store({
@@ -25,6 +28,12 @@ export default new Vuex.Store({
       mutations: NotificationMutations,
       getters: NotificationGetters,
       actions: NotificationActions,
+    },
+    cloudwatch: {
+      namespaced: true,
+      state: new CloudwatchState(),
+      mutations: CloudwatchMutations,
+      getters: CloudwatchGetters,
     },
   },
 });

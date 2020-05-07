@@ -25,7 +25,6 @@ lint:
 buildPackage:
   image: node:latest
   stage: build
-  when: manual
   script:
     - curl "https://gitlab.com/api/v4/projects/18158864/releases" > public/changelog.json
     - yarn install --pure-lockfile
@@ -33,10 +32,8 @@ buildPackage:
   artifacts:
     paths:
       - dist
-  only:
-    - master
 
-pages: # the job must be named pages
+pages: # the deploy job must be named pages
   image: node:latest
   variables:
     GIT_STRATEGY: none

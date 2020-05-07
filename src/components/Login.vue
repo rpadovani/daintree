@@ -30,6 +30,7 @@
         >
           <gl-form-input
             id="secret"
+            type="password"
             v-model="secretKey"
             :disabled="isLoading"
           />

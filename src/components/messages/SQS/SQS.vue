@@ -9,8 +9,7 @@
         :action-cancel="cancelProps"
         @primary="purgeSqs"
       >
-        Are you sure that you want to purge the queue named
-        <b>{{ sqs.queueUrl.split("/")[sqs.queueUrl.split("/").length - 1] }}</b
+        Are you sure that you want to purge the queue named<b>{{ queueName }}</b
         >?
       </gl-modal>
 
@@ -88,6 +87,125 @@
         provider="SQS"
       />
     </gl-tab>
+
+    <gl-tab title="Monitoring">
+      <div class="row justify-content-between">
+        <CloudwatchWidget
+          class="col-sm-12 col-md-6 col-lg-4"
+          v-if="sqs"
+          :metrics="metricsNumberOfMessagesSent"
+          :live-data="false"
+          stat="Sum"
+          :region="sqs.region"
+          :key="sqs.queueUrl + 'numberOfMessagesSent'"
+          :legend="{ position: 'hidden' }"
+          graph-title="Number of messages sent"
+          :label="queueName"
+        />
+        <CloudwatchWidget
+          class="col-sm-12 col-md-6 col-lg-4"
+          v-if="sqs"
+          :metrics="metricsNumberOfMessagesReceived"
+          :live-data="false"
+          stat="Sum"
+          :region="sqs.region"
+          :key="sqs.queueUrl + 'numberOfMessagesReceived'"
+          :legend="{ position: 'hidden' }"
+          graph-title="Number of messages received"
+          :label="queueName"
+        />
+        <CloudwatchWidget
+          class="col-sm-12 col-md-6 col-lg-4"
+          v-if="sqs"
+          :metrics="metricsApproximateNumberOfMessagesVisible"
+          :live-data="false"
+          :region="sqs.region"
+          :key="sqs.queueUrl + 'approximateNumberOfMessagesVisible'"
+          :legend="{ position: 'hidden' }"
+          graph-title="Approximate number of messages visible"
+          :label="queueName"
+        />
+      </div>
+
+      <div class="row justify-content-between">
+        <CloudwatchWidget
+          class="col-sm-12 col-md-6 col-lg-4"
+          v-if="sqs"
+          :metrics="metricsNumberOfMessagesDeleted"
+          :live-data="false"
+          stat="Sum"
+          :region="sqs.region"
+          :key="sqs.queueUrl + 'numberOfMessagesDeleted'"
+          :legend="{ position: 'hidden' }"
+          graph-title="Number of messages deleted"
+          :label="queueName"
+        />
+        <CloudwatchWidget
+          class="col-sm-12 col-md-6 col-lg-4"
+          v-if="sqs"
+          :metrics="metricsNumberOfEmptyReceives"
+          :live-data="false"
+          stat="Sum"
+          :region="sqs.region"
+          :key="sqs.queueUrl + 'numberOfEmptyReceives'"
+          :legend="{ position: 'hidden' }"
+          graph-title="Number of empty receives"
+          :label="queueName"
+        />
+        <CloudwatchWidget
+          class="col-sm-12 col-md-6 col-lg-4"
+          v-if="sqs"
+          :metrics="metricsApproximateNumberOfMessagesNotVisible"
+          :live-data="false"
+          :region="sqs.region"
+          :key="sqs.queueUrl + 'approximateNumberOfMessagesNotVisible'"
+          :legend="{ position: 'hidden' }"
+          graph-title="Approximate number of messages not visible"
+          :label="queueName"
+        />
+      </div>
+
+      <div class="row justify-content-between">
+        <CloudwatchWidget
+          class="col-sm-12 col-md-6 col-lg-4"
+          v-if="sqs"
+          :metrics="metricsApproximateNumberOfMessagesDelayed"
+          :live-data="false"
+          stat="Sum"
+          :region="sqs.region"
+          :key="sqs.queueUrl + 'approximateNumberOfMessagesDelayed'"
+          :legend="{ position: 'hidden' }"
+          graph-title="Approximate number of messages delayed"
+          :label="queueName"
+        />
+        <CloudwatchWidget
+          class="col-sm-12 col-md-6 col-lg-4"
+          v-if="sqs"
+          :metrics="metricsSentMessageSize"
+          :live-data="false"
+          stat="Average"
+          :region="sqs.region"
+          :key="sqs.queueUrl + 'sentMessageSize'"
+          :legend="{ position: 'hidden' }"
+          graph-title="Sent message size"
+          :label="queueName"
+          :y-axis="{ name: 'Bytes' }"
+        />
+        <CloudwatchWidget
+          class="col-sm-12 col-md-6 col-lg-4"
+          v-if="sqs"
+          :metrics="metricsApproximateAgeOfOldestMessage"
+          :live-data="false"
+          stat="Maximum"
+          :region="sqs.region"
+          :key="sqs.queueUrl + 'approximateAgeOfOldestMessage'"
+          :legend="{ position: 'hidden' }"
+          graph-title="Approximate age of oldest message"
+          :label="queueName"
+          :y-axis="{ name: 'Seconds' }"
+        />
+      </div>
+    </gl-tab>
   </gl-tabs>
 </template>
 
@@ -112,9 +230,13 @@ import TagsTable from "@/components/common/TagsTable.vue";
 import { mixins } from "vue-class-component";
 import Notifications from "@/mixins/notifications";
 import { QueueWithRegion } from "@/components/messages/SQS/sqs";
+import CloudwatchWidget from "@/components/cloudwatch/CloudwatchWidget.vue";
+import { Metric } from "aws-sdk/clients/cloudwatch";
+import echarts from "echarts";
 
 @Component({
   components: {
+    CloudwatchWidget,
     TagsTable,
     GlTabs,
     GlTab,
@@ -143,6 +265,106 @@ export default class SQS extends mixins(Formatters, Notifications) {
   cancelProps = {
     text: "Cancel",
   };
+
+  get metricsNumberOfMessagesSent(): Metric[] {
+    return [
+      {
+        Namespace: "AWS/SQS",
+        MetricName: "NumberOfMessagesSent",
+        Dimensions: [{ Name: "QueueName", Value: this.queueName }],
+      },
+    ];
+  }
+
+  get metricsNumberOfMessagesReceived(): Metric[] {
+    return [
+      {
+        Namespace: "AWS/SQS",
+        MetricName: "NumberOfMessagesReceived",
+        Dimensions: [{ Name: "QueueName", Value: this.queueName }],
+      },
+    ];
+  }
+
+  get metricsApproximateNumberOfMessagesVisible(): Metric[] {
+    return [
+      {
+        Namespace: "AWS/SQS",
+        MetricName: "ApproximateNumberOfMessagesVisible",
+        Dimensions: [{ Name: "QueueName", Value: this.queueName }],
+      },
+    ];
+  }
+
+  get metricsNumberOfMessagesDeleted(): Metric[] {
+    return [
+      {
+        Namespace: "AWS/SQS",
+        MetricName: "NumberOfMessagesDeleted",
+        Dimensions: [{ Name: "QueueName", Value: this.queueName }],
+      },
+    ];
+  }
+
+  get metricsNumberOfEmptyReceives(): Metric[] {
+    return [
+      {
+        Namespace: "AWS/SQS",
+        MetricName: "NumberOfEmptyReceives",
+        Dimensions: [{ Name: "QueueName", Value: this.queueName }],
+      },
+    ];
+  }
+
+  get metricsApproximateNumberOfMessagesNotVisible(): Metric[] {
+    return [
+      {
+        Namespace: "AWS/SQS",
+        MetricName: "ApproximateNumberOfMessagesNotVisible",
+        Dimensions: [{ Name: "QueueName", Value: this.queueName }],
+      },
+    ];
+  }
+
+  get metricsApproximateNumberOfMessagesDelayed(): Metric[] {
+    return [
+      {
+        Namespace: "AWS/SQS",
+        MetricName: "ApproximateNumberOfMessagesDelayed",
+        Dimensions: [{ Name: "QueueName", Value: this.queueName }],
+      },
+    ];
+  }
+
+  get metricsSentMessageSize(): Metric[] {
+    return [
+      {
+        Namespace: "AWS/SQS",
+        MetricName: "SentMessageSize",
+        Dimensions: [{ Name: "QueueName", Value: this.queueName }],
+      },
+    ];
+  }
+
+  get metricsApproximateAgeOfOldestMessage(): Metric[] {
+    return [
+      {
+        Namespace: "AWS/SQS",
+        MetricName: "ApproximateAgeOfOldestMessage",
+        Dimensions: [{ Name: "QueueName", Value: this.queueName }],
+      },
+    ];
+  }
+
+  get queueName(): string {
+    if (!this.sqs || !this.sqs.queueUrl) {
+      return "";
+    }
+
+    return this.sqs.queueUrl.split("/")[
+      this.sqs.queueUrl.split("/").length - 1
+    ];
+  }
 
   deleteSqs() {
     if (!this.sqs.queueUrl) {

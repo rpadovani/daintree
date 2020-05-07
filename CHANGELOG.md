@@ -8,6 +8,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Added
 
+- Created a new Cloudwatch component to show graphs about a single resource
+- Used the new Cloudwatch component to provide information about SQS
 - Daintree now uses the session storage to keep your credentials: it means you can reload the page, and you are still 
   logged in! Of course, as soon as you close the tab, the browser will delete everything from the session storage, so 
   your credentials are perfectly safe;

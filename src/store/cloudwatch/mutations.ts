@@ -13,6 +13,8 @@ export const CloudwatchMutations = {
 
     if (payload.yAxis) {
       state.yAxis = payload.yAxis;
+    } else {
+      state.yAxis = { name: "Count" };
     }
   },
 

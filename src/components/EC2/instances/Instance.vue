@@ -159,6 +159,157 @@
           </template>
         </gl-table>
       </gl-tab>
+      <gl-tab title="Monitoring">
+        <div class="row justify-content-between">
+          <CloudwatchWidget
+            class="col-12 col-md-6 col-lg-4"
+            :metrics="metricsCpuUtilization"
+            :live-data="false"
+            stat="Average"
+            :region="instance.region"
+            :key="instance.InstanceId + 'cpuUtilization'"
+            :legend="{ position: 'hidden' }"
+            graph-title="CPU utilization"
+            :label="instance.InstanceId"
+            :y-axis="{ name: 'Percent' }"
+          />
+          <CloudwatchWidget
+            class="col-12 col-md-6 col-lg-4"
+            :metrics="metricsDiskReads"
+            :live-data="false"
+            stat="Average"
+            :region="instance.region"
+            :key="instance.InstanceId + 'diskReads'"
+            :legend="{ position: 'hidden' }"
+            graph-title="Disk reads"
+            :label="instance.InstanceId"
+            :y-axis="{ name: 'Bytes' }"
+          />
+          <CloudwatchWidget
+            class="col-12 col-md-6 col-lg-4"
+            :metrics="metricsDiskReadOperations"
+            :live-data="false"
+            :region="instance.region"
+            :key="instance.InstanceId + 'DiskReadOperations'"
+            :legend="{ position: 'hidden' }"
+            graph-title="Disk read operations"
+            :label="instance.InstanceId"
+            :y-axis="{ name: 'Operations' }"
+          />
+        </div>
+
+        <div class="row justify-content-between">
+          <CloudwatchWidget
+            class="col-12 col-md-6 col-lg-4"
+            :metrics="metricsDiskWrites"
+            :live-data="false"
+            stat="Average"
+            :region="instance.region"
+            :key="instance.InstanceId + 'diskWrites'"
+            :legend="{ position: 'hidden' }"
+            graph-title="Disk writes"
+            :label="instance.InstanceId"
+            :y-axis="{ name: 'Bytes' }"
+          />
+
+          <CloudwatchWidget
+            class="col-12 col-md-6 col-lg-4"
+            :metrics="metricsDiskWriteOperations"
+            :live-data="false"
+            :region="instance.region"
+            :key="instance.InstanceId + 'DiskWriteOperations'"
+            :legend="{ position: 'hidden' }"
+            graph-title="Disk write operations"
+            :label="instance.InstanceId"
+            :y-axis="{ name: 'Operations' }"
+          />
+
+          <CloudwatchWidget
+            class="col-12 col-md-6 col-lg-4"
+            :metrics="metricsNetworkIn"
+            :live-data="false"
+            stat="Average"
+            :region="instance.region"
+            :key="instance.InstanceId + 'networkIn'"
+            :legend="{ position: 'hidden' }"
+            graph-title="Network in"
+            :label="instance.InstanceId"
+            :y-axis="{ name: 'Bytes' }"
+          />
+        </div>
+
+        <div class="row justify-content-between">
+          <CloudwatchWidget
+            class="col-12 col-md-6 col-lg-4"
+            :metrics="metricsNetworkOut"
+            :live-data="false"
+            stat="Average"
+            :region="instance.region"
+            :key="instance.InstanceId + 'networkOut'"
+            :legend="{ position: 'hidden' }"
+            graph-title="Network out"
+            :label="instance.InstanceId"
+            :y-axis="{ name: 'Bytes' }"
+          />
+          <CloudwatchWidget
+            class="col-12 col-md-6 col-lg-4"
+            :metrics="metricsNetworkPacketsIn"
+            :live-data="false"
+            stat="Average"
+            :region="instance.region"
+            :key="instance.InstanceId + 'networkPacketsIn'"
+            :legend="{ position: 'hidden' }"
+            graph-title="Network packets in"
+            :label="instance.InstanceId"
+          />
+          <CloudwatchWidget
+            class="col-12 col-md-6 col-lg-4"
+            :metrics="metricsNetworkPacketsOut"
+            :live-data="false"
+            :region="instance.region"
+            :key="instance.InstanceId + 'metricsNetworkPacketsOut'"
+            :legend="{ position: 'hidden' }"
+            graph-title="Network packets out"
+            :label="instance.InstanceId"
+          />
+        </div>
+
+        <div class="row justify-content-between">
+          <CloudwatchWidget
+            class="col-12 col-md-6 col-lg-4"
+            :metrics="metricsStatusCheckFailedAny"
+            :live-data="false"
+            stat="Average"
+            :region="instance.region"
+            :key="instance.InstanceId + 'statusCheckFailedAny'"
+            :legend="{ position: 'hidden' }"
+            graph-title="Status check failed - any"
+            :label="instance.InstanceId"
+          />
+          <CloudwatchWidget
+            class="col-12 col-md-6 col-lg-4"
+            :metrics="metricsStatusCheckFailedInstance"
+            :live-data="false"
+            stat="Average"
+            :region="instance.region"
+            :key="instance.InstanceId + 'statusCheckFailedInstance'"
+            :legend="{ position: 'hidden' }"
+            graph-title="Status check failed - instance"
+            :label="instance.InstanceId"
+          />
+          <CloudwatchWidget
+            class="col-12 col-md-6 col-lg-4"
+            :metrics="metricsStatusCheckFailedSystem"
+            :live-data="false"
+            stat="Average"
+            :region="instance.region"
+            :key="instance.InstanceId + 'statusCheckFailedSystem'"
+            :legend="{ position: 'hidden' }"
+            graph-title="Status check failed - system"
+            :label="instance.InstanceId"
+          />
+        </div>
+      </gl-tab>
     </gl-tabs>
   </div>
 </template>
@@ -169,6 +320,8 @@ import { Component, Prop, Vue } from "vue-property-decorator";
 import { instances } from "@/components/EC2/instances/instance";
 import InstanceWithRegion = instances.InstanceWithRegion;
 import RegionText from "@/components/common/RegionText.vue";
+import { Metric } from "aws-sdk/clients/cloudwatch";
+import CloudwatchWidget from "@/components/cloudwatch/CloudwatchWidget.vue";
 
 @Component({
   components: {
@@ -178,6 +331,7 @@ import RegionText from "@/components/common/RegionText.vue";
     GlTable,
     GlCard,
     RegionText,
+    CloudwatchWidget,
   },
 })
 export default class Instance extends Vue {
@@ -222,6 +376,140 @@ export default class Instance extends Vue {
       default:
         return "secondary";
     }
+  }
+
+  get metricsCpuUtilization(): Metric[] {
+    return [
+      {
+        Namespace: "AWS/EC2",
+        MetricName: "CPUUtilization",
+        Dimensions: [
+          { Name: "InstanceId", Value: this.instance.InstanceId || "" },
+        ],
+      },
+    ];
+  }
+
+  get metricsDiskReads(): Metric[] {
+    return [
+      {
+        Namespace: "AWS/EC2",
+        MetricName: "EBSReadBytes",
+        Dimensions: [
+          { Name: "InstanceId", Value: this.instance.InstanceId || "" },
+        ],
+      },
+    ];
+  }
+  get metricsDiskReadOperations(): Metric[] {
+    return [
+      {
+        Namespace: "AWS/EC2",
+        MetricName: "EBSReadOps",
+        Dimensions: [
+          { Name: "InstanceId", Value: this.instance.InstanceId || "" },
+        ],
+      },
+    ];
+  }
+  get metricsDiskWrites(): Metric[] {
+    return [
+      {
+        Namespace: "AWS/EC2",
+        MetricName: "EBSWriteBytes",
+        Dimensions: [
+          { Name: "InstanceId", Value: this.instance.InstanceId || "" },
+        ],
+      },
+    ];
+  }
+  get metricsDiskWriteOperations(): Metric[] {
+    return [
+      {
+        Namespace: "AWS/EC2",
+        MetricName: "EBSWriteOps",
+        Dimensions: [
+          { Name: "InstanceId", Value: this.instance.InstanceId || "" },
+        ],
+      },
+    ];
+  }
+  get metricsNetworkIn(): Metric[] {
+    return [
+      {
+        Namespace: "AWS/EC2",
+        MetricName: "NetworkIn",
+        Dimensions: [
+          { Name: "InstanceId", Value: this.instance.InstanceId || "" },
+        ],
+      },
+    ];
+  }
+  get metricsNetworkOut(): Metric[] {
+    return [
+      {
+        Namespace: "AWS/EC2",
+        MetricName: "NetworkOut",
+        Dimensions: [
+          { Name: "InstanceId", Value: this.instance.InstanceId || "" },
+        ],
+      },
+    ];
+  }
+  get metricsNetworkPacketsIn(): Metric[] {
+    return [
+      {
+        Namespace: "AWS/EC2",
+        MetricName: "NetworkPacketsIn",
+        Dimensions: [
+          { Name: "InstanceId", Value: this.instance.InstanceId || "" },
+        ],
+      },
+    ];
+  }
+  get metricsNetworkPacketsOut(): Metric[] {
+    return [
+      {
+        Namespace: "AWS/EC2",
+        MetricName: "NetworkPacketsOut",
+        Dimensions: [
+          { Name: "InstanceId", Value: this.instance.InstanceId || "" },
+        ],
+      },
+    ];
+  }
+  get metricsStatusCheckFailedAny(): Metric[] {
+    return [
+      {
+        Namespace: "AWS/EC2",
+        MetricName: "StatusCheckFailed",
+        Dimensions: [
+          { Name: "InstanceId", Value: this.instance.InstanceId || "" },
+        ],
+      },
+    ];
+  }
+  get metricsStatusCheckFailedInstance(): Metric[] {
+    return [
+      {
+        Namespace: "AWS/EC2",
+        MetricName: "StatusCheckFailed_Instance",
+        Dimensions: [
+          { Name: "InstanceId", Value: this.instance.InstanceId || "" },
+        ],
+      },
+    ];
+  }
+  get metricsStatusCheckFailedSystem(): Metric[] {
+    return [
+      {
+        Namespace: "AWS/EC2",
+        MetricName: "StatusCheckFailed_System",
+        Dimensions: [
+          { Name: "InstanceId", Value: this.instance.InstanceId || "" },
+        ],
+      },
+    ];
   }
 }
 </script>

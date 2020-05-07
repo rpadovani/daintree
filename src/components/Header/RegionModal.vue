@@ -15,7 +15,7 @@
     >
       <div
         class="row auto-ml mt-2"
-        v-for="n in Math.floor(this.regionsOptions.length / 2)"
+        v-for="n in Math.floor((this.regionsOptions.length + 1) / 2)"
         :key="n"
       >
         <div
@@ -115,8 +115,8 @@ export default class RegionModal extends Vue {
     { text: "Middle East (Bahrain)", value: "me-south-1" },
     { text: "South America (São Paulo)", value: "sa-east-1" },
 
-    { text: "GovCloud (US-East) - us-gov-east-1", value: "us-gov-east-1" },
-    { text: "GovCloud (US-West) - us-gov-west-1", value: "us-gov-west-1" },
+    { text: "GovCloud (US-East)", value: "us-gov-east-1" },
+    { text: "GovCloud (US-West)", value: "us-gov-west-1" },
   ];
 
   get regionsOptions() {

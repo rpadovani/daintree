@@ -91,7 +91,7 @@
     <gl-tab title="Monitoring">
       <div class="row justify-content-between">
         <CloudwatchWidget
-          class="col-sm-12 col-md-6 col-lg-4"
+          class="col-12 col-md-6 col-lg-4"
           v-if="sqs"
           :metrics="metricsNumberOfMessagesSent"
           :live-data="false"
@@ -103,7 +103,7 @@
           :label="queueName"
         />
         <CloudwatchWidget
-          class="col-sm-12 col-md-6 col-lg-4"
+          class="col-12 col-md-6 col-lg-4"
           v-if="sqs"
           :metrics="metricsNumberOfMessagesReceived"
           :live-data="false"
@@ -115,7 +115,7 @@
           :label="queueName"
         />
         <CloudwatchWidget
-          class="col-sm-12 col-md-6 col-lg-4"
+          class="col-12 col-md-6 col-lg-4"
           v-if="sqs"
           :metrics="metricsApproximateNumberOfMessagesVisible"
           :live-data="false"
@@ -129,7 +129,7 @@
 
       <div class="row justify-content-between">
         <CloudwatchWidget
-          class="col-sm-12 col-md-6 col-lg-4"
+          class="col-12 col-md-6 col-lg-4"
           v-if="sqs"
           :metrics="metricsNumberOfMessagesDeleted"
           :live-data="false"
@@ -141,7 +141,7 @@
           :label="queueName"
         />
         <CloudwatchWidget
-          class="col-sm-12 col-md-6 col-lg-4"
+          class="col-12 col-md-6 col-lg-4"
           v-if="sqs"
           :metrics="metricsNumberOfEmptyReceives"
           :live-data="false"
@@ -153,7 +153,7 @@
           :label="queueName"
         />
         <CloudwatchWidget
-          class="col-sm-12 col-md-6 col-lg-4"
+          class="col-12 col-md-6 col-lg-4"
           v-if="sqs"
           :metrics="metricsApproximateNumberOfMessagesNotVisible"
           :live-data="false"
@@ -167,7 +167,7 @@
 
       <div class="row justify-content-between">
         <CloudwatchWidget
-          class="col-sm-12 col-md-6 col-lg-4"
+          class="col-12 col-md-6 col-lg-4"
           v-if="sqs"
           :metrics="metricsApproximateNumberOfMessagesDelayed"
           :live-data="false"
@@ -179,7 +179,7 @@
           :label="queueName"
         />
         <CloudwatchWidget
-          class="col-sm-12 col-md-6 col-lg-4"
+          class="col-12 col-md-6 col-lg-4"
           v-if="sqs"
           :metrics="metricsSentMessageSize"
           :live-data="false"
@@ -192,7 +192,7 @@
           :y-axis="{ name: 'Bytes' }"
         />
         <CloudwatchWidget
-          class="col-sm-12 col-md-6 col-lg-4"
+          class="col-12 col-md-6 col-lg-4"
           v-if="sqs"
           :metrics="metricsApproximateAgeOfOldestMessage"
           :live-data="false"

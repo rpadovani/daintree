@@ -6,6 +6,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.2.0]
+
 ### Added
 
 - Created a new Cloudwatch component to show graphs about a single resource
@@ -48,7 +50,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 - First public release, with basic support for Networking, EC2, SQS, and SNS.
 
-[Unreleased]: https://gitlab.com/rpadovani/daintree/-/compare/v0.1.2...master
+[Unreleased]: https://gitlab.com/rpadovani/daintree/-/compare/v0.2.0...master
+[0.2.0]: https://gitlab.com/rpadovani/daintree/-/compare/v0.1.2...v0.2.0
 [0.1.2]: https://gitlab.com/rpadovani/daintree/-/compare/v0.1.1...v0.1.2
 [0.1.1]: https://gitlab.com/rpadovani/daintree/-/compare/v0.1.0...v0.1.1
 [0.1.0]: https://gitlab.com/rpadovani/daintree/-/tags/v0.1.0

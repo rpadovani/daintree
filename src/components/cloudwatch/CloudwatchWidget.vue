@@ -30,7 +30,6 @@ import CloudwatchClient, {
 import { mapGetters } from "vuex";
 import { DaintreeCredentials } from "@/store/sts/state";
 import Notifications from "@/mixins/notifications";
-import moment from "moment";
 import * as echarts from "echarts";
 
 @Component({
@@ -51,8 +50,8 @@ export default class CloudwatchWidget extends Notifications {
   @Prop(String) readonly region!: string;
   @Prop(Array) readonly metrics!: Metric[];
 
-  @Prop(String) readonly start: string | undefined;
-  @Prop(String) readonly end: string | undefined;
+  @Prop(Date) readonly start: Date | undefined;
+  @Prop(Date) readonly end: Date | undefined;
   @Prop(Boolean) readonly liveData: boolean | undefined;
   @Prop(Number) readonly period: number | undefined;
 
@@ -97,8 +96,8 @@ export default class CloudwatchWidget extends Notifications {
     const parameters: {
       metrics: string[][];
       region: string;
-      start?: string;
-      end?: string;
+      start?: Date;
+      end?: Date;
       liveData?: boolean;
       period?: number;
       height?: number;
@@ -205,12 +204,14 @@ export default class CloudwatchWidget extends Notifications {
       });
     });
 
-    const start = this.start || moment().subtract(3, "hours");
-    const end = this.end || moment.now();
+    const threeHoursAgo = new Date();
+    threeHoursAgo.setHours(threeHoursAgo.getHours() - 3);
+    const start = this.start || threeHoursAgo;
+    const end = this.end || new Date();
 
     const params: GetMetricDataInput = {
-      EndTime: moment(end).toDate(),
-      StartTime: moment(start).toDate(),
+      EndTime: end,
+      StartTime: start,
       MetricDataQueries,
     };
 

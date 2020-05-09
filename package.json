@@ -15,7 +15,6 @@
     "core-js": "3.6.5",
     "flag-icon-css": "3.4.6",
     "highlight.js": "10.0.2",
-    "moment": "2.25.3",
     "pikaday": "1.8.0",
     "vue": "2.6.11",
     "vue-class-component": "7.2.3",

@@ -134,7 +134,6 @@ import CloudwatchClient, {
 } from "aws-sdk/clients/cloudwatch";
 import { DaintreeCredentials } from "@/store/sts/state";
 import Notifications from "@/mixins/notifications";
-import moment from "moment";
 import * as echarts from "echarts";
 
 @Component({
@@ -231,51 +230,27 @@ export default class CloudwatchModal extends Notifications {
   }
 
   get period(): string {
-    let result = moment
-      .duration(
-        this.selectedPeriod ||
-          this.requestParameters?.MetricDataQueries[0].MetricStat?.Period ||
-          60 * 60 * 3, // default 3 hours
-        "seconds"
-      )
-      .humanize();
-
-    //We replace "an hour" with "1 hour"
-    if (result.startsWith("an")) {
-      result = result.replace("an", "1");
-    }
-
-    //We replace "a minute" with "1 minute"
-    if (result.startsWith("a")) {
-      result = result.replace("a", "1");
-    }
-
-    return result;
+    return this.humanizePeriod(
+      this.selectedPeriod ||
+        this.requestParameters?.MetricDataQueries[0].MetricStat?.Period ||
+        60 * 60 * 3 // default 3 hours
+    );
   }
 
   get timeRange(): string {
     let result = "3 hours";
 
     if (this.selectedTimeRange) {
-      result = moment.duration(this.selectedTimeRange, "seconds").humanize();
+      result = this.humanizePeriod(this.selectedTimeRange);
     } else if (
       this.requestParameters?.EndTime &&
       this.requestParameters?.StartTime
     ) {
-      const difference = moment(this.requestParameters.EndTime).diff(
-        this.requestParameters.StartTime
+      const difference = this.differenceBetweenDates(
+        this.requestParameters.StartTime,
+        this.requestParameters.EndTime
       );
-      result = moment.duration(difference).humanize();
-    }
-
-    //We replace "an hour" with "1 hour"
-    if (result.startsWith("an")) {
-      result = result.replace("an", "1");
-    }
-
-    //We replace "a minute" with "1 minute"
-    if (result.startsWith("a")) {
-      result = result.replace("a", "1");
+      result = this.humanizePeriod(difference);
     }
 
     return `Last ${result}`;
@@ -286,9 +261,6 @@ export default class CloudwatchModal extends Notifications {
       name: string | undefined;
       data: [string | undefined, number][];
     }[] = [];
-
-    const momentFormat =
-      (this.selectedTimeRange || 0) > 60 * 60 * 24 ? "lll" : "LT";
 
     this.rawData.forEach((data) => {
       if (data.Values && data.Timestamps) {
@@ -301,11 +273,25 @@ export default class CloudwatchModal extends Notifications {
         };
 
         for (let i = 1; i <= data.Values?.length; i++) {
-          const index = data.Values?.length - i; //data start from the most recent
-          obj.data.push([
-            moment(data.Timestamps[index]).format(momentFormat),
-            data.Values[index],
-          ]);
+          const index = data.Values?.length - i; //data returned by AWS start from the most recent
+
+          const time = data.Timestamps[index];
+          let label = "";
+          if ((this.selectedTimeRange || 0) > this.SECONDS_IN_DAY) {
+            label = time.toLocaleDateString(undefined, {
+              month: "short",
+              day: "numeric",
+              hour: "numeric",
+              minute: "numeric",
+            });
+          } else {
+            label = time.toLocaleTimeString([], {
+              hour: "2-digit",
+              minute: "2-digit",
+            });
+          }
+
+          obj.data.push([label, data.Values[index]]);
         }
 
         result.push(obj);
@@ -349,11 +335,11 @@ export default class CloudwatchModal extends Notifications {
 
     //Set the time range, if changed
     if (this.selectedTimeRange !== null) {
-      const now = moment();
-      requestParameters.EndTime = now.toDate();
-      requestParameters.StartTime = now
-        .subtract(this.selectedTimeRange, "seconds")
-        .toDate();
+      const nowInMS = Date.now();
+      requestParameters.EndTime = new Date(nowInMS);
+      requestParameters.StartTime = new Date(
+        nowInMS - this.selectedTimeRange * 1000
+      );
     }
 
     const cloudwatch = new CloudwatchClient({
@@ -404,6 +390,45 @@ export default class CloudwatchModal extends Notifications {
   @Watch("timeRange")
   onTimeRangeChanged() {
     this.getData();
+  }
+
+  //This method takes a duration in seconds and return a string representing in human format such duration,
+  //e.g. 1 hours, or 2 weeks
+  readonly SECONDS_IN_MINUTE = 60;
+  readonly SECONDS_IN_HOUR = 60 * this.SECONDS_IN_MINUTE;
+  readonly SECONDS_IN_DAY = 24 * this.SECONDS_IN_HOUR;
+  readonly SECONDS_IN_WEEK = 7 * this.SECONDS_IN_DAY;
+  humanizePeriod(seconds: number): string {
+    const periods = [
+      this.SECONDS_IN_WEEK,
+      this.SECONDS_IN_DAY,
+      this.SECONDS_IN_HOUR,
+      this.SECONDS_IN_MINUTE,
+    ];
+    const labels = ["week", "day", "hour", "minute"];
+
+    for (let i = 0; i < periods.length; i++) {
+      if (seconds >= periods[i]) {
+        const occurrences = Math.round(seconds / periods[i]);
+        if (occurrences > 1) {
+          return `${occurrences} ${labels[i]}s`;
+        } else {
+          return `1 ${labels[i]}`;
+        }
+      }
+    }
+
+    // No match, so we have seconds here :-)
+    if (seconds === 1) {
+      return `1 second`;
+    } else {
+      return `${seconds} seconds`;
+    }
+  }
+
+  //Returns the differences in seconds between date2 - date1
+  differenceBetweenDates(date1: Date, date2: Date): number {
+    return Math.floor((date2.valueOf() - date1.valueOf()) / 1000);
   }
 
   //This is useful during development for hot reloading

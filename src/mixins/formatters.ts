@@ -1,25 +1,43 @@
 import { TagList } from "aws-sdk/clients/ec2";
-import moment from "moment";
 import { Component, Vue } from "vue-property-decorator";
 
 @Component({
   filters: {
     standardDate(date: Date): string {
-      moment.locale();
-      return moment(date).format("lll");
+      const options = {
+        year: "numeric",
+        month: "short",
+        day: "numeric",
+        hour: "numeric",
+        minute: "numeric",
+      };
+      return date.toLocaleDateString(undefined, options);
     },
 
     standardDateFromUnixSecondsString(unix: string): string {
       const toNumber = parseInt(unix, 10);
-      moment.locale();
-      return moment(toNumber * 1000).format("lll");
+
+      const options = {
+        year: "numeric",
+        month: "short",
+        day: "numeric",
+        hour: "numeric",
+        minute: "numeric",
+      };
+      return new Date(toNumber * 1000).toLocaleDateString(undefined, options);
     },
   },
 })
 export class Formatters extends Vue {
   standardDate(date: Date): string {
-    moment.locale();
-    return moment(date).format("lll");
+    const options = {
+      year: "numeric",
+      month: "short",
+      day: "numeric",
+      hour: "numeric",
+      minute: "numeric",
+    };
+    return date.toLocaleDateString(undefined, options);
   }
 
   extractNameFromTags(tags: TagList): string | undefined {

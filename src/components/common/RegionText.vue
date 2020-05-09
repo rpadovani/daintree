@@ -29,6 +29,7 @@ export default class RegionText extends Vue {
       ? this.region.substring(0, this.region.length - 1)
       : this.region;
 
+    //When you insert a new flag here, remember to update the css in flags.css to include the icon
     switch (region) {
       case "us-east-1":
       case "us-east-2":

@@ -1,0 +1,73 @@
+/*
+This file is a subset of the CSS provided by https://github.com/lipis/flag-icon-css.
+We have it as dependency, and we use its icons. However, since we need very few flags, we include only
+the relevant CSS to improve performance.
+
+Copyright (c) 2013 Panayiotis Lipiridis
+ */
+.flag-icon {
+    background-size: contain;
+    background-position: 50%;
+    background-repeat: no-repeat;
+    position: relative;
+    display: inline-block;
+    width: 1.33333333em;
+    line-height: 1em;
+}
+.flag-icon:before {
+    content: "\00a0";
+}
+.flag-icon-us {
+    background-image: url(~flag-icon-css/flags/4x3/us.svg);
+}
+.flag-icon-za {
+    background-image: url(~flag-icon-css/flags/4x3/za.svg);
+}
+.flag-icon-hk {
+    background-image: url(~flag-icon-css/flags/4x3/hk.svg);
+}
+.flag-icon-in {
+    background-image: url(~flag-icon-css/flags/4x3/in.svg);
+}
+.flag-icon-jp {
+    background-image: url(~flag-icon-css/flags/4x3/jp.svg);
+}
+.flag-icon-kr {
+    background-image: url(~flag-icon-css/flags/4x3/kr.svg);
+}
+.flag-icon-sg {
+    background-image: url(~flag-icon-css/flags/4x3/sg.svg);
+}
+.flag-icon-au {
+    background-image: url(~flag-icon-css/flags/4x3/au.svg);
+}
+.flag-icon-ca {
+    background-image: url(~flag-icon-css/flags/4x3/ca.svg);
+}
+.flag-icon-cn {
+    background-image: url(~flag-icon-css/flags/4x3/cn.svg);
+}
+.flag-icon-de {
+    background-image: url(~flag-icon-css/flags/4x3/de.svg);
+}
+.flag-icon-ie {
+    background-image: url(~flag-icon-css/flags/4x3/ie.svg);
+}
+.flag-icon-gb {
+    background-image: url(~flag-icon-css/flags/4x3/gb.svg);
+}
+.flag-icon-fr {
+    background-image: url(~flag-icon-css/flags/4x3/fr.svg);
+}
+.flag-icon-se {
+    background-image: url(~flag-icon-css/flags/4x3/se.svg);
+}
+.flag-icon-it {
+    background-image: url(~flag-icon-css/flags/4x3/it.svg);
+}
+.flag-icon-bh {
+    background-image: url(~flag-icon-css/flags/4x3/bh.svg);
+}
+.flag-icon-br {
+    background-image: url(~flag-icon-css/flags/4x3/br.svg);
+}

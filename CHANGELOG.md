@@ -6,6 +6,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Changed
+
+- Use native Date type instead of a library: this gives us more flexibility and improved performance, since there is 
+  less Javascript to download when you connect to the website
+
 ## [0.2.0]
 
 ### Added

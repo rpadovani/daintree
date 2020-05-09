@@ -22,14 +22,18 @@
 import { Component, Vue } from "vue-property-decorator";
 import Header from "@/components/Header/Header.vue";
 import { GlButton, GlButtonGroup, GlBadge } from "@gitlab/ui";
-import moment from "moment";
 
 @Component({
   components: { Header, GlButton, GlButtonGroup, GlBadge },
   filters: {
-    standardDate(date: Date): string {
-      moment.locale();
-      return moment(date).format("ll");
+    standardDate(date: string): string {
+      const options = {
+        year: "numeric",
+        month: "short",
+        day: "numeric",
+      };
+
+      return new Date(date).toLocaleDateString(undefined, options);
     },
   },
 })

@@ -238,7 +238,10 @@ export default class TagsTable extends Vue {
     const tag = { Key: this.newTagKey, Value: this.newTagValue };
 
     if (this.provider === "EC2" || !this.provider) {
-      const EC2 = new EC2Client({ region: this.region });
+      const EC2 = new EC2Client({
+        region: this.region,
+        credentials: this.credentials,
+      });
 
       const params = {
         Resources: [this.resourceId],
@@ -299,7 +302,10 @@ export default class TagsTable extends Vue {
     }
 
     if (this.provider === "EC2" || !this.provider) {
-      const EC2 = new EC2Client({ region: this.region });
+      const EC2 = new EC2Client({
+        region: this.region,
+        credentials: this.credentials,
+      });
 
       const params = {
         Resources: [this.resourceId],
@@ -354,7 +360,10 @@ export default class TagsTable extends Vue {
 
   deleteTag(tag: TagWithMetadata) {
     if (this.provider === "EC2" || !this.provider) {
-      const EC2 = new EC2Client({ region: this.region });
+      const EC2 = new EC2Client({
+        region: this.region,
+        credentials: this.credentials,
+      });
 
       const params = {
         Resources: [this.resourceId],

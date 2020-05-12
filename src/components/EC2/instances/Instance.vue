@@ -2,13 +2,13 @@
   <div v-if="instance">
     <div class="col">
       <div class="row">
-        <gl-badge v-if="instance.State" :variant="badgeVariant">{{
-          instance.State.Name
-        }}</gl-badge>
+        <gl-badge v-if="instance.State" :variant="badgeVariant"
+          >{{ instance.State.Name }}
+        </gl-badge>
 
-        <gl-badge class="ml-1" variant="info">{{
-          instance.InstanceType
-        }}</gl-badge>
+        <gl-badge class="ml-1" variant="info"
+          >{{ instance.InstanceType }}
+        </gl-badge>
       </div>
     </div>
     <gl-tabs theme="blue">
@@ -20,30 +20,34 @@
           <gl-card class="col-3" title="VPC ID">
             <router-link :to="`/network/vpcs?vpcId=${instance.VpcId}`">
               {{ instance.VpcId }}
-            </router-link></gl-card
-          >
-          <gl-card class="col-3" title="Subnet ID"
-            ><router-link
-              :to="`/network/subnets?subnetId=${instance.SubnetId}`"
-            >
+            </router-link>
+          </gl-card>
+          <gl-card class="col-3" title="Subnet ID">
+            <router-link :to="`/network/subnets?subnetId=${instance.SubnetId}`">
               {{ instance.SubnetId }}
-            </router-link></gl-card
-          >
+            </router-link>
+          </gl-card>
         </div>
         <div class="row justify-content-around mt-3">
-          <gl-card class="col-3" title="Image-ID">{{
-            instance.ImageId
-          }}</gl-card>
-          <gl-card class="col-3" title="Launch time">{{
-            instance.LaunchTime
-          }}</gl-card>
-          <gl-card class="col-3" title="Key name">{{
-            instance.KeyName
-          }}</gl-card>
+          <gl-card class="col-3" title="Image-ID"
+            >{{ instance.ImageId }}
+          </gl-card>
+          <gl-card class="col-3" title="Launch time"
+            >{{ instance.LaunchTime }}
+          </gl-card>
+          <gl-card class="col-3" title="Key name"
+            >{{ instance.KeyName }}
+          </gl-card>
         </div>
 
-        <h5 v-if="instance.Tags.length > 0" class="mt-3">Tags</h5>
-        <gl-table :items="instance.Tags" />
+        <h5 class="mt-2">Tags</h5>
+        <!--I use key to force a rerender, I should study Vue reactivity better ¯\_(ツ)_/¯ -->
+        <TagsTable
+          :key="instance.InstanceId"
+          :tags="instance.Tags"
+          :region="instance.region"
+          :resource-id="instance.InstanceId"
+        />
       </gl-tab>
       <gl-tab title="Network">
         <div
@@ -54,14 +58,14 @@
             class="col-5"
             v-if="instance.PublicIpAddress"
             title="Public IP"
-            >{{ instance.PublicIpAddress }}</gl-card
-          >
+            >{{ instance.PublicIpAddress }}
+          </gl-card>
           <gl-card
             class="col-5"
             v-if="instance.PublicDnsName"
             title="Public DNS Name"
-            >{{ instance.PublicDnsName }}</gl-card
-          >
+            >{{ instance.PublicDnsName }}
+          </gl-card>
         </div>
         <div
           class="row justify-content-around mt-3"
@@ -71,14 +75,14 @@
             class="col-5"
             v-if="instance.PrivateIpAddress"
             title="Private IP"
-            >{{ instance.PrivateIpAddress }}</gl-card
-          >
+            >{{ instance.PrivateIpAddress }}
+          </gl-card>
           <gl-card
             class="col-5"
             v-if="instance.PrivateDnsName"
             title="Private DNS Name"
-            >{{ instance.PrivateDnsName }}</gl-card
-          >
+            >{{ instance.PrivateDnsName }}
+          </gl-card>
         </div>
 
         <h5 class="mt-2">Network interfaces</h5>
@@ -103,8 +107,8 @@
                   <li v-for="s in eni.Groups" :key="s.GroupId">
                     <router-link
                       :to="`/network/securityGroups?securityGroupId=${s.GroupId}`"
-                      >{{ s.GroupId }} {{ s.GroupName }}</router-link
-                    >
+                      >{{ s.GroupId }} {{ s.GroupName }}
+                    </router-link>
                   </li>
                 </ul>
               </div>
@@ -118,25 +122,25 @@
           <li v-for="s in instance.SecurityGroups" :key="s.GroupId">
             <router-link
               :to="`/network/securityGroups?securityGroupId=${s.GroupId}`"
-              >{{ s.GroupId }} {{ s.GroupName }}</router-link
-            >
+              >{{ s.GroupId }} {{ s.GroupName }}
+            </router-link>
           </li>
         </ul>
       </gl-tab>
       <gl-tab title="Storage">
         <div class="row justify-content-around mt-3">
-          <gl-card class="col-3" title="Root device type">{{
-            instance.RootDeviceType
-          }}</gl-card>
-          <gl-card class="col-3" title="Root device name">{{
-            instance.RootDeviceName
-          }}</gl-card>
-          <gl-card class="col-3" title="EBS optimized?">{{
-            instance.EbsOptimized
-          }}</gl-card>
-          <gl-card class="col-3" title="Virtualization type">{{
-            instance.VirtualizationType
-          }}</gl-card>
+          <gl-card class="col-3" title="Root device type"
+            >{{ instance.RootDeviceType }}
+          </gl-card>
+          <gl-card class="col-3" title="Root device name"
+            >{{ instance.RootDeviceName }}
+          </gl-card>
+          <gl-card class="col-3" title="EBS optimized?"
+            >{{ instance.EbsOptimized }}
+          </gl-card>
+          <gl-card class="col-3" title="Virtualization type"
+            >{{ instance.VirtualizationType }}
+          </gl-card>
         </div>
 
         <h5 class="mt-2">Attached devices</h5>
@@ -322,6 +326,7 @@ import InstanceWithRegion = instances.InstanceWithRegion;
 import RegionText from "@/components/common/RegionText.vue";
 import { Metric } from "aws-sdk/clients/cloudwatch";
 import CloudwatchWidget from "@/components/cloudwatch/CloudwatchWidget.vue";
+import TagsTable from "@/components/common/TagsTable.vue";
 
 @Component({
   components: {
@@ -332,6 +337,7 @@ import CloudwatchWidget from "@/components/cloudwatch/CloudwatchWidget.vue";
     GlCard,
     RegionText,
     CloudwatchWidget,
+    TagsTable,
   },
 })
 export default class Instance extends Vue {
@@ -401,6 +407,7 @@ export default class Instance extends Vue {
       },
     ];
   }
+
   get metricsDiskReadOperations(): Metric[] {
     return [
       {
@@ -412,6 +419,7 @@ export default class Instance extends Vue {
       },
     ];
   }
+
   get metricsDiskWrites(): Metric[] {
     return [
       {
@@ -423,6 +431,7 @@ export default class Instance extends Vue {
       },
     ];
   }
+
   get metricsDiskWriteOperations(): Metric[] {
     return [
       {
@@ -434,6 +443,7 @@ export default class Instance extends Vue {
       },
     ];
   }
+
   get metricsNetworkIn(): Metric[] {
     return [
       {
@@ -445,6 +455,7 @@ export default class Instance extends Vue {
       },
     ];
   }
+
   get metricsNetworkOut(): Metric[] {
     return [
       {
@@ -456,6 +467,7 @@ export default class Instance extends Vue {
       },
     ];
   }
+
   get metricsNetworkPacketsIn(): Metric[] {
     return [
       {
@@ -467,6 +479,7 @@ export default class Instance extends Vue {
       },
     ];
   }
+
   get metricsNetworkPacketsOut(): Metric[] {
     return [
       {
@@ -478,6 +491,7 @@ export default class Instance extends Vue {
       },
     ];
   }
+
   get metricsStatusCheckFailedAny(): Metric[] {
     return [
       {
@@ -489,6 +503,7 @@ export default class Instance extends Vue {
       },
     ];
   }
+
   get metricsStatusCheckFailedInstance(): Metric[] {
     return [
       {
@@ -500,6 +515,7 @@ export default class Instance extends Vue {
       },
     ];
   }
+
   get metricsStatusCheckFailedSystem(): Metric[] {
     return [
       {

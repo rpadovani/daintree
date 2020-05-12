@@ -20,5 +20,7 @@ declare namespace securityGroups {
 
     prefixListId?: string | undefined; //?
     protocol?: string | undefined;
+
+    editing: boolean; // Keep track of which rules are we editing
   }
 }

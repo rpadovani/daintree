@@ -6,6 +6,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Changed
+
+- Improved style of the header dropdown, now uses Gitlab components instead of VueBootstrap ones
+
 ## [0.2.1]
 
 ### Changed

@@ -36,35 +36,37 @@
               />
             </div>
           </div>
-          <b-nav-item-dropdown style="color: white;" right size="lg">
-            <template v-slot:button-content>
-              {{ prettyCredentials }}
-            </template>
-            <b-dropdown-header
+          <gl-nav-item-dropdown :text="prettyCredentials" right size="lg">
+            <gl-new-dropdown-header
               id="dropdown-header-roles"
               v-if="roles.length > 0"
             >
               Roles
-            </b-dropdown-header>
-            <b-dropdown-item
+            </gl-new-dropdown-header>
+            <gl-new-dropdown-item
               v-for="(role, index) in roles"
               :key="index"
               :active="index === currentRoleIndex"
               @click="() => switchRole(index)"
             >
               {{ role.nickname || `${role.role} @ ${role.accountId}` }}
-            </b-dropdown-item>
-            <b-dropdown-item v-if="currentRoleIndex !== -1" @click="backToMain">
+            </gl-new-dropdown-item>
+            <gl-new-dropdown-item
+              v-if="currentRoleIndex !== -1"
+              @click="backToMain"
+            >
               Return to {{ mainUsername }}
-            </b-dropdown-item>
-            <b-dropdown-header id="dropdown-header-actions">
+            </gl-new-dropdown-item>
+            <gl-new-dropdown-header id="dropdown-header-actions">
               Actions
-            </b-dropdown-header>
-            <b-dropdown-item v-gl-modal-directive="'assume-role-modal-id'">
+            </gl-new-dropdown-header>
+            <gl-new-dropdown-item v-gl-modal-directive="'assume-role-modal-id'">
               Assume role
-            </b-dropdown-item>
-            <b-dropdown-item @click="signOut">Sign Out</b-dropdown-item>
-          </b-nav-item-dropdown>
+            </gl-new-dropdown-item>
+            <gl-new-dropdown-item @click="signOut"
+              >Sign Out</gl-new-dropdown-item
+            >
+          </gl-nav-item-dropdown>
         </b-navbar-nav>
         <b-navbar-nav class="ml-auto" v-else>
           <gl-nav-item to="/login">Login</gl-nav-item>
@@ -84,19 +86,23 @@
 </template>
 
 <script lang="ts">
-import { GlModalDirective, GlNavbar, GlNavItem } from "@gitlab/ui";
+import {
+  GlModalDirective,
+  GlNavbar,
+  GlNavItem,
+  GlNavItemDropdown,
+  GlNewDropdownItem,
+  GlNewDropdownHeader,
+} from "@gitlab/ui";
 
 import SubHeader from "./SubHeader.vue";
 import Notifier from "./Notifier.vue";
 
 import {
   BCollapse,
-  BDropdownItem,
-  BDropdownHeader,
   BNavbarBrand,
   BNavbarNav,
   BNavbarToggle,
-  BNavItemDropdown,
 } from "bootstrap-vue";
 import RegionText from "@/components/common/RegionText.vue";
 import RegionModal from "@/components/Header/RegionModal.vue";
@@ -113,9 +119,9 @@ import { Role } from "@/store/sts/state";
     BNavbarBrand,
     BNavbarToggle,
     GlNavItem,
-    BNavItemDropdown,
-    BDropdownItem,
-    BDropdownHeader,
+    GlNavItemDropdown,
+    GlNewDropdownItem,
+    GlNewDropdownHeader,
     BNavbarNav,
     BCollapse,
     SubHeader,

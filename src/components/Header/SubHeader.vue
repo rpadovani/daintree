@@ -146,7 +146,11 @@ export default class SubHeader extends Vue {
       { name: "Elastic IPs", link: "#/network/eips" },
       { name: "Security Groups", link: "#/network/securityGroups" },
     ],
-    EC2: [{ name: "Instances", link: "#/ec2/instances" }],
+    EC2: [
+      { name: "Instances", link: "#/ec2/instances" },
+      { name: "Load Balancers", link: "#/ec2/loadBalancers" },
+      { name: "Target groups", link: "#/ec2/targetGroups" },
+    ],
     Messages: [
       { name: "SNS Topics", link: "#/messages/sns_topics" },
       { name: "SNS Subscriptions", link: "#/messages/sns_subscriptions" },

@@ -29,6 +29,9 @@ export default class StateText extends Vue {
     | "attached"
     | "detached"
     | "active"
+    | "healthy"
+    | "unhealthy"
+    | "unused"
     | InstanceStateName;
 
   get showLoadingIcon(): boolean {
@@ -47,11 +50,13 @@ export default class StateText extends Vue {
       case "attached":
       case "active":
       case "available":
+      case "healthy":
         return "text-success";
       case "deleting":
       case "deleted":
       case "terminated":
       case "detached":
+      case "unhealthy":
         return "text-danger";
       case "pending":
         return "text-info";
@@ -60,6 +65,7 @@ export default class StateText extends Vue {
       case "shutting-down":
       case "stopped":
       case "stopping":
+      case "unused":
         return "text-warning";
       default:
         return "";

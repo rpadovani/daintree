@@ -6,6 +6,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.3.0]
+
+### Added
+
+- Added support for load balancers and target groups
+
 ### Changed
 
 - Improved style of the header dropdown, now uses Gitlab components instead of VueBootstrap ones
@@ -67,7 +73,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 - First public release, with basic support for Networking, EC2, SQS, and SNS.
 
-[Unreleased]: https://gitlab.com/rpadovani/daintree/-/compare/v0.2.1...master
+[Unreleased]: https://gitlab.com/rpadovani/daintree/-/compare/v0.3.0...master
+[0.3.0]: https://gitlab.com/rpadovani/daintree/-/compare/v0.2.1...v0.3.0
 [0.2.1]: https://gitlab.com/rpadovani/daintree/-/compare/v0.2.0...v0.2.1
 [0.2.0]: https://gitlab.com/rpadovani/daintree/-/compare/v0.1.2...v0.2.0
 [0.1.2]: https://gitlab.com/rpadovani/daintree/-/compare/v0.1.1...v0.1.2

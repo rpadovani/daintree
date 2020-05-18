@@ -16,6 +16,29 @@
             </gl-avatar-labeled>
           </gl-avatar-link>
         </div>
+        <div class="col-3">
+          <gl-avatar-link to="/ec2/loadBalancers">
+            <gl-avatar-labeled
+              label="Load balancers"
+              sub-label="Incoming traffic distribution"
+              src="/assets/aws-icons/ec2/Elastic-Load-Balancing.svg"
+              shape="rect"
+              :size="32"
+            >
+            </gl-avatar-labeled>
+          </gl-avatar-link>
+        </div>
+        <div class="col-3">
+          <gl-avatar-link to="/ec2/targetGroups">
+            <gl-avatar-labeled
+              label="Target groups"
+              sub-label="Route requests to targets"
+              shape="rect"
+              :size="32"
+            >
+            </gl-avatar-labeled>
+          </gl-avatar-link>
+        </div>
       </div>
     </div>
   </div>

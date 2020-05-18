@@ -4,8 +4,8 @@
       :variant="alertVariant"
       v-if="alertMessage.length > 0"
       @dismiss="() => (alertMessage = '')"
-      >{{ alertMessage }}</gl-alert
-    >
+      >{{ alertMessage }}
+    </gl-alert>
 
     <gl-empty-state
       class="mt-5"
@@ -62,8 +62,8 @@
             v-if="data.item.editing"
             @click="() => deleteTag(data.item)"
             size="small"
-            >Delete tag</gl-button
-          >
+            >Delete tag
+          </gl-button>
           <span class="col-9" v-if="!data.item.editing">
             {{ data.value }}
           </span>
@@ -115,6 +115,7 @@ import SNSClient from "aws-sdk/clients/sns";
 import SQSClient from "aws-sdk/clients/sqs";
 import { isString } from "@/utils/isString";
 import { AWSError } from "aws-sdk/lib/error";
+import ELBv2Client from "aws-sdk/clients/elbv2";
 
 interface TagWithMetadata extends Tag {
   editing: boolean;
@@ -135,7 +136,7 @@ export default class TagsTable extends Vue {
   @Prop(Array) readonly tags: TagList | undefined;
   @Prop(String) readonly region!: string;
   @Prop(String) readonly resourceId!: string;
-  @Prop(String) readonly provider: "EC2" | "SQS" | "SNS" | undefined;
+  @Prop(String) readonly provider: "EC2" | "SQS" | "SNS" | "ELB" | undefined;
 
   fields = [
     { key: "Key", sortable: true },
@@ -161,12 +162,42 @@ export default class TagsTable extends Vue {
     return returnedTags;
   }
 
-  get credentials() {
-    return this.$store.getters["sts/credentials"];
+  get client() {
+    const clientOptions = {
+      region: this.region,
+      credentials: this.$store.getters["sts/credentials"],
+    };
+
+    switch (this.provider) {
+      case "SQS":
+        return new SQSClient(clientOptions);
+      case "SNS":
+        return new SNSClient(clientOptions);
+      case "ELB":
+        return new ELBv2Client(clientOptions);
+      case "EC2":
+      default:
+        //When the project started the tags table was way easier, so we fallback to EC2 to do not
+        //update the first components
+        return new EC2Client(clientOptions);
+    }
+  }
+
+  showErrorIfAny(err: AWSError | undefined, reloadOnError: boolean): boolean {
+    if (err) {
+      this.alertMessage = err.message;
+      this.alertVariant = "danger";
+
+      if (reloadOnError) {
+        this.reloadAllTags();
+      }
+      return true;
+    }
+    return false;
   }
 
   reloadAllTags() {
-    if (this.provider === "EC2" || !this.provider) {
+    if (this.client instanceof EC2Client) {
       const params = {
         Filters: [
           {
@@ -176,29 +207,18 @@ export default class TagsTable extends Vue {
         ],
       };
 
-      const EC2 = new EC2Client({
-        region: this.region,
-        credentials: this.credentials,
-      });
+      this.client.describeTags(params, (err, data) => {
+        this.showErrorIfAny(err, false);
 
-      EC2.describeTags(params, (err, data) => {
-        if (err) {
-          this.alertMessage = err.message;
-          this.alertVariant = "danger";
-        } else if (data.Tags) {
+        if (data.Tags) {
           this.incomingTags = data.Tags;
         }
       });
-    } else if (this.provider === "SQS") {
-      const SQS = new SQSClient({
-        region: this.region,
-        credentials: this.credentials,
-      });
-      SQS.listQueueTags({ QueueUrl: this.resourceId }, (err, data) => {
-        if (err) {
-          this.alertMessage = err.message;
-          this.alertVariant = "danger";
-        } else if (data.Tags) {
+    } else if (this.client instanceof SQSClient) {
+      this.client.listQueueTags({ QueueUrl: this.resourceId }, (err, data) => {
+        this.showErrorIfAny(err, false);
+
+        if (data.Tags) {
           const newTags: TagList = [];
           Object.entries(data.Tags).forEach(([Key, Value]) => {
             newTags.push({ Key, Value });
@@ -206,28 +226,35 @@ export default class TagsTable extends Vue {
           this.incomingTags = newTags;
         }
       });
-    } else if (this.provider === "SNS") {
-      const SNS = new SNSClient({
-        region: this.region,
-        credentials: this.credentials,
-      });
-      SNS.listTagsForResource({ ResourceArn: this.resourceId }, (err, data) => {
-        if (err) {
-          this.alertMessage = err.message;
-          this.alertVariant = "danger";
-        } else if (data.Tags) {
-          this.incomingTags = data.Tags;
+    } else if (this.client instanceof SNSClient) {
+      this.client.listTagsForResource(
+        { ResourceArn: this.resourceId },
+        (err, data) => {
+          this.showErrorIfAny(err, false);
+          if (data.Tags) {
+            this.incomingTags = data.Tags;
+          }
         }
-      });
+      );
+    } else if (this.client instanceof ELBv2Client) {
+      this.client.describeTags(
+        { ResourceArns: [this.resourceId] },
+        (err, data) => {
+          this.showErrorIfAny(err, false);
+          if (
+            data.TagDescriptions &&
+            data.TagDescriptions.length > 0 &&
+            data.TagDescriptions[0].Tags
+          ) {
+            this.incomingTags = data.TagDescriptions[0].Tags;
+          }
+        }
+      );
     }
   }
 
   callbackCreateNewTag(tag: Tag, err: AWSError) {
-    if (err) {
-      this.alertMessage = err.message;
-      this.alertVariant = "danger";
-      this.reloadAllTags();
-    } else {
+    if (!this.showErrorIfAny(err, true)) {
       this.incomingTags.push(tag);
       this.newTagKey = "";
       this.newTagValue = "";
@@ -237,23 +264,16 @@ export default class TagsTable extends Vue {
   createNewTag() {
     const tag = { Key: this.newTagKey, Value: this.newTagValue };
 
-    if (this.provider === "EC2" || !this.provider) {
-      const EC2 = new EC2Client({
-        region: this.region,
-        credentials: this.credentials,
-      });
-
+    if (this.client instanceof EC2Client) {
       const params = {
         Resources: [this.resourceId],
         Tags: [tag],
       };
 
-      EC2.createTags(params, (err) => this.callbackCreateNewTag(tag, err));
-    } else if (this.provider === "SQS") {
-      const SQS = new SQSClient({
-        region: this.region,
-        credentials: this.credentials,
-      });
+      this.client.createTags(params, (err) =>
+        this.callbackCreateNewTag(tag, err)
+      );
+    } else if (this.client instanceof SQSClient) {
       const Tags: { [key: string]: string } = {};
       const params = {
         QueueUrl: this.resourceId,
@@ -262,27 +282,29 @@ export default class TagsTable extends Vue {
 
       params.Tags[this.newTagKey] = this.newTagValue;
 
-      SQS.tagQueue(params, (err) => this.callbackCreateNewTag(tag, err));
-    } else if (this.provider === "SNS") {
-      const SNS = new SNSClient({
-        region: this.region,
-        credentials: this.credentials,
-      });
+      this.client.tagQueue(params, (err) =>
+        this.callbackCreateNewTag(tag, err)
+      );
+    } else if (this.client instanceof SNSClient) {
       const params = {
         ResourceArn: this.resourceId,
         Tags: [tag],
       };
 
-      SNS.tagResource(params, (err) => this.callbackCreateNewTag(tag, err));
+      this.client.tagResource(params, (err) =>
+        this.callbackCreateNewTag(tag, err)
+      );
+    } else if (this.client instanceof ELBv2Client) {
+      const params = {
+        ResourceArns: [this.resourceId],
+        Tags: [tag],
+      };
+      this.client.addTags(params, (err) => this.callbackCreateNewTag(tag, err));
     }
   }
 
   callbackSaveTag(tag: TagWithMetadata, err: AWSError) {
-    if (err) {
-      this.alertMessage = err.message;
-      this.alertVariant = "danger";
-      this.reloadAllTags();
-    } else {
+    if (!this.showErrorIfAny(err, true)) {
       this.alertMessage = "Tag edited successfully";
       this.alertVariant = "success";
 
@@ -295,33 +317,24 @@ export default class TagsTable extends Vue {
   }
 
   saveTag(tag: TagWithMetadata) {
+    if (!isString(tag.Key) || !isString(tag.Value)) {
+      return;
+    }
+
     //If the key has changed from its original value, we need to first delete the previous tag,
     //and then create a new one, because we cannot update an existing key
     if (tag.originalKey !== tag.Key) {
       this.deleteTag(tag);
     }
 
-    if (this.provider === "EC2" || !this.provider) {
-      const EC2 = new EC2Client({
-        region: this.region,
-        credentials: this.credentials,
-      });
-
+    if (this.client instanceof EC2Client) {
       const params = {
         Resources: [this.resourceId],
         Tags: [{ Key: tag.Key, Value: tag.Value }],
       };
 
-      EC2.createTags(params, (err) => this.callbackSaveTag(tag, err));
-    } else if (
-      this.provider === "SQS" &&
-      isString(tag.Key) &&
-      isString(tag.Value)
-    ) {
-      const SQS = new SQSClient({
-        region: this.region,
-        credentials: this.credentials,
-      });
+      this.client.createTags(params, (err) => this.callbackSaveTag(tag, err));
+    } else if (this.client instanceof SQSClient) {
       const Tags: { [key: string]: string } = {};
       const params = {
         QueueUrl: this.resourceId,
@@ -329,77 +342,65 @@ export default class TagsTable extends Vue {
       };
 
       params.Tags[tag.Key] = tag.Value;
-      SQS.tagQueue(params, (err) => this.callbackSaveTag(tag, err));
-    } else if (
-      this.provider === "SNS" &&
-      isString(tag.Key) &&
-      isString(tag.Value)
-    ) {
-      const SNS = new SNSClient({
-        region: this.region,
-        credentials: this.credentials,
-      });
+      this.client.tagQueue(params, (err) => this.callbackSaveTag(tag, err));
+    } else if (this.client instanceof SNSClient) {
       const params = {
         ResourceArn: this.resourceId,
         Tags: [{ Key: tag.Key, Value: tag.Value }],
       };
 
-      SNS.tagResource(params, (err) => this.callbackSaveTag(tag, err));
+      this.client.tagResource(params, (err) => this.callbackSaveTag(tag, err));
+    } else if (this.client instanceof ELBv2Client) {
+      const params = {
+        ResourceArns: [this.resourceId],
+        Tags: [{ Key: tag.Key, Value: tag.Value }],
+      };
+      this.client.addTags(params, (err) => this.callbackSaveTag(tag, err));
     }
   }
 
   callbackDeleteTag(originalKey: string | undefined, err: AWSError) {
-    if (err) {
-      this.alertMessage = err.message;
-      this.alertVariant = "danger";
-      this.reloadAllTags();
-    } else {
+    if (!this.showErrorIfAny(err, true)) {
       this.removeFromTagList(originalKey);
     }
   }
 
   deleteTag(tag: TagWithMetadata) {
-    if (this.provider === "EC2" || !this.provider) {
-      const EC2 = new EC2Client({
-        region: this.region,
-        credentials: this.credentials,
-      });
-
+    if (this.client instanceof EC2Client) {
       const params = {
         Resources: [this.resourceId],
         Tags: [{ Key: tag.Key, Value: tag.Value }],
       };
 
-      EC2.deleteTags(params, (err) =>
+      this.client.deleteTags(params, (err) =>
         this.callbackDeleteTag(tag.originalKey, err)
       );
-    } else if (this.provider === "SQS" && tag.Key) {
-      const SQS = new SQSClient({
-        region: this.region,
-        credentials: this.credentials,
-      });
-
+    } else if (this.client instanceof SQSClient && tag.Key) {
       const params = {
         QueueUrl: this.resourceId,
         TagKeys: [tag.Key],
       };
 
-      SQS.untagQueue(params, (err) =>
+      this.client.untagQueue(params, (err) =>
         this.callbackDeleteTag(tag.originalKey, err)
       );
-    } else if (this.provider === "SNS" && tag.Key) {
-      const SNS = new SNSClient({
-        region: this.region,
-        credentials: this.credentials,
-      });
+    } else if (this.client instanceof SNSClient && tag.Key) {
       const params = {
         ResourceArn: this.resourceId,
         TagKeys: [tag.Key],
       };
 
-      SNS.untagResource(params, (err) =>
+      this.client.untagResource(params, (err) =>
         this.callbackDeleteTag(tag.originalKey, err)
       );
+    } else if (this.client instanceof ELBv2Client && tag.Key) {
+      const params = {
+        ResourceArns: [this.resourceId],
+        TagKeys: [tag.Key],
+      };
+      this.client.removeTags(params, (err) => {
+        this.callbackDeleteTag(tag.originalKey, err);
+      });
     }
   }
 
@@ -410,8 +411,8 @@ export default class TagsTable extends Vue {
   }
 
   mounted() {
-    // SQS and SNS don't provide tags on their own
-    if (this.provider && ["SQS", "SNS"].includes(this.provider)) {
+    // SQS, SNS, and load balancers don't provide tags on their own
+    if (this.provider && ["SQS", "SNS", "ELB"].includes(this.provider)) {
       this.reloadAllTags();
     }
   }

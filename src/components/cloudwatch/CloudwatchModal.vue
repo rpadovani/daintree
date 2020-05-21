@@ -127,14 +127,13 @@ import {
   GlIcon,
   GlLoadingIcon,
 } from "@gitlab/ui";
-import { GlLineChart } from "@gitlab/ui/dist/charts";
+import { GlLineChart } from "@gitlab/ui/charts";
 import CloudwatchClient, {
   GetMetricDataInput,
   MetricDataResult,
 } from "aws-sdk/clients/cloudwatch";
 import { DaintreeCredentials } from "@/store/sts/state";
 import Notifications from "@/mixins/notifications";
-import * as echarts from "echarts";
 
 @Component({
   components: {

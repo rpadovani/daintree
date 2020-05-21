@@ -1,7 +1,5 @@
 import { GetMetricDataInput } from "aws-sdk/clients/cloudwatch";
 
-import * as echarts from "echarts";
-
 export class CloudwatchState {
   visible = false;
   requestParameters: GetMetricDataInput | undefined = undefined;

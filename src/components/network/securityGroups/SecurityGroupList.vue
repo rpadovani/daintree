@@ -5,7 +5,7 @@
     <gl-drawer
       :open="drawerOpened && selectedSecurityGroup !== {}"
       @close="close"
-      style="width: 80%;"
+      style="min-width: 80%;"
     >
       <template #header>{{ selectedSecurityGroupTitle }}</template>
 
@@ -21,7 +21,7 @@
         v-if="securityGroupsAsList.length > 0"
       >
         <gl-form-input
-          class="col-9"
+          class="col-12 col-sm-8 col-lg-9 mb-3 mb-sm-0"
           id="filter"
           v-model="filter"
           placeholder="Type to filter..."
@@ -31,7 +31,7 @@
           icon="plus"
           category="secondary"
           variant="success"
-          class="col-2"
+          class="col-12 col-sm-3 col-lg-2"
           to="/network/securityGroups/new"
           >Create new security group
         </gl-button>

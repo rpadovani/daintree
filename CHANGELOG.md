@@ -6,6 +6,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Changed
+
+- Increase responsiveness: now many pages behave better on small screens
+
 ### Fixed
 
 - Now Daintree will detect when your credentials expire and will redirect you to the login page

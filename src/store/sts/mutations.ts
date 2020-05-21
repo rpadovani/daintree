@@ -2,37 +2,23 @@ import { MutationTree } from "vuex";
 import { Role, STSState } from "@/store/sts/state";
 
 export const STSMutations = {
-  login(state: STSState, { arn, account, credentials }) {
+  login(state: STSState, { arn, account, credentials, loginMethod }) {
     state.userArn = arn;
     state.accountID = account;
     state.credentials = credentials;
-    state.loginMethod = "accessKey";
+    state.loginMethod = loginMethod;
 
     sessionStorage.setItem(
       "loginData",
       JSON.stringify({
         userArn: arn,
         accountID: account,
-        credentials,
-        loginMethod: "accessKey",
+        loginMethod,
       })
     );
-  },
-  loginWithCognito(state: STSState, { accountId, userArn, credentials }) {
-    state.loginMethod = "cognito";
-    state.accountID = accountId;
-    state.userArn = userArn;
-    state.credentials = credentials;
 
-    sessionStorage.setItem(
-      "loginData",
-      JSON.stringify({
-        userArn,
-        accountID: accountId,
-        credentials,
-        loginMethod: "cognito",
-      })
-    );
+    sessionStorage.setItem("accessKeyId", credentials.accessKeyId);
+    sessionStorage.setItem("secretAccessKey", credentials.secretAccessKey);
   },
   setEnabledRegions(state: STSState, regions) {
     state.regionsEnabled = regions;
@@ -42,6 +28,7 @@ export const STSMutations = {
   logout(state: STSState) {
     state = new STSState();
 
+    sessionStorage.clear();
     localStorage.clear();
   },
   addRole(state: STSState, payload: Role) {
@@ -57,6 +44,7 @@ export const STSMutations = {
   },
   switchRole(state: STSState, { roleIndex, credentials }) {
     state.currentRole = roleIndex;
+
     state.currentCredentials = credentials;
   },
   backToMain(state: STSState, skipSwitchRole?: boolean) {

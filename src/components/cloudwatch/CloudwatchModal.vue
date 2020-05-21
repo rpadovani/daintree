@@ -132,7 +132,7 @@ import CloudwatchClient, {
   GetMetricDataInput,
   MetricDataResult,
 } from "aws-sdk/clients/cloudwatch";
-import { DaintreeCredentials } from "@/store/sts/state";
+import { Credentials } from "aws-sdk/lib/core";
 import Notifications from "@/mixins/notifications";
 
 @Component({
@@ -164,7 +164,7 @@ export default class CloudwatchModal extends Notifications {
 
   protected readonly requestParameters!: GetMetricDataInput | undefined;
   protected readonly region!: string;
-  protected readonly credentials!: DaintreeCredentials;
+  protected readonly credentials!: Credentials;
   protected readonly visible!: boolean;
   protected readonly xAxis!: echarts.EChartOption.XAxis;
   protected readonly yAxis!: echarts.EChartOption.YAxis;

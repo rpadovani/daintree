@@ -1,21 +1,21 @@
 <template>
   <div>
-    <Header v-on:refresh="getAllSubnets" :loading="loadingCount > 0" />
+    <Header v-on:refresh="getAllResources" :loading="loadingCount > 0" />
 
     <gl-drawer
-      :open="drawerOpened && selectedSubnet !== {}"
+      :open="drawerOpened && selectedResourceKey !== ''"
       @close="close"
       style="width: 80%;"
     >
-      <template #header>{{ selectedSubnetTitle }}</template>
+      <template #header>{{ selectedResourceTitle }}</template>
 
-      <subnet :subnet="selectedSubnet" v-on:deleted="close" />
+      <subnet :subnet="selectedResource" v-on:deleted="close" />
     </gl-drawer>
 
     <div class="container-fluid">
       <div
         class="row justify-content-between mt-3 mb-2 ml-2 mr-2"
-        v-if="subnetsAsList.length > 0"
+        v-if="resourcesAsList.length > 0"
       >
         <gl-form-input
           class="col-9"
@@ -34,15 +34,15 @@
         </gl-button>
       </div>
       <gl-table
-        :items="subnetsAsList"
+        :items="resourcesAsList"
         :fields="fields"
         :filter="filter"
         :busy="loadingCount > 0"
-        ref="subnetsTable"
+        ref="resourcesTable"
         selectable
         select-mode="single"
         @row-selected="onRowSelected"
-        v-show="subnetsAsList.length > 0"
+        v-show="resourcesAsList.length > 0"
         show-empty
         hover
       >
@@ -74,12 +74,12 @@
       <div class="container">
         <gl-skeleton-loading
           class="mt-5"
-          v-if="loadingCount > 0 && subnetsAsList.length < 1"
+          v-if="loadingCount > 0 && resourcesAsList.length < 1"
         />
 
         <gl-empty-state
           class="mt-5"
-          v-if="loadingCount === 0 && subnetsAsList.length === 0"
+          v-if="loadingCount === 0 && resourcesAsList.length === 0"
           title="No subnets found in the selected regions!"
           svg-path="/assets/undraw_empty_xct9.svg"
           :description="emptyStateDescription"
@@ -104,7 +104,7 @@
 </template>
 
 <script lang="ts">
-import EC2Client from "aws-sdk/clients/ec2";
+import { DescribeVpcsRequest, Subnet as AWSSubnet } from "aws-sdk/clients/ec2";
 
 import Header from "@/components/Header/Header.vue";
 import RegionText from "@/components/common/RegionText.vue";
@@ -127,6 +127,7 @@ import { Watch } from "vue-property-decorator";
 import Subnet from "@/components/network/subnets/Subnet.vue";
 import { Subnets } from "@/components/network/subnets/subnet";
 import SubnetWithRegion = Subnets.SubnetWithRegion;
+import { NetworkComponent } from "@/components/network/networkComponent";
 
 @Component({
   components: {
@@ -146,18 +147,15 @@ import SubnetWithRegion = Subnets.SubnetWithRegion;
     "gl-modal-directive": GlModalDirective,
   },
 })
-export default class SubnetList extends mixins(Formatters, Notifications) {
-  subnets: { [key: string]: SubnetWithRegion } = {};
-
-  drawerOpened = false;
-
-  selectedSubnet: SubnetWithRegion = {};
-  filter = "";
-  loadingCount = 0;
-
-  //A list of Subnets that are being created or deleted by region. We poll over them.
-  wipSubnets: { [key: string]: string[] } = {};
-  isPolling = false;
+export default class SubnetList extends NetworkComponent<
+  AWSSubnet,
+  "SubnetId" | "State"
+> {
+  resourceName = "subnet";
+  canCreate = true;
+  resourceUniqueKey: "SubnetId" = "SubnetId";
+  resourceStateKey: "State" = "State";
+  workingStates = ["pending", "deleting"];
 
   fields = [
     {
@@ -178,54 +176,12 @@ export default class SubnetList extends mixins(Formatters, Notifications) {
     { key: "VpcId", sortable: true },
   ];
 
-  get credentials() {
-    return this.$store.getters["sts/credentials"];
-  }
-
-  get subnetsAsList(): SubnetWithRegion[] {
-    return Object.values(this.subnets);
-  }
-
-  get regionsEnabled(): string[] {
-    return this.$store.getters["sts/regions"];
-  }
-
-  get currentRoleIndex(): number {
-    return this.$store.getters["sts/currentRoleIndex"];
-  }
-
-  get emptyStateDescription(): string {
-    return (
-      "Daintree hasn't found any subnet in the selected regions! You can create a new one, or change selected regions in the settings. We have looked in " +
-      this.regionsEnabled.join(", ") +
-      "."
-    );
-  }
-
-  get selectedSubnetTitle() {
-    const nameTag = this.selectedSubnet?.Tags?.filter((v) => v.Key === "Name");
-
-    if (nameTag && nameTag.length > 0) {
-      return `${nameTag[0].Value} (${this.selectedSubnet?.SubnetId})`;
+  async getResourcesForRegion(region: string, filterBySubnetsId?: string[]) {
+    const EC2 = await this.client(region);
+    if (!EC2) {
+      return [];
     }
 
-    return this.selectedSubnet?.SubnetId;
-  }
-
-  getAllSubnets() {
-    this.regionsEnabled.forEach((region) => this.getSubnetForRegion(region));
-  }
-
-  getSubnetForRegion(region: string, filterBySubnetsId?: string[]) {
-    //While polling we do not set the loading state 'cause it is annoying
-    if (!filterBySubnetsId) {
-      this.loadingCount++;
-    }
-
-    const EC2 = new EC2Client({
-      region,
-      credentials: this.credentials,
-    });
     const params: DescribeSubnetsRequest = {};
     if (filterBySubnetsId) {
       params.Filters = [
@@ -235,184 +191,39 @@ export default class SubnetList extends mixins(Formatters, Notifications) {
         },
       ];
     }
-    EC2.describeSubnets(params, (err, data) => {
-      if (!filterBySubnetsId) {
-        this.loadingCount--;
-        Object.keys(this.subnets).forEach((key) => {
-          //Keep track if the subnets of this region are still available
-          if (this.subnets[key].region === region) {
-            this.subnets[key].stillPresent = false;
-          }
-        });
+
+    try {
+      const data = await EC2.describeSubnets(params).promise();
+      if (data.Subnets === undefined) {
+        return [];
       }
+      return data.Subnets;
+    } catch (err) {
+      this.showError(`[${region}] ` + err, `${region}#loadingSubnets`);
+      return [];
+    }
+  }
 
-      if (err) {
-        this.showError(`[${region}] ` + err, "loadingSubnet");
-        return;
-      }
+  //This is necessary 'cause calling the parent directly from the template breaks the scope
+  onRowSelected(resources: SubnetWithRegion[]) {
+    super.onRowSelected(resources);
+  }
 
-      //When we retrieve only some subnets, if we don't retrieve them it means they have been deleted
-      if (filterBySubnetsId) {
-        const retrievedIds = data.Subnets?.map((v) => v.SubnetId);
-
-        filterBySubnetsId.forEach((idFiltered) => {
-          if (!retrievedIds || !retrievedIds.includes(idFiltered)) {
-            this.$delete(this.subnets, idFiltered);
-          }
-        });
-      }
-
-      data.Subnets?.forEach((subnet) => {
-        if (subnet.SubnetId) {
-          this.$set(this.subnets, subnet.SubnetId, {
-            ...subnet,
-            region,
-            stillPresent: true,
-          });
-
-          //If subnets are pending or deleting we save them in the wip subnets, so we can poll over them
-          //Otherwise, if they are not pending nor deleting, we remove them from the wip state
-          if (subnet.State && ["pending", "deleting"].includes(subnet.State)) {
-            if (!this.wipSubnets[region]) {
-              this.$set(this.wipSubnets, region, [subnet.SubnetId]);
-            } else if (!this.wipSubnets[region].includes(subnet.SubnetId)) {
-              this.wipSubnets[region].push(subnet.SubnetId);
-            }
-            this.startPolling();
-          } else if (
-            this.wipSubnets[region] &&
-            this.wipSubnets[region].includes(subnet.SubnetId)
-          ) {
-            const subnetIndex = this.wipSubnets[region].findIndex(
-              (v) => v === subnet.SubnetId
-            );
-            //If we were creating or deleting a subnet gateway on our own, we dismiss the creating / deleting
-            //NAT alert
-            this.dismissAlertByResourceID(subnet.SubnetId);
-            this.wipSubnets[region].slice(subnetIndex, subnetIndex + 1);
-          }
-        }
-      });
-
-      //Remove subnets we don't find anymore
-      if (!filterBySubnetsId) {
-        Object.keys(this.subnets).forEach((key) => {
-          if (
-            this.subnets[key].region === region &&
-            !this.subnets[key].stillPresent
-          ) {
-            this.$delete(this.subnets, key);
-          }
-        });
-      }
-
-      //We wait until all the data have been loaded and then we select the row on the table.
-      //This is necessary because every time the data of the table is updated, a row selected event with
-      //0 elements is emitted, removing our selection
-      if (this.$route.query.subnetId && this.loadingCount === 0) {
-        this.$nextTick().then(() => {
-          const filteredSubnets = this.subnetsAsList.filter(
-            (subnet) => subnet.SubnetId === this.$route.query.subnetId
-          );
-          if (filteredSubnets && filteredSubnets.length > 0) {
-            this.selectedSubnet = filteredSubnets[0];
-            this.drawerOpened = true;
-            const index = this.subnetsAsList.findIndex(
-              (subnet) => subnet.SubnetId === this.$route.query.subnetId
-            );
-            // eslint-disable-next-line @typescript-eslint/ban-ts-ignore
-            //@ts-ignore
-            this.$refs.subnetsTable["$children"][0].selectRow(index);
-          }
-        });
-      }
-    });
+  getAllResources() {
+    super.getAllResources();
   }
 
   close() {
-    this.drawerOpened = false;
-
-    if (this.selectedSubnet.region && this.selectedSubnet.SubnetId) {
-      this.getSubnetForRegion(this.selectedSubnet.region, [
-        this.selectedSubnet.SubnetId,
-      ]);
-    }
-
-    // eslint-disable-next-line @typescript-eslint/no-empty-function
-    this.$router.push({ path: "/network/subnets", query: {} }).catch(() => {});
-    this.selectedSubnet = {};
-
-    //Do not do this at home!
-    // eslint-disable-next-line @typescript-eslint/ban-ts-ignore
-    //@ts-ignore
-    this.$refs.subnetsTable["$children"][0].clearSelected();
+    super.close();
   }
 
-  onRowSelected(subnets: SubnetWithRegion[]) {
-    if (subnets.length > 0) {
-      this.selectedSubnet = subnets[0];
-      this.drawerOpened = true;
-      this.$router
-        .push({
-          path: "/network/subnets",
-          query: { subnetId: subnets[0].SubnetId },
-        })
-        // eslint-disable-next-line @typescript-eslint/no-empty-function
-        .catch(() => {});
-    } else {
-      this.close();
-    }
-  }
-
-  @Watch("regionsEnabled")
-  onRegionsEnabledChanged(newValue: string[], oldValue: string[]) {
-    const addedRegions = [...newValue.filter((d) => !oldValue.includes(d))];
-    const removedRegions = [...oldValue.filter((d) => !newValue.includes(d))];
-
-    if (removedRegions.length > 0) {
-      this.subnetsAsList.forEach((subnet) => {
-        if (
-          subnet.region &&
-          removedRegions.includes(subnet.region) &&
-          subnet.SubnetId
-        ) {
-          this.$delete(this.subnets, subnet.SubnetId);
-        }
-      });
-    }
-
-    addedRegions.forEach((region) => this.getSubnetForRegion(region));
-  }
-
-  startPolling() {
-    if (this.isPolling) {
-      return;
-    }
-
-    this.isPolling = true;
-    window.setTimeout(() => {
-      this.isPolling = false;
-
-      Object.keys(this.wipSubnets).forEach((region) => {
-        if (this.wipSubnets[region].length > 0) {
-          this.getSubnetForRegion(region, this.wipSubnets[region]);
-        }
-      });
-    }, 5000);
-  }
-
-  @Watch("currentRoleIndex")
-  onCurrentRoleIndexChanged() {
-    this.subnets = {};
-    this.getAllSubnets();
+  //Hooks do not work in the base abstract class
+  destroyed() {
+    this.$store.commit("notifications/dismissByKey", "loadingVpc");
   }
 
   beforeMount() {
-    this.getAllSubnets();
-  }
-
-  destroyed() {
-    this.$store.commit("notifications/dismissByKey", "loadingSubnet");
+    this.getAllResources();
   }
 }
 </script>

@@ -8,7 +8,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Fixed
 
-- Fixed Gitlab-UI integration
+- Now Daintree will detect when your credentials expire and will redirect you to the login page
+- Fixed integration with @gitlab/ui library. Thanks [Paul Gascou-Vaillancourt](https://gitlab.com/pgascouvaillancourt) for suggestions and improvements upstream!
 
 ## [0.3.0]
 

@@ -28,7 +28,7 @@ import CloudwatchClient, {
   MetricDataQueries,
 } from "aws-sdk/clients/cloudwatch";
 import { mapGetters } from "vuex";
-import { DaintreeCredentials } from "@/store/sts/state";
+import { Credentials } from "aws-sdk/lib/core";
 import Notifications from "@/mixins/notifications";
 
 @Component({
@@ -79,7 +79,7 @@ export default class CloudwatchWidget extends Notifications {
   elWidth = 0;
   elHeight = 0;
 
-  protected credentials!: DaintreeCredentials;
+  protected credentials!: Credentials;
 
   metricImage: any = "";
 

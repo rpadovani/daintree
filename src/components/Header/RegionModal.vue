@@ -8,23 +8,12 @@
     :action-cancel="cancelProps"
     @primary="save"
   >
-    <gl-form-checkbox-group
-      v-model="selectedRegions"
-      class="mx-auto"
-      style="width: 700px;"
-    >
-      <div
-        class="row auto-ml mt-2"
-        v-for="n in Math.floor((this.regionsOptions.length + 1) / 2)"
-        :key="n"
-      >
+    <gl-form-checkbox-group v-model="selectedRegions" class="mx-auto col-12">
+      <div class="row">
         <div
-          class="col-6"
+          class="col-12 col-md-6 mb-2"
           :key="r.value"
-          v-for="r in regionsOptions.slice(
-            Math.floor((n - 1) * 2),
-            Math.floor((n - 1) * 2) + 2
-          )"
+          v-for="r in regionsOptions"
         >
           <b-form-checkbox :value="r.value">
             <div class="row ml-1">

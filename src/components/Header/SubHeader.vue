@@ -1,6 +1,6 @@
 <template>
   <div class="row justify-content-between mr-0">
-    <b-breadcrumb class="gl-breadcrumb-list col-6 ml-5 mt-1">
+    <b-breadcrumb class="gl-breadcrumb-list col-10 ml-5 mt-1">
       <b-breadcrumb-item href="/#/home" class="gl-breadcrumb-item">
         Resources
       </b-breadcrumb-item>
@@ -60,7 +60,7 @@
       </b-breadcrumb-item>
     </b-breadcrumb>
 
-    <div class="col-1 mt-1 mr-0 pr-3">
+    <div class="col-1 mt-2 mr-0 pr-3">
       <gl-icon
         class="float-right"
         v-if="!hideRefresh && !loading"

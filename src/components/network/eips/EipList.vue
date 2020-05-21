@@ -5,7 +5,7 @@
     <gl-drawer
       :open="drawerOpened && selectedEip !== {}"
       @close="close"
-      style="width: 80%;"
+      style="min-width: 80%;"
     >
       <template #header>{{ selectedEipTitle }}</template>
 
@@ -22,7 +22,7 @@
         v-if="eipsAsList.length > 0"
       >
         <gl-form-input
-          class="col-9"
+          class="col-12 col-sm-8 col-lg-9 mb-3 mb-sm-0"
           id="filter"
           v-model="filter"
           placeholder="Type to filter..."
@@ -32,7 +32,7 @@
           icon="plus"
           category="secondary"
           variant="success"
-          class="col-2"
+          class="col-12 col-sm-3 col-lg-2"
           to="/network/eips/new"
           >Allocate new
         </gl-button>

@@ -5,7 +5,7 @@
     <gl-drawer
       :open="drawerOpened && selectedInstance !== {}"
       @close="close"
-      style="width: 80%;"
+      style="min-width: 80%;"
     >
       <template #header>{{ selectedInstanceTitle }}</template>
 
@@ -18,7 +18,7 @@
         v-if="instancesAsList.length > 0"
       >
         <gl-form-input
-          class="col-9"
+          class="col-12 col-sm-8 col-lg-9 mb-3 mb-sm-0"
           id="filter"
           v-model="filter"
           placeholder="Type to filter..."
@@ -28,7 +28,7 @@
           icon="plus"
           category="secondary"
           variant="success"
-          class="col-2"
+          class="col-12 col-sm-3 col-lg-2"
           href="#/ec2/instances/new"
           v-if="false"
           >Launch a new instance</gl-button

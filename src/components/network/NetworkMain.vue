@@ -4,7 +4,7 @@
     <div class="container mt-2">
       <h3>Network resources</h3>
       <div class="row mt-2">
-        <div class="col-3">
+        <div class="col-12 col-sm-6 col-lg-3">
           <gl-avatar-link to="/network/vpcs">
             <gl-avatar-labeled
               label="VPCs"
@@ -16,7 +16,7 @@
             </gl-avatar-labeled>
           </gl-avatar-link>
         </div>
-        <div class="col-3">
+        <div class="col-12 col-sm-6 col-lg-3">
           <gl-avatar-link to="/network/subnets">
             <gl-avatar-labeled
               label="Subnets"
@@ -28,7 +28,7 @@
             </gl-avatar-labeled>
           </gl-avatar-link>
         </div>
-        <div class="col-3">
+        <div class="col-12 col-sm-6 col-lg-3">
           <gl-avatar-link to="/network/igws">
             <gl-avatar-labeled
               label="Internet Gateways"
@@ -40,7 +40,7 @@
             </gl-avatar-labeled>
           </gl-avatar-link>
         </div>
-        <div class="col-3">
+        <div class="col-12 col-sm-6 col-lg-3">
           <gl-avatar-link to="/network/nats">
             <gl-avatar-labeled
               label="Nat Gateways"
@@ -52,10 +52,8 @@
             </gl-avatar-labeled>
           </gl-avatar-link>
         </div>
-      </div>
 
-      <div class="row mt-2">
-        <div class="col-3">
+        <div class="col-12 col-sm-6 col-lg-3">
           <gl-avatar-link to="/network/routeTables">
             <gl-avatar-labeled
               label="Route Tables"
@@ -66,7 +64,7 @@
             />
           </gl-avatar-link>
         </div>
-        <div class="col-3">
+        <div class="col-12 col-sm-6 col-lg-3">
           <gl-avatar-link to="/network/eips">
             <gl-avatar-labeled
               label="Elastic IPs"
@@ -77,7 +75,7 @@
             />
           </gl-avatar-link>
         </div>
-        <div class="col-3">
+        <div class="col-12 col-sm-6 col-lg-3">
           <gl-avatar-link to="/network/securityGroups">
             <gl-avatar-labeled
               label="Security groups"

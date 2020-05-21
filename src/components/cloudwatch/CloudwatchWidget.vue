@@ -30,7 +30,6 @@ import CloudwatchClient, {
 import { mapGetters } from "vuex";
 import { DaintreeCredentials } from "@/store/sts/state";
 import Notifications from "@/mixins/notifications";
-import * as echarts from "echarts";
 
 @Component({
   computed: {

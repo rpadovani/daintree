@@ -232,7 +232,6 @@ import Notifications from "@/mixins/notifications";
 import { QueueWithRegion } from "@/components/messages/SQS/sqs";
 import CloudwatchWidget from "@/components/cloudwatch/CloudwatchWidget.vue";
 import { Metric } from "aws-sdk/clients/cloudwatch";
-import echarts from "echarts";
 
 @Component({
   components: {

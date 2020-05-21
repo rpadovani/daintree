@@ -1,47 +1,52 @@
 import { ActionContext } from "vuex";
 import { Role, STSState } from "@/store/sts/state";
 import STSClient from "aws-sdk/clients/sts";
+import { CognitoIdentityCredentials, Credentials } from "aws-sdk/lib/core";
 import { AppNotification } from "@/store/notifications/state";
 import CognitoIdentityClient from "aws-sdk/clients/cognitoidentity";
+
+async function getCallerIdentity(
+  loginMethod: "cognito" | "accessKey",
+  context: ActionContext<STSState, any>,
+  credentials: Credentials
+): Promise<boolean> {
+  const STS = new STSClient({ credentials });
+
+  try {
+    const response = await STS.getCallerIdentity({}).promise();
+    context.commit("login", {
+      arn: response.Arn,
+      account: response.Account,
+      credentials,
+      loginMethod,
+    });
+
+    return true;
+  } catch (err) {
+    const notification: AppNotification = {
+      key: "login",
+      text: err.message,
+      variant: "danger",
+    };
+    context.commit("notifications/show", notification, { root: true });
+    return false;
+  }
+}
 
 export const STSActions = {
   loginWithAccessKey(
     context: ActionContext<STSState, any>,
     payload: { ["accessKeyId"]: string; ["secretAccessKey"]: string }
   ) {
-    return new Promise((resolve, reject) => {
-      const credentials = {
-        accessKeyId: payload.accessKeyId,
-        secretAccessKey: payload.secretAccessKey,
-      };
-
-      const STS = new STSClient({ credentials });
-
-      STS.getCallerIdentity({}, (err, data) => {
-        context.commit("notifications/dismissByKey", "login", { root: true });
-
-        if (err) {
-          const notification: AppNotification = {
-            key: "login",
-            text: err.message,
-            variant: "danger",
-          };
-          context.commit("notifications/show", notification, { root: true });
-          return reject();
-        } else {
-          context.commit("login", {
-            arn: data.Arn,
-            account: data.Account,
-            credentials,
-          });
-
-          return resolve();
-        }
-      });
+    const credentials = new Credentials({
+      accessKeyId: payload.accessKeyId,
+      secretAccessKey: payload.secretAccessKey,
     });
+
+    return getCallerIdentity("accessKey", context, credentials);
   },
 
-  loginWithCognito(
+  async loginWithCognito(
     context: ActionContext<STSState, any>,
     payload: {
       ["issuer"]: string;
@@ -53,82 +58,45 @@ export const STSActions = {
       root: true,
     });
 
-    return new Promise((resolve, reject) => {
-      //Cognito returns `https://` in the issuer field, but it is not required by the identity pool
-      //Not sure about other issuers
-      const iss = payload.issuer.replace("https://", "");
+    //Cognito returns `https://` in the issuer field, but it is not required by the identity pool
+    //Not sure about other issuers
+    const iss = payload.issuer.replace("https://", "");
 
-      const Logins: { [key: string]: string } = {};
-      Logins[iss] = payload.idToken;
+    const Logins: { [key: string]: string } = {};
+    Logins[iss] = payload.idToken;
 
-      //The cognito identity pool contains the region in the name
-      const region = payload.cognitoIdentityPoolId.split(":")[0];
+    //The cognito identity pool contains the region in the name
+    const region = payload.cognitoIdentityPoolId.split(":")[0];
 
-      const cognitoIdentityClient = new CognitoIdentityClient({ region });
+    const cognitoIdentityClient = new CognitoIdentityClient({ region });
 
-      //We first retrieve the ID of the user
-      cognitoIdentityClient.getId(
-        { IdentityPoolId: payload.cognitoIdentityPoolId, Logins },
-        (err, data) => {
-          if (!data.IdentityId) {
-            return reject("Identity not found");
-          }
+    //We first retrieve the ID of the user
+    const getIdResponse = await cognitoIdentityClient
+      .getId({ IdentityPoolId: payload.cognitoIdentityPoolId, Logins })
+      .promise();
 
-          const credentials = {
-            IdentityId: data.IdentityId,
-            Logins,
-          };
+    if (!getIdResponse.IdentityId) {
+      throw new Error("Identity not found");
+    }
 
-          cognitoIdentityClient.getCredentialsForIdentity(
-            credentials,
-            (err, data) => {
-              if (err) {
-                const notification: AppNotification = {
-                  key: "cognitoCallback",
-                  text: err.message,
-                  variant: "danger",
-                };
-                context.commit("notifications/show", notification, {
-                  root: true,
-                });
-                return reject();
-              }
-              const credentials = {
-                accessKeyId: data.Credentials?.AccessKeyId || "",
-                secretAccessKey: data.Credentials?.SecretKey || "",
-                sessionToken: data.Credentials?.SessionToken,
-                expiration: data.Credentials?.Expiration,
-              };
-              const STS = new STSClient({ credentials, region });
+    const cognitoCredentials = new CognitoIdentityCredentials(
+      {
+        IdentityId: getIdResponse.IdentityId,
+        Logins,
+      },
+      { region }
+    );
 
-              STS.getCallerIdentity({}, (err, data) => {
-                if (err) {
-                  const notification: AppNotification = {
-                    key: "cognitoCallback",
-                    text: err.message,
-                    variant: "danger",
-                  };
-                  context.commit("notifications/show", notification, {
-                    root: true,
-                  });
-                  return reject();
-                } else {
-                  context.commit("loginWithCognito", {
-                    credentials,
-                    userArn: data.Arn,
-                    accountId: data.Account,
-                  });
-                  return resolve();
-                }
-              });
-            }
-          );
-        }
-      );
-    });
+    await cognitoCredentials.getPromise();
+
+    sessionStorage.setItem("cognito#IdentityId", getIdResponse.IdentityId);
+    sessionStorage.setItem("cognito#Logins", JSON.stringify(Logins));
+    sessionStorage.setItem("cognito#Region", region);
+
+    return getCallerIdentity("cognito", context, cognitoCredentials);
   },
 
-  assumeRole(
+  async assumeRole(
     context: ActionContext<STSState, any>,
     payload: {
       ["accountId"]: string;
@@ -138,59 +106,45 @@ export const STSActions = {
       ["remember"]?: boolean;
     }
   ) {
-    return new Promise((resolve, reject) => {
-      if (!context.state.credentials) {
-        return reject("Not logged in");
-      }
+    if (!context.state.credentials) {
+      throw new Error("Not logged in");
+    }
 
-      //We go back to the main account to switch role
-      const credentials = context.state.credentials;
+    //We go back to the main account to switch role
+    const credentials = context.state.credentials;
 
-      const STS = new STSClient({ credentials });
-      STS.assumeRole(
-        {
-          RoleArn: `arn:aws:iam::${payload.accountId}:role/${payload.role}`,
-          RoleSessionName: "daintree",
-        },
-        (err, data) => {
-          if (err) {
-            const notification: AppNotification = {
-              key: "assumeRole",
-              text: err.message,
-              variant: "danger",
-            };
-            context.commit("notifications/show", notification, { root: true });
-            return reject();
-          } else if (data.Credentials) {
-            const credentials = {
-              accessKeyId: data.Credentials?.AccessKeyId || "",
-              secretAccessKey: data.Credentials?.SecretAccessKey || "",
-              sessionToken: data.Credentials?.SessionToken,
-              expiration: data.Credentials?.Expiration,
-            };
+    const STS = new STSClient({ credentials });
+    const data = await STS.assumeRole({
+      RoleArn: `arn:aws:iam::${payload.accountId}:role/${payload.role}`,
+      RoleSessionName: "daintree",
+    }).promise();
 
-            if (payload.newRole) {
-              const role: Role = {
-                accountId: payload.accountId,
-                nickname: payload.nickname,
-                role: payload.role,
-                credentials,
-                remember: payload.remember,
-              };
-              context.commit("addRole", role);
-            } else {
-              context.commit("switchRole", {
-                roleIndex: context.state.roles.findIndex(
-                  (r) =>
-                    r.accountId === payload.accountId && r.role === payload.role
-                ),
-                credentials,
-              });
-            }
-            return resolve();
-          }
-        }
-      );
+    if (!data.Credentials) {
+      throw new Error("noCredentials");
+    }
+
+    const newCredentials = new Credentials({
+      accessKeyId: data.Credentials?.AccessKeyId || "",
+      secretAccessKey: data.Credentials?.SecretAccessKey || "",
+      sessionToken: data.Credentials?.SessionToken,
     });
+
+    if (payload.newRole) {
+      const role: Role = {
+        accountId: payload.accountId,
+        nickname: payload.nickname,
+        role: payload.role,
+        credentials: newCredentials,
+        remember: payload.remember,
+      };
+      context.commit("addRole", role);
+    } else {
+      context.commit("switchRole", {
+        roleIndex: context.state.roles.findIndex(
+          (r) => r.accountId === payload.accountId && r.role === payload.role
+        ),
+        credentials: newCredentials,
+      });
+    }
   },
 };

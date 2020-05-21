@@ -119,7 +119,7 @@ import {
   GlLoadingIcon,
 } from "@gitlab/ui";
 import Component from "vue-class-component";
-import Notifications from "@/mixins/notifications";
+import { DaintreeComponent } from "@/mixins/DaintreeComponent";
 
 @Component({
   components: {
@@ -136,7 +136,7 @@ import Notifications from "@/mixins/notifications";
     GlLoadingIcon,
   },
 })
-export default class Login extends Notifications {
+export default class Login extends DaintreeComponent {
   accessKey = "";
   secretKey = "";
 
@@ -160,19 +160,21 @@ export default class Login extends Notifications {
     );
   }
 
-  loginWithAccessKey() {
+  async loginWithAccessKey() {
     this.isLoading = true;
-    this.$store
-      .dispatch("sts/loginWithAccessKey", {
+    this.dismissAlertByKey("login");
+
+    try {
+      await this.$store.dispatch("sts/loginWithAccessKey", {
         accessKeyId: this.accessKey,
         secretAccessKey: this.secretKey,
-      })
-      .then(() => {
-        this.$router.push(this.$store.getters["sts/routeAfterLogin"]);
-      })
-      // eslint-disable-next-line @typescript-eslint/no-empty-function
-      .catch(() => {})
-      .finally(() => (this.isLoading = false));
+      });
+      await this.$router.push(this.$store.getters["sts/routeAfterLogin"]);
+    } catch (err) {
+      this.showError(err, "login");
+    } finally {
+      this.isLoading = false;
+    }
   }
 
   mounted() {

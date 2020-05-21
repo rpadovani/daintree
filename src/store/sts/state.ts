@@ -1,11 +1,30 @@
-export interface DaintreeCredentials {
-  accessKeyId: string;
-  secretAccessKey: string;
-  sessionToken?: string;
-  expiration?: Date;
-}
+import { CognitoIdentityCredentials, Credentials } from "aws-sdk/lib/core";
 
 const sessionData = JSON.parse(sessionStorage.getItem("loginData") || "{}");
+
+let credentials: Credentials | undefined = undefined;
+
+const accessKeyId = sessionStorage.getItem("accessKeyId");
+const secretAccessKey = sessionStorage.getItem("secretAccessKey");
+const IdentityId = sessionStorage.getItem("cognito#IdentityId");
+const region = sessionStorage.getItem("cognito#Region") || undefined;
+
+if (accessKeyId !== null && secretAccessKey !== null) {
+  if (sessionData.loginMethod === "cognito" && IdentityId) {
+    //TODO: We should keep the refresh token from the pool and use it again
+    const Logins = JSON.parse(sessionStorage.getItem("cognito#Logins") || "{}");
+
+    credentials = new CognitoIdentityCredentials(
+      { Logins, IdentityId },
+      { region }
+    );
+  } else {
+    credentials = new Credentials({
+      accessKeyId,
+      secretAccessKey,
+    });
+  }
+}
 
 export class STSState {
   userArn: string | null = sessionData.userArn || null;
@@ -15,9 +34,9 @@ export class STSState {
   );
 
   //The original credentials used to login
-  credentials: DaintreeCredentials | undefined = sessionData.credentials || undefined;
+  credentials: Credentials | undefined = credentials;
   //Current credentials when a role is assumed
-  currentCredentials: DaintreeCredentials | undefined = undefined;
+  currentCredentials: Credentials | undefined = undefined;
 
   loginMethod: "cognito" | "accessKey" | undefined =
     sessionData.loginMethod || undefined;
@@ -35,5 +54,5 @@ export interface Role {
   role: string;
   nickname: string | undefined;
   remember?: boolean | undefined;
-  credentials?: DaintreeCredentials | undefined;
+  credentials?: Credentials | undefined;
 }

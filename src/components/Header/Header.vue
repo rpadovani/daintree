@@ -109,6 +109,7 @@ import RegionModal from "@/components/Header/RegionModal.vue";
 import { Component, Emit, Prop, Vue } from "vue-property-decorator";
 import AssumeRoleModal from "@/components/Header/AssumeRoleModal.vue";
 import { Role } from "@/store/sts/state";
+import { DaintreeComponent } from "@/mixins/DaintreeComponent";
 
 @Component({
   components: {
@@ -129,7 +130,7 @@ import { Role } from "@/store/sts/state";
   },
   directives: { "gl-modal-directive": GlModalDirective },
 })
-export default class Header extends Vue {
+export default class Header extends DaintreeComponent {
   @Prop(Boolean) readonly hideSubHeader: boolean | undefined;
   @Prop(Boolean) readonly loading: boolean | undefined;
   @Prop(Boolean) readonly hideRefresher: boolean | undefined;
@@ -179,11 +180,16 @@ export default class Header extends Vue {
     this.$store.commit("sts/backToMain");
   }
 
-  switchRole(roleIndex: number) {
-    this.$store.dispatch("sts/assumeRole", {
-      ...this.roles[roleIndex],
-      newRole: false,
-    });
+  async switchRole(roleIndex: number) {
+    try {
+      this.hideErrors("switchRoleError");
+      await this.$store.dispatch("sts/assumeRole", {
+        ...this.roles[roleIndex],
+        newRole: false,
+      });
+    } catch (e) {
+      this.showError(e, "switchRoleError");
+    }
   }
 }
 </script>

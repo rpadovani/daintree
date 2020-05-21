@@ -1,6 +1,30 @@
 import { TagList } from "aws-sdk/clients/ec2";
 import { Component, Vue } from "vue-property-decorator";
 
+export function standardDate(date: Date): string {
+  const options = {
+    year: "numeric",
+    month: "short",
+    day: "numeric",
+    hour: "numeric",
+    minute: "numeric",
+  };
+  return date.toLocaleDateString(undefined, options);
+}
+
+export function standardDateFromUnixSecondsString(unix: string): string {
+  const toNumber = parseInt(unix, 10);
+
+  const options = {
+    year: "numeric",
+    month: "short",
+    day: "numeric",
+    hour: "numeric",
+    minute: "numeric",
+  };
+  return new Date(toNumber * 1000).toLocaleDateString(undefined, options);
+}
+
 @Component({
   filters: {
     standardDate(date: Date): string {

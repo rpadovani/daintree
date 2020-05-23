@@ -8,7 +8,7 @@
     "lint": "vue-cli-service lint"
   },
   "dependencies": {
-    "@gitlab/svgs": "1.129.0",
+    "@gitlab/svgs": "1.130.0",
     "@gitlab/ui": "15.4.1",
     "aws-sdk": "2.682.0",
     "bootstrap-vue": "2.15.0",

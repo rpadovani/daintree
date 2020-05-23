@@ -9,7 +9,7 @@
     >
       <template #header>{{ selectedResourceTitle }}</template>
 
-      <subnet :subnet="selectedResource" v-on:deleted="close" />
+      <KeyPair :keyPair="selectedResource" v-on:deleted="close" />
     </gl-drawer>
 
     <div class="container-fluid">
@@ -29,8 +29,8 @@
           category="secondary"
           variant="success"
           class="col-12 col-sm-3 col-lg-2"
-          to="/network/subnets/new"
-          >Create new subnet
+          to="/ec2/keyPairs/new"
+          >Create new key pair
         </gl-button>
       </div>
       <gl-table
@@ -41,7 +41,7 @@
         ref="resourcesTable"
         selectable
         select-mode="single"
-        @row-selected="onRowSelected"
+        @row-selected="(row) => onRowSelected(row)"
         v-show="resourcesAsList.length > 0"
         show-empty
         hover
@@ -55,19 +55,8 @@
             compact
           />
         </template>
-        <template v-slot:cell(state)="data">
-          <StateText :state="data.value" />
-        </template>
-        <template v-slot:cell(AvailabilityZone)="data">
-          <RegionText :region="data.value" is-az />
-        </template>
-        <template v-slot:cell(DefaultForAz)="data">
-          <gl-icon v-if="data.value" name="check-circle" />
-        </template>
-        <template v-slot:cell(VpcId)="data">
-          <router-link :to="`/network/vpcs?vpcId=${data.value}`">
-            {{ data.value }}
-          </router-link>
+        <template v-slot:cell(region)="data">
+          <RegionText :region="data.value" />
         </template>
       </gl-table>
 
@@ -80,14 +69,14 @@
         <gl-empty-state
           class="mt-5"
           v-if="loadingCount === 0 && resourcesAsList.length === 0"
-          title="No subnets found in the selected regions!"
+          title="No key pair found in the selected regions!"
           svg-path="/assets/undraw_empty_xct9.svg"
           :description="emptyStateDescription"
           compact
         >
           <template #actions>
-            <gl-button icon="plus" variant="success" to="/network/subnets/new"
-              >Create new subnet
+            <gl-button icon="plus" variant="success" to="/ec2/keyPairs/new"
+              >Create new key pair
             </gl-button>
             <gl-button
               category="secondary"
@@ -104,35 +93,35 @@
 </template>
 
 <script lang="ts">
-import { Subnet as AWSSubnet } from "aws-sdk/clients/ec2";
+import {
+  DescribeKeyPairsRequest,
+  KeyPair as AWSKeyPair,
+} from "aws-sdk/clients/ec2";
 
 import Header from "@/components/Header/Header.vue";
 import RegionText from "@/components/common/RegionText.vue";
 import {
+  GlButton,
   GlDrawer,
+  GlEmptyState,
   GlFormInput,
   GlIcon,
-  GlButton,
-  GlTable,
-  GlEmptyState,
-  GlSkeletonLoading,
   GlModalDirective,
+  GlSkeletonLoading,
+  GlTable,
 } from "@gitlab/ui";
 import Component from "vue-class-component";
-import StateText from "@/components/common/StateText.vue";
-import { DescribeSubnetsRequest } from "aws-sdk/clients/ec2";
-import Subnet from "@/components/network/subnets/Subnet.vue";
 import { NetworkComponent } from "@/components/network/networkComponent";
+import KeyPair from "@/components/EC2/keyPairs/KeyPair.vue";
 
 @Component({
   components: {
-    StateText,
+    KeyPair,
     Header,
     GlTable,
     RegionText,
     GlIcon,
     GlDrawer,
-    Subnet,
     GlButton,
     GlFormInput,
     GlSkeletonLoading,
@@ -142,65 +131,57 @@ import { NetworkComponent } from "@/components/network/networkComponent";
     "gl-modal-directive": GlModalDirective,
   },
 })
-export default class SubnetList extends NetworkComponent<
-  AWSSubnet,
-  "SubnetId" | "State"
+export default class KeyPairsList extends NetworkComponent<
+  AWSKeyPair,
+  "KeyPairId"
 > {
-  resourceName = "subnet";
+  resourceName = "key pair";
   canCreate = true;
-  resourceUniqueKey: "SubnetId" = "SubnetId";
-  resourceStateKey: "State" = "State";
-  workingStates = ["pending", "deleting"];
+  resourceUniqueKey: "KeyPairId" = "KeyPairId";
+  resourceStateKey = undefined;
+  workingStates = [];
 
   fields = [
-    {
-      key: "Tags",
-      label: "Name",
-      sortable: true,
-      formatter: this.extractNameFromTags,
-    },
-    { key: "SubnetId", sortable: true },
-    "State",
-    { key: "CidrBlock", sortable: true },
-    { key: "AvailabilityZone", sortable: true },
-    {
-      key: "DefaultForAz",
-      label: "Default?",
-      class: "text-center",
-    },
-    { key: "VpcId", sortable: true },
+    { key: "KeyName", sortable: true },
+    { key: "KeyPairId", sortable: true },
+    { key: "KeyFingerprint", sortable: true },
+    { key: "region", sortable: true },
   ];
 
-  async getResourcesForRegion(region: string, filterBySubnetsId?: string[]) {
+  get selectedResourceTitle() {
+    return this.selectedResource?.KeyName;
+  }
+
+  async getResourcesForRegion(region: string, filterByKeyPairsId?: string[]) {
     const EC2 = await this.client(region);
     if (!EC2) {
       return [];
     }
 
-    const params: DescribeSubnetsRequest = {};
-    if (filterBySubnetsId) {
+    const params: DescribeKeyPairsRequest = {};
+    if (filterByKeyPairsId) {
       params.Filters = [
         {
-          Name: "subnet-id",
-          Values: filterBySubnetsId,
+          Name: "key-pair-id",
+          Values: filterByKeyPairsId,
         },
       ];
     }
 
     try {
-      const data = await EC2.describeSubnets(params).promise();
-      if (data.Subnets === undefined) {
+      const data = await EC2.describeKeyPairs(params).promise();
+      if (data.KeyPairs === undefined) {
         return [];
       }
-      return data.Subnets;
+      return data.KeyPairs;
     } catch (err) {
-      this.showError(`[${region}] ` + err, `${region}#loadingSubnets`);
+      this.showError(`[${region}] ` + err, `${region}#loadingKeyPairs`);
       return [];
     }
   }
 
   destroyed() {
-    this.$store.commit("notifications/dismissByKey", "loadingSubnets");
+    this.$store.commit("notifications/dismissByKey", "loadingKeyPairs");
   }
 }
 </script>

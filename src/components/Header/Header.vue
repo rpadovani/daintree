@@ -106,7 +106,7 @@ import {
 } from "bootstrap-vue";
 import RegionText from "@/components/common/RegionText.vue";
 import RegionModal from "@/components/Header/RegionModal.vue";
-import { Component, Emit, Prop, Vue } from "vue-property-decorator";
+import { Component, Emit, Prop } from "vue-property-decorator";
 import AssumeRoleModal from "@/components/Header/AssumeRoleModal.vue";
 import { Role } from "@/store/sts/state";
 import { DaintreeComponent } from "@/mixins/DaintreeComponent";

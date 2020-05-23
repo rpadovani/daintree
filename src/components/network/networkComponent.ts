@@ -1,5 +1,5 @@
 import { DaintreeComponent } from "@/mixins/DaintreeComponent";
-import { Ref, Watch } from "vue-property-decorator";
+import { Component, Ref, Watch } from "vue-property-decorator";
 import EC2Client, { Tag } from "aws-sdk/clients/ec2";
 import { BTable } from "bootstrap-vue";
 
@@ -8,29 +8,35 @@ interface Metadata {
   region?: string;
 }
 
+//We do not use an abstract class here because it breaks the scope calling abstract class method from within Vue
+//template
+
 //This class implements a lot of the common code used by all the resources inside network, providing some
 //properties to customize some behavior
-export abstract class NetworkComponent<
+@Component
+export class NetworkComponent<
   R extends { [key: string]: any },
   K extends keyof R
 > extends DaintreeComponent {
   //Mandatory parameters
   //The name of the resource (e.g., vpc)
-  abstract resourceName: string;
+  resourceName!: string;
   //Do we support resource creation?
   canCreate = false;
   //Which object property is used to identify it?
-  abstract resourceUniqueKey: K;
+  resourceUniqueKey!: K;
   //Which object property is used to identify its state? If undefined polling of WIP resources will be disabled
-  abstract resourceStateKey: K | undefined;
+  resourceStateKey: K | undefined;
   //Which values represent a working status?
-  abstract workingStates: string[];
+  workingStates!: string[];
 
   //How to retrieve the resource for a given region?
-  abstract async getResourcesForRegion(
+  async getResourcesForRegion(
     region: string,
     filterById?: string[]
-  ): Promise<R[]>;
+  ): Promise<R[]> {
+    throw new Error("getResourcesForRegion not implemented");
+  }
 
   //Properties managed by NetworkComponent that you still need in your component, so they are not marked as private
   resources: {
@@ -303,6 +309,10 @@ export abstract class NetworkComponent<
   @Watch("currentRoleIndex")
   onCurrentRoleIndexChanged() {
     this.resources = {};
+    this.getAllResources();
+  }
+
+  beforeMount() {
     this.getAllResources();
   }
 }

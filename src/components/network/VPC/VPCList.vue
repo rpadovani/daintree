@@ -114,11 +114,9 @@ import {
   GlTable,
 } from "@gitlab/ui";
 import Component from "vue-class-component";
-import { vpcs } from "@/components/network/VPC/vpc";
 import VPC from "@/components/network/VPC/VPC.vue";
 import StateText from "@/components/common/StateText.vue";
 import { NetworkComponent } from "@/components/network/networkComponent";
-import VpcWithRegion = vpcs.VpcWithRegion;
 
 @Component({
   components: {
@@ -192,26 +190,8 @@ export default class VPCList extends NetworkComponent<Vpc, "VpcId" | "State"> {
     }
   }
 
-  //This is necessary 'cause calling the parent directly from the template breaks the scope
-  onRowSelected(resources: VpcWithRegion[]) {
-    super.onRowSelected(resources);
-  }
-
-  getAllResources() {
-    super.getAllResources();
-  }
-
-  close() {
-    super.close();
-  }
-
-  //Hooks do not work in the base abstract class
   destroyed() {
     this.$store.commit("notifications/dismissByKey", "loadingVpc");
-  }
-
-  beforeMount() {
-    this.getAllResources();
   }
 }
 </script>

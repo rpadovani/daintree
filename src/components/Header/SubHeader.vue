@@ -1,6 +1,13 @@
 <template>
   <div class="row justify-content-between mr-0">
     <b-breadcrumb class="gl-breadcrumb-list col-10 ml-5 mt-1">
+      <img
+        class="gl-breadcrumb-avatar-tile"
+        src="/assets/aws-icons/AWS-Cloud-alt_light-bg.svg"
+        width="15"
+        height="15"
+        alt="logo-aws"
+      />
       <b-breadcrumb-item href="/#/home" class="gl-breadcrumb-item">
         Resources
       </b-breadcrumb-item>
@@ -150,6 +157,7 @@ export default class SubHeader extends Vue {
       { name: "Instances", link: "#/ec2/instances" },
       { name: "Load Balancers", link: "#/ec2/loadBalancers" },
       { name: "Target groups", link: "#/ec2/targetGroups" },
+      { name: "Key pairs", link: "#/ec2/keyPairs" },
     ],
     Messages: [
       { name: "SNS Topics", link: "#/messages/sns_topics" },

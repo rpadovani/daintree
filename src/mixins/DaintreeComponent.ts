@@ -39,6 +39,41 @@ export class DaintreeComponent extends Vue {
   stsCredentials!: Credentials;
   currentRoleIndex!: number;
 
+  //Injected by Gitlab UI: https://gitlab-org.gitlab.io/gitlab-ui/?path=/story/base-toast--default
+  $toast!: {
+    show: (
+      text: string,
+      options?: {
+        position?:
+          | "top-right"
+          | "top-center"
+          | "top-left"
+          | "bottom-right"
+          | "bottom-center"
+          | "bottom-left"; // Position of the toast container
+        duration?: number; //Display time of the toast in millisecond
+        action?: object; // 	Add single actions to toast
+        fullWidth?: boolean; //	Enable Full Width
+        fitToScreen?: boolean; // 	Fits to Screen on Full Width
+        className?: string | string[]; //	Custom css class name of the toast
+        containerClass?: string | string[]; //	Custom css classes for toast container
+        iconPack?:
+          | "material"
+          | "fontawesome"
+          | "mdi"
+          | "custom-class"
+          | "callback";
+        icon?: string | object; //	Material icon name as string
+        type?: "success" | "info" | "error";
+        theme?: "toasted-primary" | "outline" | "bubble";
+        onComplete?: () => void; // 	Trigger when toast is completed
+        closeOnSwipe?: boolean; // 	Closes the toast when the user swipes it
+        keepOnHover?: boolean; // 	Prevents toast from closing on hover
+        singleton?: boolean; // 	Only allows one toast at a time
+      }
+    ) => void;
+  };
+
   showError(msg: string, key: string) {
     this.showAlert({
       key: key,

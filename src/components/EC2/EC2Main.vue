@@ -39,6 +39,18 @@
             </gl-avatar-labeled>
           </gl-avatar-link>
         </div>
+        <div class="col-col-12 col-sm-6 col-lg-3">
+          <gl-avatar-link to="/ec2/keyPairs">
+            <gl-avatar-labeled
+              label="Key pairs"
+              sub-label="SSH to your instances"
+              shape="rect"
+              :size="32"
+              src="assets/aws-icons/ec2/AWS-Key-Management-Service.svg"
+            >
+            </gl-avatar-labeled>
+          </gl-avatar-link>
+        </div>
       </div>
     </div>
   </div>

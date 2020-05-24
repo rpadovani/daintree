@@ -88,6 +88,15 @@ export class NetworkComponent<
     return response;
   }
 
+  //You can override this if the resource's state it's more difficult to retrieve
+  getResourceState(resource: R): string | null {
+    if (this.resourceStateKey) {
+      return resource[this.resourceStateKey];
+    }
+
+    return null;
+  }
+
   getAllResources() {
     this.regionsEnabled.map((region) => {
       this.loadingCount++;
@@ -96,41 +105,53 @@ export class NetworkComponent<
           this.dataRetrieved(resources, region);
         })
         .finally(() => {
-          //We wait until all the data have been loaded and then we select the row on the table.
-          //This is necessary because every time the data of the table is updated, a row selected event with
-          //0 elements is emitted, removing our selection
-          if (
-            this.$route.query[this.resourceUniqueKey as string] &&
-            this.loadingCount === 0
-          ) {
-            this.$nextTick().then(() => {
-              const filteredResources = this.resourcesAsList.filter(
-                (resource) =>
-                  resource[this.resourceUniqueKey] ===
-                  this.$route.query[this.resourceUniqueKey as string]
-              );
-
-              if (
-                filteredResources &&
-                filteredResources.length > 0 &&
-                filteredResources[0][this.resourceUniqueKey]
-              ) {
-                this.selectedResourceKey =
-                  filteredResources[0][this.resourceUniqueKey];
-                this.drawerOpened = true;
-                const index = this.resourcesAsList.findIndex(
-                  (resource) =>
-                    resource[this.resourceUniqueKey] ===
-                    this.$route.query[this.resourceUniqueKey as string]
-                );
-                // eslint-disable-next-line @typescript-eslint/ban-ts-comment
-                //@ts-ignore
-                this.$refs.resourcesTable["$children"][0].selectRow(index);
-              }
-            });
-          }
+          this.selectActiveResource();
         });
     });
+  }
+
+  selectActiveResource(): void {
+    //We wait until all the data have been loaded and then we select the row on the table.
+    //This is necessary because every time the data of the table is updated, a row selected event with
+    //0 elements is emitted, removing our selection
+
+    if (typeof this.resourceUniqueKey !== "string") {
+      return;
+    }
+
+    let uniqueId = "";
+
+    //Unfortunately queries are case sensitive in vue-router, we need to find a matching parameter ignoring cases
+    for (const key in this.$route.query) {
+      if (Object.prototype.hasOwnProperty.call(this.$route.query, key)) {
+        const value = this.$route.query[key];
+        if (
+          key.toLocaleLowerCase() === this.resourceUniqueKey.toLowerCase() &&
+          typeof value === "string"
+        ) {
+          uniqueId = value;
+        }
+      }
+    }
+
+    if (uniqueId && this.loadingCount === 0) {
+      this.$nextTick().then(() => {
+        const filteredResources = this.resourcesAsList.filter(
+          (resource) => resource[this.resourceUniqueKey] === uniqueId
+        );
+
+        if (filteredResources && filteredResources.length > 0) {
+          this.selectedResourceKey = uniqueId;
+          this.drawerOpened = true;
+          const index = this.resourcesAsList.findIndex(
+            (resource) => resource[this.resourceUniqueKey] === uniqueId
+          );
+          // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+          //@ts-ignore
+          this.$refs.resourcesTable["$children"][0].selectRow(index);
+        }
+      });
+    }
   }
 
   async client(region: string) {
@@ -190,7 +211,12 @@ export class NetworkComponent<
 
       //If we know how to identify a work in progress resource (e.g., a VPC which is being created), we store it and
       //start polling over it
-      if (this.resourceStateKey && this.workingStates.includes(id)) {
+      const resourceState = this.getResourceState(resource);
+      if (
+        resourceState &&
+        this.workingStates.length > 0 &&
+        this.workingStates.includes(resourceState)
+      ) {
         if (!this.wipResources[region]) {
           this.$set(this.wipResources, region, [id]);
         } else if (!this.wipResources[region].includes(id)) {

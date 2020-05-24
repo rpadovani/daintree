@@ -6,6 +6,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Fixed
+
+- Resources IDs in the URL are not case sensitive anymore, fixing some broken internal link
+- Improved how Daintree detects a work in progress resource
+
 ## [0.4.0]
 
 ### Added

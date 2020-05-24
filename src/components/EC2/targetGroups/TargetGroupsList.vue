@@ -293,7 +293,7 @@ export default class TargetGroups extends mixins(Formatters, Notifications) {
               (targetGroup) =>
                 targetGroup.TargetGroupArn === this.$route.query.targetGroupArn
             );
-            // eslint-disable-next-line @typescript-eslint/ban-ts-ignore
+            // eslint-disable-next-line @typescript-eslint/ban-ts-comment
             //@ts-ignore
             this.$refs.targetGroupsTable["$children"][0].selectRow(index);
           }
@@ -323,7 +323,7 @@ export default class TargetGroups extends mixins(Formatters, Notifications) {
     this.selectedTargetGroup = {};
 
     //Do not do this at home!
-    // eslint-disable-next-line @typescript-eslint/ban-ts-ignore
+    // eslint-disable-next-line @typescript-eslint/ban-ts-comment
     //@ts-ignore
     this.$refs.targetGroupsTable["$children"][0].clearSelected();
   }

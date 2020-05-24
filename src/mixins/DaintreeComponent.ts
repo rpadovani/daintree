@@ -52,7 +52,7 @@ export class DaintreeComponent extends Vue {
           | "bottom-center"
           | "bottom-left"; // Position of the toast container
         duration?: number; //Display time of the toast in millisecond
-        action?: object; // 	Add single actions to toast
+        action?: Record<string, unknown>; // 	Add single actions to toast
         fullWidth?: boolean; //	Enable Full Width
         fitToScreen?: boolean; // 	Fits to Screen on Full Width
         className?: string | string[]; //	Custom css class name of the toast
@@ -63,7 +63,7 @@ export class DaintreeComponent extends Vue {
           | "mdi"
           | "custom-class"
           | "callback";
-        icon?: string | object; //	Material icon name as string
+        icon?: string | Record<string, unknown>; //	Material icon name as string
         type?: "success" | "info" | "error";
         theme?: "toasted-primary" | "outline" | "bubble";
         onComplete?: () => void; // 	Trigger when toast is completed

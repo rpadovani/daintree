@@ -354,7 +354,7 @@ export default class CloudwatchModal extends Notifications {
         this.hideErrors("cloudwatchModal");
         this.rawData = data.MetricDataResults;
         this.$nextTick().then(() =>
-          //eslint-disable-next-line @typescript-eslint/ban-ts-ignore
+          //eslint-disable-next-line @typescript-eslint/ban-ts-comment
           //@ts-ignore
           this.$refs.lineChart.$children[0].setChartSize()
         );

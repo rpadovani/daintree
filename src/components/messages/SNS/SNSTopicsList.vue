@@ -283,7 +283,7 @@ export default class SNSTopicsList extends mixins(Formatters, Notifications) {
                 this.getTopicNameFromArn(sns.topicArn) ===
                   this.$route.query.topic
             );
-            // eslint-disable-next-line @typescript-eslint/ban-ts-ignore
+            // eslint-disable-next-line @typescript-eslint/ban-ts-comment
             //@ts-ignore
             this.$refs.snsTable["$children"][0].selectRow(index);
           }
@@ -315,7 +315,7 @@ export default class SNSTopicsList extends mixins(Formatters, Notifications) {
     this.selectedSns = {};
 
     //Do not do this at home!
-    // eslint-disable-next-line @typescript-eslint/ban-ts-ignore
+    // eslint-disable-next-line @typescript-eslint/ban-ts-comment
     //@ts-ignore
     this.$refs.snsTable["$children"][0].clearSelected();
   }

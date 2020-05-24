@@ -291,7 +291,7 @@ export default class IgwList extends mixins(Formatters, Notifications) {
             const index = this.igwsAsList.findIndex(
               (igw) => igw.InternetGatewayId === this.$route.query.igwId
             );
-            // eslint-disable-next-line @typescript-eslint/ban-ts-ignore
+            // eslint-disable-next-line @typescript-eslint/ban-ts-comment
             //@ts-ignore
             this.$refs.igwsTable["$children"][0].selectRow(index);
           }
@@ -316,7 +316,7 @@ export default class IgwList extends mixins(Formatters, Notifications) {
     this.selectedIgw = {};
 
     //Do not do this at home!
-    // eslint-disable-next-line @typescript-eslint/ban-ts-ignore
+    // eslint-disable-next-line @typescript-eslint/ban-ts-comment
     //@ts-ignore
     this.$refs.igwsTable["$children"][0].clearSelected();
   }

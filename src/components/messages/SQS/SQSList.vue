@@ -315,7 +315,7 @@ export default class SQSList extends mixins(Formatters, Notifications) {
                 sqs.queueUrl === this.$route.query.queueUrl ||
                 sqs.QueueArn === this.$route.query.arn
             );
-            // eslint-disable-next-line @typescript-eslint/ban-ts-ignore
+            // eslint-disable-next-line @typescript-eslint/ban-ts-comment
             //@ts-ignore
             this.$refs.sqsTable["$children"][0].selectRow(index);
           }
@@ -344,7 +344,7 @@ export default class SQSList extends mixins(Formatters, Notifications) {
     this.selectedSqs = {};
 
     //Do not do this at home!
-    // eslint-disable-next-line @typescript-eslint/ban-ts-ignore
+    // eslint-disable-next-line @typescript-eslint/ban-ts-comment
     //@ts-ignore
     this.$refs.sqsTable["$children"][0].clearSelected();
   }

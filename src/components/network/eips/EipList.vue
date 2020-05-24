@@ -294,7 +294,7 @@ export default class EipList extends mixins(Formatters, Notifications) {
             const index = this.eipsAsList.findIndex(
               (eip) => eip.AllocationId === this.$route.query.allocationId
             );
-            // eslint-disable-next-line @typescript-eslint/ban-ts-ignore
+            // eslint-disable-next-line @typescript-eslint/ban-ts-comment
             //@ts-ignore
             this.$refs.eipsTable["$children"][0].selectRow(index);
           }
@@ -318,7 +318,7 @@ export default class EipList extends mixins(Formatters, Notifications) {
     this.selectedEip = {};
 
     //Do not do this at home!
-    // eslint-disable-next-line @typescript-eslint/ban-ts-ignore
+    // eslint-disable-next-line @typescript-eslint/ban-ts-comment
     //@ts-ignore
     this.$refs.eipsTable["$children"][0].clearSelected();
   }

@@ -308,7 +308,7 @@ export default class RouteTableList extends mixins(Formatters, Notifications) {
               (routeTable) =>
                 routeTable.RouteTableId === this.$route.query.routeTableId
             );
-            // eslint-disable-next-line @typescript-eslint/ban-ts-ignore
+            // eslint-disable-next-line @typescript-eslint/ban-ts-comment
             //@ts-ignore
             this.$refs.routeTablesTable["$children"][0].selectRow(index);
           }
@@ -335,7 +335,7 @@ export default class RouteTableList extends mixins(Formatters, Notifications) {
     this.selectedRouteTable = {};
 
     //Do not do this at home!
-    // eslint-disable-next-line @typescript-eslint/ban-ts-ignore
+    // eslint-disable-next-line @typescript-eslint/ban-ts-comment
     //@ts-ignore
     this.$refs.routeTablesTable["$children"][0].clearSelected();
   }

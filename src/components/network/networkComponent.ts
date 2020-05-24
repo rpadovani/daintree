@@ -123,7 +123,7 @@ export class NetworkComponent<
                     resource[this.resourceUniqueKey] ===
                     this.$route.query[this.resourceUniqueKey as string]
                 );
-                // eslint-disable-next-line @typescript-eslint/ban-ts-ignore
+                // eslint-disable-next-line @typescript-eslint/ban-ts-comment
                 //@ts-ignore
                 this.$refs.resourcesTable["$children"][0].selectRow(index);
               }
@@ -235,7 +235,7 @@ export class NetworkComponent<
 
     this.selectedResourceKey = "";
 
-    //eslint-disable-next-line @typescript-eslint/ban-ts-ignore
+    //eslint-disable-next-line @typescript-eslint/ban-ts-comment
     //@ts-ignore
     this.$refs.resourcesTable["$children"][0].clearSelected();
 

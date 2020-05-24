@@ -292,7 +292,7 @@ export default class SecurityGroupList extends mixins(
         (securityGroup) =>
           securityGroup.GroupId === this.$route.query.securityGroupId
       );
-      // eslint-disable-next-line @typescript-eslint/ban-ts-ignore
+      // eslint-disable-next-line @typescript-eslint/ban-ts-comment
       //@ts-ignore
       this.$refs.securityGroupsTable["$children"][0].selectRow(index);
     }
@@ -316,7 +316,7 @@ export default class SecurityGroupList extends mixins(
     this.selectedSecurityGroup = {};
 
     //Do not do this at home!s
-    // eslint-disable-next-line @typescript-eslint/ban-ts-ignore
+    // eslint-disable-next-line @typescript-eslint/ban-ts-comment
     //@ts-ignore
     this.$refs.securityGroupsTable["$children"][0].clearSelected();
   }

@@ -9,7 +9,7 @@
     >
       <template #header>{{ selectedResourceTitle }}</template>
 
-      <KeyPair :keyPair="selectedResource" v-on:deleted="close" />
+      <Volume :volume="selectedResource" v-on:deleted="close" />
     </gl-drawer>
 
     <div class="container-fluid">
@@ -29,8 +29,8 @@
           category="secondary"
           variant="success"
           class="col-12 col-sm-3 col-lg-2"
-          to="/ec2/keyPairs/new"
-          >Create new key pair
+          to="/ec2/volumes/new"
+          >Create new volume
         </gl-button>
       </div>
       <gl-table
@@ -55,8 +55,35 @@
             compact
           />
         </template>
-        <template v-slot:cell(region)="data">
-          <RegionText :region="data.value" />
+        <template v-slot:cell(AvailabilityZone)="data">
+          <RegionText :region="data.value" is-az />
+        </template>
+        <template v-slot:cell(Attachments)="data">
+          <gl-link
+            v-for="att in data.value"
+            :key="att.VolumeId"
+            :to="`/ec2/instances?instanceId=${att.InstanceId}`"
+          >
+            {{ att.InstanceId }}
+          </gl-link>
+        </template>
+        <template v-slot:cell(state)="data">
+          <StateText :state="data.value" />
+        </template>
+
+        <template v-slot:cell(encrypted)="data">
+          <gl-icon
+            v-if="data.value"
+            name="check-circle"
+            v-gl-tooltip.hover
+            title="Encrypted"
+          />
+          <gl-icon
+            v-else
+            name="status_failed"
+            v-gl-tooltip.hover
+            title="Not encrypted"
+          />
         </template>
       </gl-table>
 
@@ -69,14 +96,14 @@
         <gl-empty-state
           class="mt-5"
           v-if="loadingCount === 0 && resourcesAsList.length === 0"
-          title="No key pair found in the selected regions!"
+          title="No volume found in the selected regions!"
           svg-path="/assets/undraw_empty_xct9.svg"
           :description="emptyStateDescription"
           compact
         >
           <template #actions>
-            <gl-button icon="plus" variant="success" to="/ec2/keyPairs/new"
-              >Create new key pair
+            <gl-button icon="plus" variant="success" to="/ec2/volumes/new"
+              >Create new volume
             </gl-button>
             <gl-button
               category="secondary"
@@ -94,8 +121,8 @@
 
 <script lang="ts">
 import {
-  DescribeKeyPairsRequest,
-  KeyPair as AWSKeyPair,
+  DescribeVolumesRequest,
+  Volume as AWSVolume,
 } from "aws-sdk/clients/ec2";
 
 import Header from "@/components/Header/Header.vue";
@@ -109,14 +136,17 @@ import {
   GlModalDirective,
   GlSkeletonLoading,
   GlTable,
+  GlLink,
+  GlTooltipDirective,
 } from "@gitlab/ui";
 import Component from "vue-class-component";
 import { NetworkComponent } from "@/components/network/networkComponent";
-import KeyPair from "@/components/EC2/keyPairs/KeyPair.vue";
+import Volume from "@/components/EC2/volumes/Volume.vue";
+import StateText from "@/components/common/StateText.vue";
 
 @Component({
   components: {
-    KeyPair,
+    Volume,
     Header,
     GlTable,
     RegionText,
@@ -126,62 +156,74 @@ import KeyPair from "@/components/EC2/keyPairs/KeyPair.vue";
     GlFormInput,
     GlSkeletonLoading,
     GlEmptyState,
+    GlLink,
+    StateText,
   },
   directives: {
     "gl-modal-directive": GlModalDirective,
+    "gl-tooltip": GlTooltipDirective,
   },
 })
-export default class KeyPairsList extends NetworkComponent<
-  AWSKeyPair,
-  "KeyPairId"
+export default class VolumesList extends NetworkComponent<
+  AWSVolume,
+  "VolumeId" | "State"
 > {
-  resourceName = "key pair";
+  resourceName = "volume";
   canCreate = true;
-  resourceUniqueKey: "KeyPairId" = "KeyPairId";
-  resourceStateKey = undefined;
-  workingStates = [];
+  resourceUniqueKey: "VolumeId" = "VolumeId";
+  resourceStateKey: "State" = "State";
+  workingStates = ["creating", "deleting"];
 
   fields = [
-    { key: "KeyName", sortable: true },
-    { key: "KeyPairId", sortable: true },
-    { key: "KeyFingerprint", sortable: true },
-    { key: "region", sortable: true },
+    {
+      key: "Tags",
+      label: "Name",
+      sortable: true,
+      formatter: this.extractNameFromTags,
+    },
+    { key: "VolumeId", sortable: true },
+    "Attachments",
+    "State",
+    { key: "Encrypted", label: "Encrypted", class: "text-center" },
+    {
+      key: "Size",
+      sortable: true,
+      formatter: (value: string): string => `${value} GiB`,
+    },
+    { key: "CreateTime", formatter: this.standardDate },
+    { key: "AvailabilityZone", sortable: true },
   ];
 
-  get selectedResourceTitle() {
-    return this.selectedResource?.KeyName || "";
-  }
-
-  async getResourcesForRegion(region: string, filterByKeyPairsId?: string[]) {
+  async getResourcesForRegion(region: string, filterByVolumesId?: string[]) {
     const EC2 = await this.client(region);
     if (!EC2) {
       return [];
     }
 
-    const params: DescribeKeyPairsRequest = {};
-    if (filterByKeyPairsId) {
-      params.Filters = [
-        {
-          Name: "key-pair-id",
-          Values: filterByKeyPairsId,
-        },
-      ];
+    const params: DescribeVolumesRequest = {};
+    if (filterByVolumesId) {
+      params.VolumeIds = filterByVolumesId;
     }
 
     try {
-      const data = await EC2.describeKeyPairs(params).promise();
-      if (data.KeyPairs === undefined) {
+      const data = await EC2.describeVolumes(params).promise();
+      if (data.Volumes === undefined) {
         return [];
       }
-      return data.KeyPairs;
+
+      return data.Volumes;
     } catch (err) {
-      this.showError(`[${region}] ` + err, `${region}#loadingKeyPairs`);
+      if (err.code === "InvalidVolume.NotFound") {
+        //We were looking for a volume that doesn't exist anymore, it's not an error
+        return [];
+      }
+      this.showError(`[${region}] ` + err, `${region}#loadingVolumes`);
       return [];
     }
   }
 
   destroyed() {
-    this.$store.commit("notifications/dismissByKey", "loadingKeyPairs");
+    this.$store.commit("notifications/dismissByKey", "loadingVolumes");
   }
 }
 </script>

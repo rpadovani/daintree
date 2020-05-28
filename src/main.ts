@@ -8,6 +8,7 @@ import "@/assets/css/flags.css";
 import "@gitlab/ui/dist/index.css";
 import "@gitlab/ui/dist/utility_classes.css";
 import "highlight.js/styles/github.css";
+import "vue-class-component/hooks";
 
 Vue.use(GlToast);
 

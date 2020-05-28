@@ -1,18 +1,24 @@
 <template>
-  <div class="row" :class="color">
-    <gl-loading-icon
-      class="mr-1"
-      inline
-      v-if="showLoadingIcon"
-    ></gl-loading-icon>
-    {{ state }}
+  <div class="container">
+    <div class="row" :class="color">
+      <gl-loading-icon
+        class="mr-1"
+        inline
+        v-if="showLoadingIcon"
+      ></gl-loading-icon>
+      {{ state }}
+    </div>
   </div>
 </template>
 
 <script lang="ts">
 import { GlLoadingIcon } from "@gitlab/ui";
 import { Component, Prop, Vue } from "vue-property-decorator";
-import { InstanceStateName } from "aws-sdk/clients/ec2";
+import {
+  InstanceStateName,
+  SnapshotState,
+  VolumeState,
+} from "aws-sdk/clients/ec2";
 
 @Component({
   components: {
@@ -32,7 +38,9 @@ export default class StateText extends Vue {
     | "healthy"
     | "unhealthy"
     | "unused"
-    | InstanceStateName;
+    | InstanceStateName
+    | VolumeState
+    | SnapshotState;
 
   get showLoadingIcon(): boolean {
     return [
@@ -41,6 +49,7 @@ export default class StateText extends Vue {
       "shutting-down",
       "stopping",
       "deleting",
+      "creating",
     ].includes(this.state);
   }
 
@@ -49,16 +58,20 @@ export default class StateText extends Vue {
       case "running":
       case "attached":
       case "active":
-      case "available":
       case "healthy":
+      case "in-use":
+      case "completed":
         return "text-success";
       case "deleting":
       case "deleted":
       case "terminated":
       case "detached":
       case "unhealthy":
+      case "error":
         return "text-danger";
       case "pending":
+      case "creating":
+      case "available":
         return "text-info";
       case "failed":
         return "text-light";

@@ -4,7 +4,7 @@
     <div class="container mt-2">
       <h3>Messages resources</h3>
       <div class="row mt-2">
-        <div class="col-12 col-sm-6 col-lg-3">
+        <div class="col-12 col-sm-6 col-lg-3 mt-1">
           <gl-avatar-link to="/messages/sns_topics">
             <gl-avatar-labeled
               label="SNS Topics"
@@ -16,7 +16,7 @@
             </gl-avatar-labeled>
           </gl-avatar-link>
         </div>
-        <div class="col-12 col-sm-6 col-lg-3">
+        <div class="col-12 col-sm-6 col-lg-3 mt-1">
           <gl-avatar-link to="/messages/sns_subscriptions">
             <gl-avatar-labeled
               label="SNS Subscriptions"
@@ -28,7 +28,7 @@
             </gl-avatar-labeled>
           </gl-avatar-link>
         </div>
-        <div class="col-12 col-sm-6 col-lg-3">
+        <div class="col-12 col-sm-6 col-lg-3 mt-1">
           <gl-avatar-link to="/messages/sqs">
             <gl-avatar-labeled
               label="SQS"

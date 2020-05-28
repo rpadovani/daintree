@@ -1,7 +1,7 @@
 const KeyPairsList = () =>
-  import(/* webpackChunkName: "network_vpc_list" */ "./KeyPairsList.vue");
+  import(/* webpackChunkName: "ec2_key_pair_list" */ "./KeyPairsList.vue");
 const NewKeyPair = () =>
-  import(/* webpackChunkName: "network_vpc_new" */ "./NewKeyPair.vue");
+  import(/* webpackChunkName: "ec2_key_pair_new" */ "./NewKeyPair.vue");
 
 export const keyPairsRoutes = [
   {

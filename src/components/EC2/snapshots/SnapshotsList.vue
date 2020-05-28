@@ -9,7 +9,7 @@
     >
       <template #header>{{ selectedResourceTitle }}</template>
 
-      <KeyPair :keyPair="selectedResource" v-on:deleted="close" />
+      <Snapshot :snapshot="selectedResource" v-on:deleted="close" />
     </gl-drawer>
 
     <div class="container-fluid">
@@ -29,8 +29,8 @@
           category="secondary"
           variant="success"
           class="col-12 col-sm-3 col-lg-2"
-          to="/ec2/keyPairs/new"
-          >Create new key pair
+          to="/ec2/snapshots/new"
+          >Create new snapshot
         </gl-button>
       </div>
       <gl-table
@@ -58,6 +58,24 @@
         <template v-slot:cell(region)="data">
           <RegionText :region="data.value" />
         </template>
+        <template v-slot:cell(state)="data">
+          <StateText :state="data.value" />
+        </template>
+
+        <template v-slot:cell(encrypted)="data">
+          <gl-icon
+            v-if="data.value"
+            name="check-circle"
+            v-gl-tooltip.hover
+            title="Encrypted"
+          />
+          <gl-icon
+            v-else
+            name="status_failed"
+            v-gl-tooltip.hover
+            title="Not encrypted"
+          />
+        </template>
       </gl-table>
 
       <div class="container">
@@ -69,14 +87,14 @@
         <gl-empty-state
           class="mt-5"
           v-if="loadingCount === 0 && resourcesAsList.length === 0"
-          title="No key pair found in the selected regions!"
+          title="No snapshot found in the selected regions!"
           svg-path="/assets/undraw_empty_xct9.svg"
           :description="emptyStateDescription"
           compact
         >
           <template #actions>
-            <gl-button icon="plus" variant="success" to="/ec2/keyPairs/new"
-              >Create new key pair
+            <gl-button icon="plus" variant="success" to="/ec2/snapshots/new"
+              >Create new snapshot
             </gl-button>
             <gl-button
               category="secondary"
@@ -94,8 +112,8 @@
 
 <script lang="ts">
 import {
-  DescribeKeyPairsRequest,
-  KeyPair as AWSKeyPair,
+  DescribeSnapshotsRequest,
+  Snapshot as AWSSnapshot,
 } from "aws-sdk/clients/ec2";
 
 import Header from "@/components/Header/Header.vue";
@@ -109,14 +127,17 @@ import {
   GlModalDirective,
   GlSkeletonLoading,
   GlTable,
+  GlLink,
+  GlTooltipDirective,
 } from "@gitlab/ui";
 import Component from "vue-class-component";
 import { NetworkComponent } from "@/components/network/networkComponent";
-import KeyPair from "@/components/EC2/keyPairs/KeyPair.vue";
+import Snapshot from "@/components/EC2/snapshots/Snapshot.vue";
+import StateText from "@/components/common/StateText.vue";
 
 @Component({
   components: {
-    KeyPair,
+    Snapshot,
     Header,
     GlTable,
     RegionText,
@@ -126,62 +147,83 @@ import KeyPair from "@/components/EC2/keyPairs/KeyPair.vue";
     GlFormInput,
     GlSkeletonLoading,
     GlEmptyState,
+    GlLink,
+    StateText,
   },
   directives: {
     "gl-modal-directive": GlModalDirective,
+    "gl-tooltip": GlTooltipDirective,
   },
 })
-export default class KeyPairsList extends NetworkComponent<
-  AWSKeyPair,
-  "KeyPairId"
+export default class SnapshotsList extends NetworkComponent<
+  AWSSnapshot,
+  "SnapshotId" | "State"
 > {
-  resourceName = "key pair";
+  resourceName = "snapshot";
   canCreate = true;
-  resourceUniqueKey: "KeyPairId" = "KeyPairId";
-  resourceStateKey = undefined;
-  workingStates = [];
+  resourceUniqueKey: "SnapshotId" = "SnapshotId";
+  resourceStateKey: "State" = "State";
+  workingStates = ["creating", "pending", "deleting"];
 
   fields = [
-    { key: "KeyName", sortable: true },
-    { key: "KeyPairId", sortable: true },
-    { key: "KeyFingerprint", sortable: true },
+    {
+      key: "Tags",
+      label: "Name",
+      sortable: true,
+      formatter: this.extractNameFromTags,
+    },
+    { key: "Description" },
+    { key: "SnapshotId", sortable: true },
+    "State",
+    "Progress",
+    { key: "Encrypted", label: "Encrypted", class: "text-center" },
+    {
+      key: "VolumeSize",
+      sortable: true,
+      formatter: (value: string): string => `${value} GiB`,
+      label: "Size",
+    },
+
+    { key: "StartTime", formatter: this.standardDate, sortable: true },
     { key: "region", sortable: true },
   ];
 
-  get selectedResourceTitle() {
-    return this.selectedResource?.KeyName || "";
-  }
-
-  async getResourcesForRegion(region: string, filterByKeyPairsId?: string[]) {
+  async getResourcesForRegion(
+    region: string,
+    filterBySnapshotsId?: string[]
+  ): Promise<AWSSnapshot[]> {
     const EC2 = await this.client(region);
-    if (!EC2) {
+    if (!EC2 || !this.accountId) {
       return [];
     }
 
-    const params: DescribeKeyPairsRequest = {};
-    if (filterByKeyPairsId) {
-      params.Filters = [
-        {
-          Name: "key-pair-id",
-          Values: filterByKeyPairsId,
-        },
-      ];
+    const params: DescribeSnapshotsRequest = {
+      Filters: [{ Name: "owner-id", Values: [this.accountId] }],
+    };
+
+    if (filterBySnapshotsId) {
+      params.SnapshotIds = filterBySnapshotsId;
     }
 
     try {
-      const data = await EC2.describeKeyPairs(params).promise();
-      if (data.KeyPairs === undefined) {
+      const data = await EC2.describeSnapshots(params).promise();
+      if (data.Snapshots === undefined) {
         return [];
       }
-      return data.KeyPairs;
+
+      return data.Snapshots;
     } catch (err) {
-      this.showError(`[${region}] ` + err, `${region}#loadingKeyPairs`);
+      if (err.code === "InvalidSnapshot.NotFound") {
+        //We were looking for a snapshot that doesn't exist anymore, it's not an error
+        return [];
+      }
+      this.showError(`[${region}] ` + err, `${region}#loadingSnapshots`);
       return [];
     }
   }
 
-  destroyed() {
-    this.$store.commit("notifications/dismissByKey", "loadingKeyPairs");
+  destroyed(): void {
+    this.$store.commit("notifications/dismissByKey", "loadingSnapshots");
   }
 }
 </script>

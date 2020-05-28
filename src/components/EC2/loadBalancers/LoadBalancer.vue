@@ -211,7 +211,7 @@ export default class LoadBalancer extends Formatters {
       case "failed":
         return "danger";
       default:
-        return "secondary";
+        return "neutral";
     }
   }
 

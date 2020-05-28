@@ -10,10 +10,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 - Added support for EBS
 - Added support for Snapshots
-
+- Added [Github](https://github.com/rpadovani/daintree) mirroring of the source code! If you want, you can follow development of the project also over there!
 ### Changed
 
 - More coherent notifications when deleting resources
+- Changed label style for Load Balancers and Instances status (thanks Gitlab developers!)
 
 ### Fixed
 

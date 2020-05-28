@@ -119,7 +119,11 @@
                 software: this way, everyone can contribute improving the
                 experience of using it. The full source code is available over
                 <a href="https://gitlab.com/rpadovani/daintree" target="_blank"
-                  >Gitlab <gl-icon name="external-link" /> </a
+                  >Gitlab <gl-icon name="external-link" />
+                </a>
+                and mirrored over
+                <a href="https://github.com/rpadovani/daintree" target="_blank"
+                  >Github <gl-icon name="external-link" /> </a
                 >.
               </p>
 

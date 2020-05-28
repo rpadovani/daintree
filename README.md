@@ -12,8 +12,10 @@ Daintree does not aim to replace the original console, but would like to improve
 - **Fast navigation**: Daintree aims to be fast, without full page reloads, and making switching between roles, regions, and services painless;
 - **...and much more**: Daintree tries to improve the daily experience of using AWS services from the web! You can read about all our features in [the dedicated page](https://daintree.app/#/about), or login and try it! 
 
+![multiple regions](https://daintree.app/assets/features/multiple-regions.gif)
+
 ## Contributing 
 
-Thanks for being interested in contributing :-)
+Thanks for being interested in contributing! Development happens over [Gitlab.com](https://gitlab.com/rpadovani/daintree), but feel free to report issues also over Github, if you prefer :-)
 
 Read [CONTRIBUTING.md](https://gitlab.com/rpadovani/daintree/-/blob/master/CONTRIBUTING.md) for more information!

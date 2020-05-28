@@ -1,3 +1,5 @@
-export function isString(str: string | undefined): str is string {
-  return str !== undefined;
+export function isString(
+  str: string | undefined | (string | null)[]
+): str is string {
+  return !Array.isArray(str) && str !== undefined;
 }

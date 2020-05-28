@@ -3,7 +3,11 @@
     <Header hide-sub-header />
 
     <div class="container">
-      <section class="gl-banner mt-1" v-for="news in data" :key="news.tagName">
+      <section
+        class="gl-banner mt-1"
+        v-for="news in changelogs"
+        :key="news.tagName"
+      >
         <div class="gl-banner-content">
           <h1 class="gl-banner-title">
             {{ news.name }}
@@ -38,11 +42,11 @@ import { GlButton, GlButtonGroup, GlBadge } from "@gitlab/ui";
   },
 })
 export default class NotFound extends Vue {
-  data = [];
+  changelogs = [];
 
-  async mounted() {
+  async mounted(): Promise<void> {
     const response = await fetch("/changelog.json");
-    this.data = await response.json();
+    this.changelogs = await response.json();
   }
 }
 </script>

@@ -245,6 +245,12 @@ export default class CloudwatchWidget extends Notifications {
       }
     );
   }
+
+  beforeDestroy() {
+    if (this.imageData) {
+      URL.revokeObjectURL(this.imageData);
+    }
+  }
 }
 </script>
 

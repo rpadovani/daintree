@@ -4,7 +4,7 @@
     <div class="container mt-2">
       <h3>EC2 resources</h3>
       <div class="row mt-2">
-        <div class="col-col-12 col-sm-6 col-lg-3">
+        <div class="col-12 col-sm-6 col-lg-3 mt-1">
           <gl-avatar-link to="/ec2/instances">
             <gl-avatar-labeled
               label="Instances"
@@ -16,7 +16,7 @@
             </gl-avatar-labeled>
           </gl-avatar-link>
         </div>
-        <div class="col-col-12 col-sm-6 col-lg-3">
+        <div class="col-12 col-sm-6 col-lg-3 mt-1">
           <gl-avatar-link to="/ec2/loadBalancers">
             <gl-avatar-labeled
               label="Load balancers"
@@ -28,7 +28,7 @@
             </gl-avatar-labeled>
           </gl-avatar-link>
         </div>
-        <div class="col-col-12 col-sm-6 col-lg-3">
+        <div class="col-12 col-sm-6 col-lg-3 mt-1">
           <gl-avatar-link to="/ec2/targetGroups">
             <gl-avatar-labeled
               label="Target groups"
@@ -39,7 +39,7 @@
             </gl-avatar-labeled>
           </gl-avatar-link>
         </div>
-        <div class="col-col-12 col-sm-6 col-lg-3">
+        <div class="col-12 col-sm-6 col-lg-3 mt-1">
           <gl-avatar-link to="/ec2/keyPairs">
             <gl-avatar-labeled
               label="Key pairs"
@@ -47,6 +47,30 @@
               shape="rect"
               :size="32"
               src="assets/aws-icons/ec2/AWS-Key-Management-Service.svg"
+            >
+            </gl-avatar-labeled>
+          </gl-avatar-link>
+        </div>
+        <div class="col-12 col-sm-6 col-lg-3 mt-1">
+          <gl-avatar-link to="/ec2/volumes">
+            <gl-avatar-labeled
+              label="EBS volumes"
+              sub-label="Block storage service"
+              shape="rect"
+              :size="32"
+              src="assets/aws-icons/ec2/Amazon-Elastic-Block-Store-EBS_Volume_light-bg.svg"
+            >
+            </gl-avatar-labeled>
+          </gl-avatar-link>
+        </div>
+        <div class="col-12 col-sm-6 col-lg-3 mt-1">
+          <gl-avatar-link to="/ec2/snapshots">
+            <gl-avatar-labeled
+              label="EBS snapshots"
+              sub-label="Backup your EBS"
+              shape="rect"
+              :size="32"
+              src="assets/aws-icons/ec2/Amazon-Elastic-Block-Store-EBS_Snapshot_light-bg.svg"
             >
             </gl-avatar-labeled>
           </gl-avatar-link>

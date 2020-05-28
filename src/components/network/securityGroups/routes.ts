@@ -1,10 +1,10 @@
 const SecurityGroupList = () =>
   import(
-    /* webpackChunkName: "network_route_table_list" */ "./SecurityGroupList.vue"
+    /* webpackChunkName: "network_security_group_list" */ "./SecurityGroupList.vue"
   );
 const NewSecurityGroup = () =>
   import(
-    /* webpackChunkName: "network_route_table_new" */ "./NewSecurityGroup.vue"
+    /* webpackChunkName: "network_security_group_new" */ "./NewSecurityGroup.vue"
   );
 
 export const securityGroupRoutes = [

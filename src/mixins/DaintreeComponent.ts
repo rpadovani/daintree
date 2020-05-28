@@ -28,6 +28,7 @@ import store from "@/store";
       regionsEnabled: "regions",
       stsCredentials: "credentials",
       currentRoleIndex: "currentRoleIndex",
+      accountId: "account",
     }),
   },
 })
@@ -38,6 +39,7 @@ export class DaintreeComponent extends Vue {
   regionsEnabled!: string[];
   stsCredentials!: Credentials;
   currentRoleIndex!: number;
+  accountId!: string | undefined;
 
   //Injected by Gitlab UI: https://gitlab-org.gitlab.io/gitlab-ui/?path=/story/base-toast--default
   $toast!: {
@@ -86,7 +88,9 @@ export class DaintreeComponent extends Vue {
     this.dismissAlertByKey(key);
   }
 
-  standardDate = standardDate;
+  standardDate(date: Date): string {
+    return standardDate(date);
+  }
 
   extractNameFromTags(tags: TagList): string | undefined {
     const nameTag = tags.filter((v) => v.Key === "Name");

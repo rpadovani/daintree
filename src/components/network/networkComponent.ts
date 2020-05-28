@@ -49,7 +49,7 @@ export class NetworkComponent<
   filter = "";
   loadingCount = 0;
 
-  wipResources: { [key: string]: string[] } = {};
+  wipResources: { [key: string]: R[K][] } = {};
   isPolling = false;
 
   @Ref() readonly resourcesTable!: BTable;
@@ -62,16 +62,21 @@ export class NetworkComponent<
     return this.resources[this.selectedResourceKey];
   }
 
-  get selectedResourceTitle() {
-    const nameTag = this.selectedResource?.Tags?.filter(
+  get selectedResourceTitle(): string {
+    if (!this.selectedResource) {
+      return "";
+    }
+    const nameTag = this.selectedResource.Tags?.filter(
       (v: Tag) => v.Key === "Name"
     );
 
+    const resourceKey = this.selectedResource[this.resourceUniqueKey];
+
     if (nameTag && nameTag.length > 0) {
-      return `${nameTag[0].Value} (${this.selectedResource?.VpcId})`;
+      return `${nameTag[0].Value} (${resourceKey})`;
     }
 
-    return this.selectedResource?.VpcId;
+    return resourceKey;
   }
 
   get emptyStateDescription(): string {
@@ -97,7 +102,7 @@ export class NetworkComponent<
     return null;
   }
 
-  getAllResources() {
+  getAllResources(): void {
     this.regionsEnabled.map((region) => {
       this.loadingCount++;
       this.getResourcesForRegion(region)
@@ -154,7 +159,7 @@ export class NetworkComponent<
     }
   }
 
-  async client(region: string) {
+  async client(region: string): Promise<EC2Client | void> {
     const credentials = await this.credentials();
 
     if (credentials !== undefined) {
@@ -163,7 +168,7 @@ export class NetworkComponent<
   }
 
   //Keep track if the resource of this region are still available
-  markRegionForRefresh(region: string) {
+  markRegionForRefresh(region: string): void {
     Object.keys(this.resources).forEach((key) => {
       if (this.resources[key].region === region) {
         this.resources[key].stillPresent = false;
@@ -172,18 +177,28 @@ export class NetworkComponent<
   }
 
   //Remove the resources tracked for the update that we don't have anymore: they have been deleted
-  cleanResourcesNotUpdatedInRegion(region: string) {
+  cleanResourcesNotUpdatedInRegion(region: string): void {
     Object.keys(this.resources).forEach((key) => {
       if (
         this.resources[key].region === region &&
         !this.resources[key].stillPresent
       ) {
+        //If there was a notification about this resource, we dismiss it, and set a new one about the component being
+        // deleted
+        this.dismissAlertByResourceID(
+          this.resources[key][this.resourceUniqueKey]
+        );
+        this.showAlert({
+          variant: "warning",
+          text: `Deleted ${this.resourceName} with ID ${key}`,
+          key: `deletedResource${key}`,
+        });
         this.$delete(this.resources, key);
       }
     });
   }
 
-  dataRetrieved(resourcesList: R[], region: string, filterById?: R[K][]) {
+  dataRetrieved(resourcesList: R[], region: string, filterById?: R[K][]): void {
     if (!filterById) {
       this.loadingCount--;
       this.markRegionForRefresh(region);
@@ -196,6 +211,13 @@ export class NetworkComponent<
       filterById.forEach((idFiltered) => {
         if (!retrievedIds || !retrievedIds.includes(idFiltered)) {
           this.$delete(this.resources, idFiltered);
+          //If there was a notification about this resource, we dismiss it
+          this.dismissAlertByResourceID(idFiltered);
+          this.showAlert({
+            variant: "warning",
+            text: `Deleted ${this.resourceName} with ID ${idFiltered}`,
+            key: `deletedResource${idFiltered}`,
+          });
         }
       });
     }
@@ -243,7 +265,7 @@ export class NetworkComponent<
     }
   }
 
-  close() {
+  close(): void {
     this.drawerOpened = false;
     const region = this.selectedResource?.region;
     if (region === undefined || !this.selectedResource) {
@@ -270,7 +292,7 @@ export class NetworkComponent<
     this.$router.push({ query: {} }).catch(() => {});
   }
 
-  onRowSelected(resources: (R & Metadata)[]) {
+  onRowSelected(resources: (R & Metadata)[]): void {
     if (resources.length > 0 && resources[0][this.resourceUniqueKey]) {
       this.selectedResourceKey = resources[0][this.resourceUniqueKey];
       this.drawerOpened = true;
@@ -285,7 +307,7 @@ export class NetworkComponent<
     }
   }
 
-  startPolling() {
+  startPolling(): void {
     if (this.isPolling) {
       return;
     }
@@ -298,7 +320,7 @@ export class NetworkComponent<
         if (this.wipResources[region].length > 0) {
           this.getResourcesForRegion(region, this.wipResources[region]).then(
             (resources) => {
-              this.dataRetrieved(resources, region);
+              this.dataRetrieved(resources, region, this.wipResources[region]);
             }
           );
         }
@@ -307,7 +329,7 @@ export class NetworkComponent<
   }
 
   @Watch("regionsEnabled")
-  onRegionsEnabledChanged(newValue: string[], oldValue: string[]) {
+  onRegionsEnabledChanged(newValue: string[], oldValue: string[]): void {
     const addedRegions = [...newValue.filter((d) => !oldValue.includes(d))];
     const removedRegions = [...oldValue.filter((d) => !newValue.includes(d))];
 
@@ -333,12 +355,12 @@ export class NetworkComponent<
 
   //Changing roles requires to reload all resources
   @Watch("currentRoleIndex")
-  onCurrentRoleIndexChanged() {
+  onCurrentRoleIndexChanged(): void {
     this.resources = {};
     this.getAllResources();
   }
 
-  beforeMount() {
+  beforeMount(): void {
     this.getAllResources();
   }
 }

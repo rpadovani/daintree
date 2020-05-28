@@ -158,6 +158,8 @@ export default class SubHeader extends Vue {
       { name: "Load Balancers", link: "#/ec2/loadBalancers" },
       { name: "Target groups", link: "#/ec2/targetGroups" },
       { name: "Key pairs", link: "#/ec2/keyPairs" },
+      { name: "EBS volumes", link: "#/ec2/volumes" },
+      { name: "EBS snapshots", link: "#/ec2/snapshots" },
     ],
     Messages: [
       { name: "SNS Topics", link: "#/messages/sns_topics" },
@@ -166,14 +168,14 @@ export default class SubHeader extends Vue {
     ],
   };
 
-  get filteredSections() {
+  get filteredSections(): { name: string; link: string }[] {
     const lowerCasedSearchTerm = this.sectionSearchTerm.toLowerCase();
     return this.sections.filter((resultString) =>
       resultString["name"].toLowerCase().includes(lowerCasedSearchTerm)
     );
   }
 
-  get filteredSubsections() {
+  get filteredSubsections(): { name: string; link: string }[] {
     const lowerCasedSearchTerm = this.subsectionSearchTerm.toLowerCase();
     if (this.selectedSection) {
       return this.subsections[this.selectedSection].filter((resultString) =>

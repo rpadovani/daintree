@@ -6,10 +6,20 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Added
+
+- Added support for EBS
+- Added support for Snapshots
+
+### Changed
+
+- More coherent notifications when deleting resources
+
 ### Fixed
 
 - Resources IDs in the URL are not case sensitive anymore, fixing some broken internal link
 - Improved how Daintree detects a work in progress resource
+- Fixed a memory leak in displaying CloudWatch widgets
 
 ## [0.4.0]
 

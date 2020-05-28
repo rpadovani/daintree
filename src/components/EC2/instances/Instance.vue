@@ -374,13 +374,13 @@ export default class Instance extends Vue {
       case "shutting-down":
         return "warning";
       case "terminated":
-        return "dark";
+        return "neutral";
       case "stopping":
         return "warning";
       case "stopped":
         return "danger";
       default:
-        return "secondary";
+        return "muted";
     }
   }
 

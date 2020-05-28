@@ -64,6 +64,11 @@
           <a href="https://gitlab.com/rpadovani/daintree" target="_blank"
             >Gitlab
             <gl-icon name="external-link" />
+          </a>
+          and mirrored over
+          <a href="https://github.com/rpadovani/daintree" target="_blank"
+            >Github
+            <gl-icon name="external-link" />
             .</a
           >
           Illustrations by Katerina Limpitsouni from

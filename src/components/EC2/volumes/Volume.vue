@@ -153,35 +153,11 @@
       </gl-table>
 
       <h5 class="mt-3">Related EC2 instances</h5>
-      <gl-alert
-        v-if="instancesState === 'error'"
-        variant="danger"
-        :dismissible="false"
-        >{{ instancesError }}
-      </gl-alert>
-      <gl-table
-        :fields="instancesFields"
-        :items="instances"
-        borderless
-        small
-        hover
-        :busy="instancesState === 'loading'"
-        thead-class="hidden-header"
-        show-empty
-        empty-text="Daintree hasn't found any instance using this volume!"
-      >
-        <template v-slot:cell(state)="data">
-          <StateText :state="data.value" />
-        </template>
-        <template v-slot:cell(InstanceId)="data">
-          <gl-link :to="`/ec2/instances?instanceId=${data.value}`">
-            {{ data.value }}
-          </gl-link>
-        </template>
-        <template v-slot:table-busy>
-          <gl-skeleton-loading />
-        </template>
-      </gl-table>
+      <RelatedInstances
+        :region="volume.region"
+        filter-key="block-device-mapping.volume-id"
+        :filter-value="this.volume.VolumeId"
+      />
     </gl-tab>
 
     <gl-tab title="Status check" @click="retrieveVolumeStatus">
@@ -257,11 +233,7 @@ import {
   GlTooltipDirective,
   GlLink,
 } from "@gitlab/ui";
-import EC2Client, {
-  Instance,
-  InstanceState,
-  VolumeStatusInfo,
-} from "aws-sdk/clients/ec2";
+import EC2Client, { VolumeStatusInfo } from "aws-sdk/clients/ec2";
 import { Component, Prop, Watch } from "vue-property-decorator";
 import TagsTable from "@/components/common/TagsTable.vue";
 import FlowLogsTab from "@/components/network/flowLogs/FlowLogsTab.vue";
@@ -273,9 +245,11 @@ import StateText from "@/components/common/StateText.vue";
 import RegionText from "@/components/common/RegionText.vue";
 import CloudwatchWidget from "@/components/cloudwatch/CloudwatchWidget.vue";
 import SnapshotTab from "@/components/EC2/snapshots/SnapshotTab.vue";
+import RelatedInstances from "@/components/EC2/instances/RelatedInstances.vue";
 
 @Component({
   components: {
+    RelatedInstances,
     SnapshotTab,
     TagsTable,
     GlTable,
@@ -421,28 +395,6 @@ export default class Volume extends DaintreeComponent {
     ];
   }
 
-  //Related instances
-  instances: Instance[] = [];
-  instancesState: "loading" | "loaded" | "empty" | "error" = "loading";
-  instancesError: string | undefined;
-  instancesFields = [
-    {
-      key: "Tags",
-      label: "Name",
-      sortable: true,
-      formatter: this.extractNameFromTags,
-    },
-    {
-      key: "InstanceId",
-      sortable: true,
-    },
-    {
-      key: "InstanceType",
-      sortable: true,
-    },
-    { key: "State", formatter: (s: InstanceState): string => s.Name || "" },
-  ];
-
   async EC2Client(): Promise<EC2Client | void> {
     const credentials = await this.credentials();
 
@@ -451,41 +403,6 @@ export default class Volume extends DaintreeComponent {
     }
 
     return new EC2Client({ region: this.volume.region, credentials });
-  }
-
-  async describeInstances(): Promise<void> {
-    const params = {
-      Filters: [
-        {
-          Name: "block-device-mapping.volume-id",
-          Values: [this.volume.VolumeId || ""],
-        },
-      ],
-    };
-    this.instancesState = "loading";
-    this.instances = [];
-    this.instancesError = "";
-
-    const EC2 = await this.EC2Client();
-
-    if (!EC2) {
-      return;
-    }
-
-    try {
-      const data = await EC2.describeInstances(params).promise();
-      data.Reservations?.forEach((r) => {
-        if (r.Instances) {
-          this.instances = this.instances.concat(r.Instances);
-        }
-      });
-
-      this.instancesError = undefined;
-      this.instancesState = this.instances.length === 0 ? "empty" : "loaded";
-    } catch (err) {
-      this.instancesError = err.message;
-      this.instancesState = "error";
-    }
   }
 
   volumeStatus: VolumeStatusInfo = {};
@@ -594,16 +511,6 @@ export default class Volume extends DaintreeComponent {
     } catch (err) {
       this.showError(err.message, "detachVolume");
     }
-  }
-
-  //This happens while the user clicks on a row of the table while the sidebar is open.
-  @Watch("volume")
-  onVolumeChanged(): void {
-    this.describeInstances();
-  }
-
-  mounted(): void {
-    this.describeInstances();
   }
 }
 </script>

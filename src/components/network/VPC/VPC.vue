@@ -161,6 +161,18 @@
       />
     </gl-tab>
 
+    <gl-tab title="EC2 Instances">
+      <gl-alert variant="tip" :dismissible="false">
+        A list of EC2 instances that have been deployed on this VPC.
+      </gl-alert>
+
+      <RelatedInstances
+        :region="vpc.region"
+        filter-key="vpc-id"
+        :filter-value="vpc.VpcId"
+      />
+    </gl-tab>
+
     <gl-tab title="Flow logs">
       <FlowLogsTab :region="vpc.region" :resource-id="vpc.VpcId" />
     </gl-tab>
@@ -196,6 +208,7 @@ import { mixins } from "vue-class-component";
 import Notifications from "@/mixins/notifications";
 import FlowLogsTab from "@/components/network/flowLogs/FlowLogsTab.vue";
 import SubnetTab from "@/components/network/subnets/SubnetTab.vue";
+import RelatedInstances from "@/components/EC2/instances/RelatedInstances.vue";
 
 @Component({
   components: {
@@ -211,6 +224,7 @@ import SubnetTab from "@/components/network/subnets/SubnetTab.vue";
     GlModal,
     FlowLogsTab,
     SubnetTab,
+    RelatedInstances,
   },
   directives: { "gl-modal-directive": GlModalDirective },
 })

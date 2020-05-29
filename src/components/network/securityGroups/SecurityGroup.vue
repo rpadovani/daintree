@@ -62,6 +62,18 @@
           is-outbound
         />
       </gl-tab>
+
+      <gl-tab title="EC2 Instances">
+        <gl-alert variant="tip" :dismissible="false">
+          A list of EC2 instances that are using this security group.
+        </gl-alert>
+
+        <RelatedInstances
+          :region="securityGroup.region"
+          filter-key="instance.group-id"
+          :filter-value="securityGroup.GroupId"
+        />
+      </gl-tab>
     </gl-tabs>
   </div>
 </template>
@@ -91,9 +103,11 @@ import { securityGroups } from "@/components/network/securityGroups/securityGrou
 import SecurityGroupWithRegion = securityGroups.SecurityGroupWithRegion;
 import SubnetTab from "@/components/network/subnets/SubnetTab.vue";
 import ListOfRules from "@/components/network/securityGroups/ListOfRules.vue";
+import RelatedInstances from "@/components/EC2/instances/RelatedInstances.vue";
 
 @Component({
   components: {
+    RelatedInstances,
     ListOfRules,
     TagsTable,
     GlTabs,

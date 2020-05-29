@@ -10,7 +10,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 - Added support for EBS
 - Added support for Snapshots
+- Added a list of EC2 related instances to VPCs, subnets, EBS, and key pairs page: you can now see in a glance how such resources are linked to any of your instances!
 - Added [Github](https://github.com/rpadovani/daintree) mirroring of the source code! If you want, you can follow development of the project also over there!
+
 ### Changed
 
 - More coherent notifications when deleting resources
@@ -18,7 +20,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Fixed
 
-- Resources IDs in the URL are not case sensitive anymore, fixing some broken internal link
+- Resources IDs in the URL are not case-sensitive anymore, fixing some broken internal link
 - Improved how Daintree detects a work in progress resource
 - Fixed a memory leak in displaying CloudWatch widgets
 

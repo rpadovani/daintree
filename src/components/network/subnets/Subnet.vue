@@ -148,6 +148,18 @@
       />
     </gl-tab>
 
+    <gl-tab title="EC2 Instances">
+      <gl-alert variant="tip" :dismissible="false">
+        A list of EC2 instances that have been deployed on this subnet.
+      </gl-alert>
+
+      <RelatedInstances
+        :region="subnet.region"
+        filter-key="subnet-id"
+        :filter-value="subnet.SubnetId"
+      />
+    </gl-tab>
+
     <gl-tab title="Flow logs">
       <FlowLogsTab :region="subnet.region" :resource-id="subnet.SubnetId" />
     </gl-tab>
@@ -179,6 +191,7 @@ import SubnetWithRegion = Subnets.SubnetWithRegion;
 import FlowLogsTab from "@/components/network/flowLogs/FlowLogsTab.vue";
 import StateText from "@/components/common/StateText.vue";
 import ListOfRoutes from "@/components/network/routeTables/ListOfRoutes.vue";
+import RelatedInstances from "@/components/EC2/instances/RelatedInstances.vue";
 
 @Component({
   components: {
@@ -195,6 +208,7 @@ import ListOfRoutes from "@/components/network/routeTables/ListOfRoutes.vue";
     GlButton,
     GlModal,
     StateText,
+    RelatedInstances,
   },
   directives: { "gl-modal-directive": GlModalDirective },
 })

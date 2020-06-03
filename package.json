@@ -23,7 +23,7 @@
     "vuex": "3.4.0"
   },
   "devDependencies": {
-    "@types/echarts": "4.6.0",
+    "@types/echarts": "4.6.1",
     "@types/node": "13.13.9",
     "@types/webpack-env": "1.15.2",
     "@typescript-eslint/eslint-plugin": "3.0.2",

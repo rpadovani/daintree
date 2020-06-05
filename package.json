@@ -24,7 +24,7 @@
   },
   "devDependencies": {
     "@types/echarts": "4.6.1",
-    "@types/node": "13.13.9",
+    "@types/node": "13.13.10",
     "@types/webpack-env": "1.15.2",
     "@typescript-eslint/eslint-plugin": "3.0.2",
     "@typescript-eslint/parser": "3.0.2",

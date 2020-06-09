@@ -2,14 +2,9 @@ stages:
   - test
   - build
   - deploy
-  - dast
-
-variables:
-  DAST_WEBSITE: https://daintree.app
 
 include:
   - template: SAST.gitlab-ci.yml
-  - template: DAST.gitlab-ci.yml
   - template: Dependency-Scanning.gitlab-ci.yml
   - template: License-Scanning.gitlab-ci.yml
 

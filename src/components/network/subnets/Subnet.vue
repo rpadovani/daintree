@@ -1,5 +1,5 @@
 <template>
-  <gl-tabs theme="blue">
+  <gl-tabs theme="blue" lazy>
     <gl-tab title="Overview">
       <gl-modal
         modal-id="delete-subnet-modal"
@@ -70,48 +70,11 @@
       />
     </gl-tab>
 
-    <gl-tab title="Route Table" @click="describeRouteTable">
-      <gl-alert
-        v-if="routeTableState === 'error'"
-        variant="danger"
-        :dismissible="false"
-        >{{ routeTableError }}
-      </gl-alert>
-      <gl-skeleton-loading v-if="routeTableState === 'loading'" />
-
-      <gl-empty-state
-        v-if="routeTableState === 'empty'"
-        title="No related route table"
-        svg-path="/assets/undraw_empty_xct9.svg"
-        description="Daintree hasn't found any route table associated to this subnet!"
-        compact
-      />
-
-      <div
-        class="row justify-content-around mt-3"
-        v-if="routeTableState === 'loaded'"
-      >
-        <gl-card class="col-3" title="Route Table ID">
-          <router-link
-            :to="`/network/routeTables?routeTableId=${routeTable.RouteTableId}`"
-          >
-            {{ routeTable.RouteTableId }}
-          </router-link>
-        </gl-card>
-        <gl-card class="col-3" title="VPC ID">
-          <router-link :to="`/network/vpcs?vpcId=${routeTable.VpcId}`">
-            {{ routeTable.VpcId }}
-          </router-link>
-        </gl-card>
-
-        <gl-card class="col-3" title="Owner ID">
-          {{ routeTable.OwnerId }}
-        </gl-card>
-      </div>
-
-      <ListOfRoutes
-        :routes="routeTable.Routes"
-        v-if="routeTableState === 'loaded'"
+    <gl-tab title="Route tables">
+      <RelatedRoutesTable
+        :region="subnet.region"
+        filter-key="association.subnet-id"
+        :filter-value="subnet.SubnetId"
       />
     </gl-tab>
 
@@ -181,7 +144,7 @@ import {
 } from "@gitlab/ui";
 import EC2Client from "aws-sdk/clients/ec2";
 import { Component, Prop, Watch } from "vue-property-decorator";
-import { RouteTable, NetworkAcl, NetworkAclEntry } from "aws-sdk/clients/ec2";
+import { NetworkAcl, NetworkAclEntry } from "aws-sdk/clients/ec2";
 import { Formatters } from "@/mixins/formatters";
 import TagsTable from "@/components/common/TagsTable.vue";
 import { mixins } from "vue-class-component";
@@ -192,9 +155,11 @@ import FlowLogsTab from "@/components/network/flowLogs/FlowLogsTab.vue";
 import StateText from "@/components/common/StateText.vue";
 import ListOfRoutes from "@/components/network/routeTables/ListOfRoutes.vue";
 import RelatedInstances from "@/components/EC2/instances/RelatedInstances.vue";
+import RelatedRoutesTable from "@/components/network/routeTables/RelatedRoutesTable.vue";
 
 @Component({
   components: {
+    RelatedRoutesTable,
     ListOfRoutes,
     FlowLogsTab,
     TagsTable,
@@ -227,39 +192,6 @@ export default class Subnet extends mixins(Formatters, Notifications) {
     return new EC2Client({
       region: this.subnet.region,
       credentials: this.$store.getters["sts/credentials"],
-    });
-  }
-
-  //Route table tab
-  routeTable: RouteTable = {};
-  routeTableState: "loading" | "loaded" | "empty" | "error" = "loading";
-  routeTableError: string | undefined;
-
-  routesFields = ["Destination", "Target", "State", "Origin"];
-
-  describeRouteTable() {
-    const params = {
-      Filters: [
-        { Name: "association.subnet-id", Values: [this.subnet.SubnetId || ""] },
-      ],
-    };
-    this.routeTableState = "loading";
-    this.routeTable = {};
-    this.routeTableError = "";
-
-    this.EC2.describeRouteTables(params, (err, data) => {
-      if (err) {
-        this.routeTableError = err.message;
-        this.routeTableState = "error";
-      } else if (data.RouteTables && data.RouteTables.length > 0) {
-        this.routeTable = data.RouteTables[0];
-        this.routeTableError = undefined;
-        this.routeTableState = "loaded";
-      } else {
-        this.routeTableError = undefined;
-
-        this.routeTableState = "empty";
-      }
     });
   }
 
@@ -366,7 +298,6 @@ export default class Subnet extends mixins(Formatters, Notifications) {
   //This happens while the user clicks on a row of the table while the sidebar is open.
   @Watch("subnet")
   onSubnetChanged() {
-    this.describeRouteTable();
     this.describeAcls();
   }
 }

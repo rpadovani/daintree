@@ -1,5 +1,5 @@
 <template>
-  <gl-tabs theme="blue">
+  <gl-tabs theme="blue" lazy>
     <gl-tab title="Overview">
       <gl-modal
         modal-id="delete-vpc-modal"
@@ -134,30 +134,11 @@
       />
     </gl-tab>
 
-    <gl-tab title="Route Tables" @click="describeRoutesTables">
-      <gl-alert
-        v-if="routeTablesState === 'error'"
-        variant="danger"
-        :dismissible="false"
-        >{{ routeTablesError }}
-      </gl-alert>
-      <gl-skeleton-loading v-if="routeTablesState === 'loading'" />
-
-      <gl-table :items="routeTables" :fields="routeTablesFields">
-        <template v-slot:cell(RouteTableId)="data">
-          <router-link
-            :to="`/network/routeTables?routeTableId=${data.value}`"
-            >{{ data.value }}</router-link
-          >
-        </template>
-      </gl-table>
-
-      <gl-empty-state
-        v-if="routeTablesState === 'empty'"
-        title="No related route tables"
-        svg-path="/assets/undraw_empty_xct9.svg"
-        description="Daintree hasn't found any route table associated to this VPC!"
-        compact
+    <gl-tab title="Route Tables">
+      <RelatedRoutesTable
+        :region="vpc.region"
+        filter-key="vpc"
+        :filter-value="vpc.VpcId"
       />
     </gl-tab>
 
@@ -209,9 +190,11 @@ import Notifications from "@/mixins/notifications";
 import FlowLogsTab from "@/components/network/flowLogs/FlowLogsTab.vue";
 import SubnetTab from "@/components/network/subnets/SubnetTab.vue";
 import RelatedInstances from "@/components/EC2/instances/RelatedInstances.vue";
+import RelatedRoutesTable from "@/components/network/routeTables/RelatedRoutesTable.vue";
 
 @Component({
   components: {
+    RelatedRoutesTable,
     TagsTable,
     GlTabs,
     GlTab,
@@ -328,42 +311,6 @@ export default class VPC extends mixins(Formatters, Notifications) {
     });
   }
 
-  //Route tables tab
-  routeTables: RouteTableList | undefined = [];
-  routeTablesState: "loading" | "loaded" | "empty" | "error" = "loading";
-  routeTablesError: string | undefined;
-  routeTablesFields = [
-    { key: "RouteTableId", sortable: true },
-    {
-      key: "Tags",
-      label: "Name",
-      sortable: true,
-      formatter: this.extractNameFromTags,
-    },
-    "OwnerId",
-  ];
-
-  describeRoutesTables() {
-    const params = { Filters: this.filterByVPC };
-    this.routeTables = [];
-    this.routeTablesState = "loading";
-    this.routeTablesError = undefined;
-
-    this.EC2.describeRouteTables(params, (err, data) => {
-      if (err) {
-        this.routeTablesError = err.message;
-        this.routeTablesState = "error";
-      } else {
-        this.routeTables = data.RouteTables;
-        this.routeTablesError = undefined;
-        this.routeTablesState =
-          this.routeTables === undefined || this.routeTables.length === 0
-            ? "empty"
-            : "loaded";
-      }
-    });
-  }
-
   get alertVariant() {
     switch (this.vpc.State) {
       case "available":
@@ -384,7 +331,7 @@ export default class VPC extends mixins(Formatters, Notifications) {
       if (err) {
         this.showError(err.message, "deleteVpc");
       } else {
-        this.hideErrors("deleteNat");
+        this.hideErrors("deleteVpc");
         this.showAlert({
           variant: "info",
           text: "Deleted VPC with ID " + this.vpc.VpcId,
@@ -401,7 +348,6 @@ export default class VPC extends mixins(Formatters, Notifications) {
   onVpcChanged() {
     this.describeIgws();
     this.describeNats();
-    this.describeRoutesTables();
   }
 }
 </script>

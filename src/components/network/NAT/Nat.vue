@@ -1,5 +1,5 @@
 <template>
-  <gl-tabs theme="blue" v-if="nat" class="mt-n3">
+  <gl-tabs theme="blue" v-if="nat" class="mt-n3" lazy>
     <gl-tab title="Overview">
       <gl-modal
         modal-id="delete-nat-modal"
@@ -187,6 +187,14 @@
         />
       </div>
     </gl-tab>
+
+    <gl-tab title="Route tables">
+      <RelatedRoutesTable
+        :region="nat.region"
+        filter-key="route.nat-gateway-id"
+        :filter-value="nat.NatGatewayId"
+      />
+    </gl-tab>
   </gl-tabs>
 </template>
 
@@ -211,9 +219,11 @@ import { mixins } from "vue-class-component";
 import Notifications from "@/mixins/notifications";
 import CloudwatchWidget from "@/components/cloudwatch/CloudwatchWidget.vue";
 import { Metric } from "aws-sdk/clients/cloudwatch";
+import RelatedRoutesTable from "@/components/network/routeTables/RelatedRoutesTable.vue";
 
 @Component({
   components: {
+    RelatedRoutesTable,
     TagsTable,
     GlTable,
     GlCard,

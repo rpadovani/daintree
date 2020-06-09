@@ -6,6 +6,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Added
+
+- Support for VPC peering connections
+- Instances and NAT gateways shows now also related route tables
+
 ## [0.5.0]
 
 ### Added
@@ -109,7 +114,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - First public release, with basic support for Networking, EC2, SQS, and SNS.
 
 [Unreleased]: https://gitlab.com/rpadovani/daintree/-/compare/v0.5.0...master
-[0.4.0]: https://gitlab.com/rpadovani/daintree/-/compare/v0.4.0...v0.5.0
+[0.5.0]: https://gitlab.com/rpadovani/daintree/-/compare/v0.4.0...v0.5.0
 [0.4.0]: https://gitlab.com/rpadovani/daintree/-/compare/v0.3.0...v0.4.0
 [0.3.0]: https://gitlab.com/rpadovani/daintree/-/compare/v0.2.1...v0.3.0
 [0.2.1]: https://gitlab.com/rpadovani/daintree/-/compare/v0.2.0...v0.2.1

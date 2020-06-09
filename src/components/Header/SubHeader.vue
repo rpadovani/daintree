@@ -136,14 +136,14 @@ export default class SubHeader extends Vue {
   }
 
   sectionSearchTerm = "";
-  sections = [
+  readonly sections = [
     { name: "Network", link: "#/network" },
     { name: "EC2", link: "#/ec2" },
     { name: "Messages", link: "#/messages" },
   ];
 
   subsectionSearchTerm = "";
-  subsections = {
+  readonly subsections = {
     Network: [
       { name: "VPCs", link: "#/network/vpcs" },
       { name: "Subnets", link: "#/network/subnets" },
@@ -152,6 +152,7 @@ export default class SubHeader extends Vue {
       { name: "Route Tables", link: "#/network/routeTables" },
       { name: "Elastic IPs", link: "#/network/eips" },
       { name: "Security Groups", link: "#/network/securityGroups" },
+      { name: "Peering connections", link: "#/network/peeringConnections" },
     ],
     EC2: [
       { name: "Instances", link: "#/ec2/instances" },

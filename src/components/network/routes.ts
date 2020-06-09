@@ -5,6 +5,7 @@ import { subnetRoutes } from "@/components/network/subnets/routes";
 import { eipRoutes } from "@/components/network/eips/routes";
 import { routeTableRoutes } from "@/components/network/routeTables/routes";
 import { securityGroupRoutes } from "@/components/network/securityGroups/routes";
+import { peeringRoutes } from "@/components/network/peering/routes";
 
 const NetworkMain = () =>
   import(/* webpackChunkName: "network_main" */ "./NetworkMain.vue");
@@ -26,4 +27,5 @@ export const NetworkRoutes = [
   ...eipRoutes,
   ...routeTableRoutes,
   ...securityGroupRoutes,
+  ...peeringRoutes,
 ];

@@ -57,6 +57,7 @@ import { BFormCheckbox, BvModal } from "bootstrap-vue";
 import RegionText from "@/components/common/RegionText.vue";
 import EC2Client from "aws-sdk/clients/ec2";
 import { isString } from "@/utils/isString";
+import { ALL_REGIONS } from "@/components/common/regions";
 
 @Component({
   components: {
@@ -73,49 +74,13 @@ export default class RegionModal extends Vue {
   errorLoading = false;
 
   selectedRegions = this.$store.getters["sts/regions"];
-  allRegionsOptions = [
-    { text: "US East (N. Virginia)", value: "us-east-1" },
-    { text: "US East (Ohio)", value: "us-east-2" },
-    { text: "US West (N. California)", value: "us-west-1" },
-    { text: "US West (Oregon)", value: "us-west-2" },
-
-    { text: "Africa (Cape Town)", value: "af-south-1" },
-
-    { text: "Asia Pacific (Hong Kong)", value: "ap-east-1" },
-    { text: "Asia Pacific (Mumbai)", value: "ap-south-1" },
-    { text: "Asia Pacific (Tokyo)", value: "ap-northeast-1" },
-    { text: "Asia Pacific (Seoul)", value: "ap-northeast-2" },
-    { text: "Asia Pacific (Osaka)", value: "ap-northeast-3" },
-    { text: "Asia Pacific (Singapore)", value: "ap-southeast-1" },
-    { text: "Asia Pacific (Sydney)", value: "ap-southeast-2" },
-
-    { text: "Canada (Central)", value: "ca-central-1" },
-
-    { text: "China (Beijing)", value: "cn-north-1" },
-    { text: "China (Ningxia)", value: "cn-northwest-1" },
-
-    { text: "Europe (Frankfurt)", value: "eu-central-1" },
-    { text: "Europe (Ireland)", value: "eu-west-1" },
-    { text: "Europe (London)", value: "eu-west-2" },
-    { text: "Europe (Paris)", value: "eu-west-3" },
-    { text: "Europe (Stockholm)", value: "eu-north-1" },
-    { text: "Europe (Milan)", value: "eu-south-1" },
-
-    { text: "Middle East (Bahrain)", value: "me-south-1" },
-    { text: "South America (São Paulo)", value: "sa-east-1" },
-
-    { text: "GovCloud (US-East)", value: "us-gov-east-1" },
-    { text: "GovCloud (US-West)", value: "us-gov-west-1" },
-  ];
 
   get regionsOptions() {
     //If, for any reason, we weren't able to download any region, we show them all
     if (this.enabledRegions.length < 1) {
-      return this.allRegionsOptions;
+      return ALL_REGIONS;
     }
-    return this.allRegionsOptions.filter((r) =>
-      this.enabledRegions.includes(r.value)
-    );
+    return ALL_REGIONS.filter((r) => this.enabledRegions.includes(r.value));
   }
 
   get primaryProps() {

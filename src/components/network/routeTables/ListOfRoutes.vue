@@ -15,15 +15,22 @@
       >
         {{ data.item.GatewayId }}</router-link
       >
-      <span v-if="data.item.GatewayId && data.item.GatewayId === 'local'"
+      <span v-else-if="data.item.GatewayId && data.item.GatewayId === 'local'"
         >local</span
       >
       <router-link
-        v-if="data.item.NatGatewayId"
+        v-else-if="data.item.NatGatewayId"
         :to="`/network/nat?natId=${data.item.NatGatewayId}`"
       >
         {{ data.item.NatGatewayId }}
       </router-link>
+      <router-link
+        v-else-if="data.item.VpcPeeringConnectionId"
+        :to="`/network/peeringConnections?VpcPeeringConnectionId=${data.item.VpcPeeringConnectionId}`"
+      >
+        {{ data.item.VpcPeeringConnectionId }}
+      </router-link>
+      <span v-else>{{ data.item }}</span>
     </template>
 
     <template v-slot:cell(state)="data">

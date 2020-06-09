@@ -11,7 +11,7 @@
         </gl-badge>
       </div>
     </div>
-    <gl-tabs theme="blue">
+    <gl-tabs theme="blue" lazy>
       <gl-tab title="Overview">
         <div class="row justify-content-around mt-3">
           <gl-card class="col-3" title="Availability zone">
@@ -314,6 +314,13 @@
           />
         </div>
       </gl-tab>
+      <gl-tab title="Route tables">
+        <RelatedRoutesTable
+          :region="instance.region"
+          filter-key="route.instance-id"
+          :filter-value="instance.InstanceId"
+        />
+      </gl-tab>
     </gl-tabs>
   </div>
 </template>
@@ -327,9 +334,11 @@ import RegionText from "@/components/common/RegionText.vue";
 import { Metric } from "aws-sdk/clients/cloudwatch";
 import CloudwatchWidget from "@/components/cloudwatch/CloudwatchWidget.vue";
 import TagsTable from "@/components/common/TagsTable.vue";
+import RelatedRoutesTable from "@/components/network/routeTables/RelatedRoutesTable.vue";
 
 @Component({
   components: {
+    RelatedRoutesTable,
     GlBadge,
     GlTabs,
     GlTab,

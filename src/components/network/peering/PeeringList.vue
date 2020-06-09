@@ -9,7 +9,7 @@
     >
       <template #header>{{ selectedResourceTitle }}</template>
 
-      <VPC :vpc="selectedResource" v-on:deleted="close" />
+      <Peering :peering="selectedResource" v-on:deleted="close" />
     </gl-drawer>
 
     <div class="container-fluid">
@@ -29,8 +29,8 @@
           category="secondary"
           variant="success"
           class="col-12 col-sm-3 col-lg-2"
-          to="/network/vpcs/new"
-          >Create new VPC
+          to="/network/peeringConnections/new"
+          >New peering connection
         </gl-button>
       </div>
       <gl-table
@@ -39,7 +39,7 @@
         :filter="filter"
         :busy="loadingCount > 0"
         ref="resourcesTable"
-        :primary-key="resourceUniqueKey"
+        primary-key="VpcPeeringConnectionId"
         selectable
         select-mode="single"
         @row-selected="onRowSelected"
@@ -56,14 +56,35 @@
             compact
           />
         </template>
-        <template v-slot:cell(state)="data">
-          <StateText :state="data.value" />
+        <template v-slot:cell(requestervpc)="data">
+          <gl-link
+            :to="`/network/vpcs?vpcId=${data.item.RequesterVpcInfo.VpcId}`"
+          >
+            {{ data.item.RequesterVpcInfo.VpcId }}
+          </gl-link>
+        </template>
+        <template v-slot:cell(acceptervpc)="data">
+          <gl-link
+            :to="`/network/vpcs?vpcId=${data.item.AccepterVpcInfo.VpcId}`"
+          >
+            {{ data.item.AccepterVpcInfo.VpcId }}
+          </gl-link>
+        </template>
+        <template v-slot:cell(requestercidrs)="data">
+          {{ data.item.RequesterVpcInfo.CidrBlock }}
+        </template>
+        <template v-slot:cell(acceptercidrs)="data">
+          {{ data.item.AccepterVpcInfo.CidrBlock }}
+        </template>
+        <template v-slot:cell(status)="data">
+          <StateText
+            :state="data.value.Code"
+            v-gl-tooltip.hover
+            :title="data.value.Message"
+          />
         </template>
         <template v-slot:cell(region)="data">
           <RegionText :region="data.value" />
-        </template>
-        <template v-slot:cell(IsDefault)="data">
-          <gl-icon v-if="data.value" name="check-circle" />
         </template>
       </gl-table>
 
@@ -76,14 +97,17 @@
         <gl-empty-state
           class="mt-5"
           v-if="loadingCount === 0 && resourcesAsList.length === 0"
-          title="No Vpc found in the selected regions!"
+          title="No peering connections found in the selected regions!"
           svg-path="/assets/undraw_empty_xct9.svg"
           :description="emptyStateDescription"
           compact
         >
           <template #actions>
-            <gl-button icon="plus" variant="success" to="/network/vpcs/new"
-              >Create new VPC
+            <gl-button
+              icon="plus"
+              variant="success"
+              to="/network/peeringConnections/new"
+              >New peering connection
             </gl-button>
             <gl-button
               category="secondary"
@@ -100,7 +124,11 @@
 </template>
 
 <script lang="ts">
-import { DescribeVpcsRequest, Vpc } from "aws-sdk/clients/ec2";
+import {
+  DescribeVpcPeeringConnectionsRequest,
+  VpcPeeringConnection,
+  VpcPeeringConnectionList,
+} from "aws-sdk/clients/ec2";
 
 import Header from "@/components/Header/Header.vue";
 import RegionText from "@/components/common/RegionText.vue";
@@ -113,11 +141,13 @@ import {
   GlModalDirective,
   GlSkeletonLoading,
   GlTable,
+  GlLink,
+  GlTooltipDirective,
 } from "@gitlab/ui";
 import Component from "vue-class-component";
-import VPC from "@/components/network/VPC/VPC.vue";
 import StateText from "@/components/common/StateText.vue";
 import { NetworkComponent } from "@/components/network/networkComponent";
+import Peering from "@/components/network/peering/Peering.vue";
 
 @Component({
   components: {
@@ -127,72 +157,98 @@ import { NetworkComponent } from "@/components/network/networkComponent";
     RegionText,
     GlIcon,
     GlDrawer,
-    VPC,
     GlButton,
     GlFormInput,
     GlSkeletonLoading,
     GlEmptyState,
+    GlLink,
+    Peering,
   },
   directives: {
     "gl-modal-directive": GlModalDirective,
+    "gl-tooltip": GlTooltipDirective,
   },
 })
-export default class VPCList extends NetworkComponent<Vpc, "VpcId" | "State"> {
-  resourceName = "vpc";
+export default class PeeringList extends NetworkComponent<
+  VpcPeeringConnection,
+  "VpcPeeringConnectionId" | "Status"
+> {
+  resourceName = "peering";
   canCreate = true;
-  resourceUniqueKey: "VpcId" = "VpcId";
-  resourceStateKey: "State" = "State";
-  workingStates = ["pending", "deleting"];
+  resourceUniqueKey: "VpcPeeringConnectionId" = "VpcPeeringConnectionId";
+  resourceStateKey: "Status" = "Status";
+  workingStates = [
+    "initiating-request",
+    "pending-acceptance",
+    "provisioning",
+    "deleting",
+  ];
 
   fields = [
     {
       key: "Tags",
       label: "Name",
-      sortable: true,
+      sortByFormatter: true,
       formatter: this.extractNameFromTags,
     },
-    { key: "VpcId", sortable: true },
-    "State",
-    { key: "CidrBlock", sortable: true },
-    { key: "region", sortable: true },
+    { key: "VpcPeeringConnectionId", label: "Peering Id", sortable: true },
+    { key: "Status", label: "State" },
     {
-      key: "IsDefault",
-      label: "Default?",
-      class: "text-center",
+      key: "RequesterVPC",
+      label: "Requester VPC",
     },
-    { key: "DhcpOptionsId", sortable: true },
+    {
+      key: "AccepterVPC",
+      label: "Accepter VPC",
+    },
+    {
+      key: "RequesterCIDRs",
+      label: "Requester CIDRs",
+    },
+    {
+      key: "AccepterCIDRs",
+      label: "Accepter CIDRs",
+    },
+    { key: "region", sortable: true },
   ];
 
-  async getResourcesForRegion(region: string, filterByVpcsId?: string[]) {
+  async getResourcesForRegion(
+    region: string,
+    filterByPeeringsId?: string[]
+  ): Promise<VpcPeeringConnectionList> {
     const EC2 = await this.client(region);
     if (!EC2) {
       return [];
     }
 
-    const params: DescribeVpcsRequest = {};
-    if (filterByVpcsId) {
+    const params: DescribeVpcPeeringConnectionsRequest = {};
+    if (filterByPeeringsId) {
       params.Filters = [
         {
-          Name: "vpc-id",
-          Values: filterByVpcsId,
+          Name: "vpc-peering-connection-id",
+          Values: filterByPeeringsId,
         },
       ];
     }
 
     try {
-      const data = await EC2.describeVpcs(params).promise();
-      if (data.Vpcs === undefined) {
+      const data = await EC2.describeVpcPeeringConnections(params).promise();
+      if (data.VpcPeeringConnections === undefined) {
         return [];
       }
-      return data.Vpcs;
+      return data.VpcPeeringConnections;
     } catch (err) {
-      this.showError(`[${region}] ` + err, `${region}#loadingVpc`);
+      this.showError(`[${region}] ` + err, `${region}#loadingPeering`);
       return [];
     }
   }
 
-  destroyed() {
-    this.$store.commit("notifications/dismissByKey", "loadingVpc");
+  getResourceState(resource: VpcPeeringConnection): string | null {
+    return resource.Status?.Code || null;
+  }
+
+  destroyed(): void {
+    this.$store.commit("notifications/dismissByKey", "loadingPeering");
   }
 }
 </script>

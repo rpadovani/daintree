@@ -137,7 +137,7 @@
     <gl-tab title="Route Tables">
       <RelatedRoutesTable
         :region="vpc.region"
-        filter-key="vpc"
+        filter-key="vpc-id"
         :filter-value="vpc.VpcId"
       />
     </gl-tab>

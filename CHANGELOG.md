@@ -6,6 +6,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Fixed
+
+- Fix `The filter 'vpc' is invalid` error when checking route tables associated to a VPC
+
 ## [0.6.0]
 
 ### Added

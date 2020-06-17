@@ -140,6 +140,7 @@ export default class SubHeader extends Vue {
     { name: "Network", link: "#/network" },
     { name: "EC2", link: "#/ec2" },
     { name: "Messages", link: "#/messages" },
+    { name: "ECS", link: "#/ecs" },
   ];
 
   subsectionSearchTerm = "";
@@ -167,6 +168,7 @@ export default class SubHeader extends Vue {
       { name: "SNS Subscriptions", link: "#/messages/sns_subscriptions" },
       { name: "SQS", link: "#/messages/sqs" },
     ],
+    ECS: [{ name: "Tasks definitions", link: "#/ecs/tasksDefinitions" }],
   };
 
   get filteredSections(): { name: string; link: string }[] {

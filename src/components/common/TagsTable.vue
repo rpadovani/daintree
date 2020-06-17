@@ -102,6 +102,7 @@
 <script lang="ts">
 import { Vue, Component, Prop } from "vue-property-decorator";
 import { TagList, Tag } from "aws-sdk/clients/ec2";
+import ECS from "aws-sdk/clients/ecs";
 import {
   GlTable,
   GlIcon,
@@ -116,6 +117,7 @@ import SQSClient from "aws-sdk/clients/sqs";
 import { isString } from "@/utils/isString";
 import { AWSError } from "aws-sdk/lib/error";
 import ELBv2Client from "aws-sdk/clients/elbv2";
+import { DaintreeComponent } from "@/mixins/DaintreeComponent";
 
 interface TagWithMetadata extends Tag {
   editing: boolean;
@@ -132,11 +134,17 @@ interface TagWithMetadata extends Tag {
     GlEmptyState,
   },
 })
-export default class TagsTable extends Vue {
-  @Prop(Array) readonly tags: TagList | undefined;
+export default class TagsTable extends DaintreeComponent {
+  @Prop(Array) readonly tags: TagList | ECS.Tags | undefined;
   @Prop(String) readonly region!: string;
   @Prop(String) readonly resourceId!: string;
-  @Prop(String) readonly provider: "EC2" | "SQS" | "SNS" | "ELB" | undefined;
+  @Prop(String) readonly provider:
+    | "EC2"
+    | "SQS"
+    | "SNS"
+    | "ELB"
+    | "ECS"
+    | undefined;
 
   fields = [
     { key: "Key", sortable: true },
@@ -162,10 +170,13 @@ export default class TagsTable extends Vue {
     return returnedTags;
   }
 
-  get client() {
+  async client(): Promise<
+    EC2Client | ECS | SQSClient | ELBv2Client | SNSClient
+  > {
+    const credentials = await this.credentials();
     const clientOptions = {
       region: this.region,
-      credentials: this.$store.getters["sts/credentials"],
+      credentials,
     };
 
     switch (this.provider) {
@@ -175,6 +186,8 @@ export default class TagsTable extends Vue {
         return new SNSClient(clientOptions);
       case "ELB":
         return new ELBv2Client(clientOptions);
+      case "ECS":
+        return new ECS(clientOptions);
       case "EC2":
       default:
         //When the project started the tags table was way easier, so we fallback to EC2 to do not
@@ -183,140 +196,127 @@ export default class TagsTable extends Vue {
     }
   }
 
-  showErrorIfAny(err: AWSError | undefined, reloadOnError: boolean): boolean {
-    if (err) {
-      this.alertMessage = err.message;
-      this.alertVariant = "danger";
+  async showErrorIfAny(err: AWSError, reloadOnError: boolean): Promise<void> {
+    this.alertMessage = err.message;
+    this.alertVariant = "danger";
 
-      if (reloadOnError) {
-        this.reloadAllTags();
+    if (reloadOnError) {
+      await this.reloadAllTags();
+    }
+  }
+
+  async reloadAllTags(): Promise<void> {
+    const client = await this.client();
+    try {
+      if (client instanceof EC2Client) {
+        const params = {
+          Filters: [
+            {
+              Name: "resource-id",
+              Values: [this.resourceId],
+            },
+          ],
+        };
+
+        const data = await client.describeTags(params).promise();
+        this.incomingTags = data.Tags || [];
+      } else if (client instanceof SQSClient) {
+        const data = await client
+          .listQueueTags({ QueueUrl: this.resourceId })
+          .promise();
+
+        const newTags: TagList = [];
+        Object.entries(data.Tags || []).forEach(([Key, Value]) => {
+          newTags.push({ Key, Value });
+        });
+        this.incomingTags = newTags;
+      } else if (client instanceof SNSClient) {
+        const data = await client
+          .listTagsForResource({ ResourceArn: this.resourceId })
+          .promise();
+        this.incomingTags = data.Tags || [];
+      } else if (client instanceof ELBv2Client) {
+        const data = await client
+          .describeTags({ ResourceArns: [this.resourceId] })
+          .promise();
+        if (
+          data.TagDescriptions &&
+          data.TagDescriptions.length > 0 &&
+          data.TagDescriptions[0].Tags
+        ) {
+          this.incomingTags = data.TagDescriptions[0].Tags;
+        }
+      } else if (client instanceof ECS) {
+        const data = await client
+          .listTagsForResource({ resourceArn: this.resourceId })
+          .promise();
+        const newTags: TagList = [];
+        (data.tags || []).forEach((tag) => {
+          newTags.push({ Key: tag.key, Value: tag.value });
+        });
+        this.incomingTags = newTags;
       }
-      return true;
-    }
-    return false;
-  }
-
-  reloadAllTags() {
-    if (this.client instanceof EC2Client) {
-      const params = {
-        Filters: [
-          {
-            Name: "resource-id",
-            Values: [this.resourceId],
-          },
-        ],
-      };
-
-      this.client.describeTags(params, (err, data) => {
-        this.showErrorIfAny(err, false);
-
-        if (data.Tags) {
-          this.incomingTags = data.Tags;
-        }
-      });
-    } else if (this.client instanceof SQSClient) {
-      this.client.listQueueTags({ QueueUrl: this.resourceId }, (err, data) => {
-        this.showErrorIfAny(err, false);
-
-        if (data.Tags) {
-          const newTags: TagList = [];
-          Object.entries(data.Tags).forEach(([Key, Value]) => {
-            newTags.push({ Key, Value });
-          });
-          this.incomingTags = newTags;
-        }
-      });
-    } else if (this.client instanceof SNSClient) {
-      this.client.listTagsForResource(
-        { ResourceArn: this.resourceId },
-        (err, data) => {
-          this.showErrorIfAny(err, false);
-          if (data.Tags) {
-            this.incomingTags = data.Tags;
-          }
-        }
-      );
-    } else if (this.client instanceof ELBv2Client) {
-      this.client.describeTags(
-        { ResourceArns: [this.resourceId] },
-        (err, data) => {
-          this.showErrorIfAny(err, false);
-          if (
-            data.TagDescriptions &&
-            data.TagDescriptions.length > 0 &&
-            data.TagDescriptions[0].Tags
-          ) {
-            this.incomingTags = data.TagDescriptions[0].Tags;
-          }
-        }
-      );
+    } catch (err) {
+      await this.showErrorIfAny(err, false);
     }
   }
 
-  callbackCreateNewTag(tag: Tag, err: AWSError) {
-    if (!this.showErrorIfAny(err, true)) {
+  newTagCreated(tag: Tag): void {
+    this.incomingTags.push(tag);
+    this.newTagKey = "";
+    this.newTagValue = "";
+  }
+
+  async createNewTag(): Promise<void> {
+    try {
+      const tag = { Key: this.newTagKey, Value: this.newTagValue };
+      const client = await this.client();
+
+      if (client instanceof EC2Client) {
+        const params = { Resources: [this.resourceId], Tags: [tag] };
+        await client.createTags(params).promise();
+      } else if (client instanceof SQSClient) {
+        const Tags: { [key: string]: string } = {};
+        const params = { QueueUrl: this.resourceId, Tags };
+
+        params.Tags[this.newTagKey] = this.newTagValue;
+
+        await client.tagQueue(params);
+      } else if (client instanceof SNSClient) {
+        const params = { ResourceArn: this.resourceId, Tags: [tag] };
+
+        await client.tagResource(params).promise();
+      } else if (client instanceof ELBv2Client) {
+        const params = { ResourceArns: [this.resourceId], Tags: [tag] };
+
+        await client.addTags(params).promise();
+      } else if (client instanceof ECS) {
+        const params = {
+          resourceArn: this.resourceId,
+          tags: [{ key: tag.Key, value: tag.Value }],
+        };
+
+        await client.tagResource(params).promise();
+      }
+
+      this.newTagCreated(tag);
+    } catch (err) {
+      await this.showErrorIfAny(err, true);
+    }
+  }
+
+  tagSaved(tag: TagWithMetadata): void {
+    this.alertMessage = "Tag edited successfully";
+    this.alertVariant = "success";
+
+    if (tag.originalKey !== tag.Key) {
+      //If the user changed the key, we need to push the new one, since the old one has been deleted
+      tag.originalKey = tag.Key;
       this.incomingTags.push(tag);
-      this.newTagKey = "";
-      this.newTagValue = "";
     }
   }
 
-  createNewTag() {
-    const tag = { Key: this.newTagKey, Value: this.newTagValue };
-
-    if (this.client instanceof EC2Client) {
-      const params = {
-        Resources: [this.resourceId],
-        Tags: [tag],
-      };
-
-      this.client.createTags(params, (err) =>
-        this.callbackCreateNewTag(tag, err)
-      );
-    } else if (this.client instanceof SQSClient) {
-      const Tags: { [key: string]: string } = {};
-      const params = {
-        QueueUrl: this.resourceId,
-        Tags,
-      };
-
-      params.Tags[this.newTagKey] = this.newTagValue;
-
-      this.client.tagQueue(params, (err) =>
-        this.callbackCreateNewTag(tag, err)
-      );
-    } else if (this.client instanceof SNSClient) {
-      const params = {
-        ResourceArn: this.resourceId,
-        Tags: [tag],
-      };
-
-      this.client.tagResource(params, (err) =>
-        this.callbackCreateNewTag(tag, err)
-      );
-    } else if (this.client instanceof ELBv2Client) {
-      const params = {
-        ResourceArns: [this.resourceId],
-        Tags: [tag],
-      };
-      this.client.addTags(params, (err) => this.callbackCreateNewTag(tag, err));
-    }
-  }
-
-  callbackSaveTag(tag: TagWithMetadata, err: AWSError) {
-    if (!this.showErrorIfAny(err, true)) {
-      this.alertMessage = "Tag edited successfully";
-      this.alertVariant = "success";
-
-      if (tag.originalKey !== tag.Key) {
-        //If the user changed the key, we need to push the new one, since the old one has been deleted
-        tag.originalKey = tag.Key;
-        this.incomingTags.push(tag);
-      }
-    }
-  }
-
-  saveTag(tag: TagWithMetadata) {
+  async saveTag(tag: TagWithMetadata): Promise<void> {
     if (!isString(tag.Key) || !isString(tag.Value)) {
       return;
     }
@@ -324,95 +324,111 @@ export default class TagsTable extends Vue {
     //If the key has changed from its original value, we need to first delete the previous tag,
     //and then create a new one, because we cannot update an existing key
     if (tag.originalKey !== tag.Key) {
-      this.deleteTag(tag);
+      await this.deleteTag(tag);
     }
 
-    if (this.client instanceof EC2Client) {
-      const params = {
-        Resources: [this.resourceId],
-        Tags: [{ Key: tag.Key, Value: tag.Value }],
-      };
+    try {
+      const client = await this.client();
 
-      this.client.createTags(params, (err) => this.callbackSaveTag(tag, err));
-    } else if (this.client instanceof SQSClient) {
-      const Tags: { [key: string]: string } = {};
-      const params = {
-        QueueUrl: this.resourceId,
-        Tags,
-      };
+      if (client instanceof EC2Client) {
+        const params = {
+          Resources: [this.resourceId],
+          Tags: [{ Key: tag.Key, Value: tag.Value }],
+        };
 
-      params.Tags[tag.Key] = tag.Value;
-      this.client.tagQueue(params, (err) => this.callbackSaveTag(tag, err));
-    } else if (this.client instanceof SNSClient) {
-      const params = {
-        ResourceArn: this.resourceId,
-        Tags: [{ Key: tag.Key, Value: tag.Value }],
-      };
+        await client.createTags(params).promise();
+      } else if (client instanceof SQSClient) {
+        const Tags: { [key: string]: string } = {};
+        const params = {
+          QueueUrl: this.resourceId,
+          Tags,
+        };
 
-      this.client.tagResource(params, (err) => this.callbackSaveTag(tag, err));
-    } else if (this.client instanceof ELBv2Client) {
-      const params = {
-        ResourceArns: [this.resourceId],
-        Tags: [{ Key: tag.Key, Value: tag.Value }],
-      };
-      this.client.addTags(params, (err) => this.callbackSaveTag(tag, err));
-    }
-  }
+        params.Tags[tag.Key] = tag.Value;
+        await client.tagQueue(params).promise();
+      } else if (client instanceof SNSClient) {
+        const params = {
+          ResourceArn: this.resourceId,
+          Tags: [{ Key: tag.Key, Value: tag.Value }],
+        };
 
-  callbackDeleteTag(originalKey: string | undefined, err: AWSError) {
-    if (!this.showErrorIfAny(err, true)) {
-      this.removeFromTagList(originalKey);
-    }
-  }
+        await client.tagResource(params).promise();
+      } else if (client instanceof ELBv2Client) {
+        const params = {
+          ResourceArns: [this.resourceId],
+          Tags: [{ Key: tag.Key, Value: tag.Value }],
+        };
 
-  deleteTag(tag: TagWithMetadata) {
-    if (this.client instanceof EC2Client) {
-      const params = {
-        Resources: [this.resourceId],
-        Tags: [{ Key: tag.Key, Value: tag.Value }],
-      };
+        await client.addTags(params).promise();
+      } else if (client instanceof ECS) {
+        const params = {
+          resourceArn: this.resourceId,
+          tags: [{ key: tag.Key, value: tag.Value }],
+        };
 
-      this.client.deleteTags(params, (err) =>
-        this.callbackDeleteTag(tag.originalKey, err)
-      );
-    } else if (this.client instanceof SQSClient && tag.Key) {
-      const params = {
-        QueueUrl: this.resourceId,
-        TagKeys: [tag.Key],
-      };
+        await client.tagResource(params).promise();
+      }
 
-      this.client.untagQueue(params, (err) =>
-        this.callbackDeleteTag(tag.originalKey, err)
-      );
-    } else if (this.client instanceof SNSClient && tag.Key) {
-      const params = {
-        ResourceArn: this.resourceId,
-        TagKeys: [tag.Key],
-      };
-
-      this.client.untagResource(params, (err) =>
-        this.callbackDeleteTag(tag.originalKey, err)
-      );
-    } else if (this.client instanceof ELBv2Client && tag.Key) {
-      const params = {
-        ResourceArns: [this.resourceId],
-        TagKeys: [tag.Key],
-      };
-      this.client.removeTags(params, (err) => {
-        this.callbackDeleteTag(tag.originalKey, err);
-      });
+      this.tagSaved(tag);
+    } catch (err) {
+      await this.showErrorIfAny(err, true);
     }
   }
 
-  removeFromTagList(originalKey: string | undefined) {
+  async deleteTag(tag: TagWithMetadata): Promise<void> {
+    try {
+      const client = await this.client();
+      if (client instanceof EC2Client) {
+        const params = {
+          Resources: [this.resourceId],
+          Tags: [{ Key: tag.Key, Value: tag.Value }],
+        };
+
+        await client.deleteTags(params).promise();
+      } else if (client instanceof SQSClient && tag.Key) {
+        const params = {
+          QueueUrl: this.resourceId,
+          TagKeys: [tag.Key],
+        };
+
+        await client.untagQueue(params).promise();
+      } else if (client instanceof SNSClient && tag.Key) {
+        const params = {
+          ResourceArn: this.resourceId,
+          TagKeys: [tag.Key],
+        };
+
+        await client.untagResource(params).promise();
+      } else if (client instanceof ELBv2Client && tag.Key) {
+        const params = {
+          ResourceArns: [this.resourceId],
+          TagKeys: [tag.Key],
+        };
+        await client.removeTags(params).promise();
+      } else if (client instanceof ECS && tag.Key) {
+        const params = {
+          resourceArn: this.resourceId,
+          tagKeys: [tag.Key],
+        };
+
+        await client.untagResource(params).promise();
+      }
+
+      this.removeFromTagList(tag.originalKey);
+    } catch (err) {
+      await this.showErrorIfAny(err, true);
+    }
+  }
+
+  removeFromTagList(originalKey: string | undefined): void {
     this.incomingTags = this.incomingTags?.filter(
       (tag) => tag.Key !== originalKey
     );
   }
 
-  mounted() {
+  mounted(): void {
     // SQS, SNS, and load balancers don't provide tags on their own
-    if (this.provider && ["SQS", "SNS", "ELB"].includes(this.provider)) {
+    if (this.provider && ["SQS", "SNS", "ELB", "ECS"].includes(this.provider)) {
       this.reloadAllTags();
     }
   }

@@ -6,6 +6,14 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## Added
+
+- Add support for ECS tasks
+
+## Changed
+
+- Refactored the tags table to use more modern Javascript
+
 ### Fixed
 
 - Fix `The filter 'vpc' is invalid` error when checking route tables associated to a VPC

@@ -6,6 +6,7 @@ import store from "@/store";
 import { NetworkRoutes } from "@/components/network/routes";
 import { EC2Routes } from "@/components/EC2/routes";
 import { MessagesRoutes } from "@/components/messages/routes";
+import { ECSRoutes } from "@/components/ECS/routes";
 
 Vue.use(VueRouter);
 
@@ -75,6 +76,7 @@ const routes = [
   ...NetworkRoutes,
   ...EC2Routes,
   ...MessagesRoutes,
+  ...ECSRoutes,
   {
     path: "*",
     name: "Not Found",

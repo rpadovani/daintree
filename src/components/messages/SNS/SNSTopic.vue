@@ -24,29 +24,7 @@
         </gl-button-group>
       </div>
 
-      <div class="row justify-content-around mt-2">
-        <gl-card class="col-3" title="Number of subscriptions">
-          {{ sns.SubscriptionsConfirmed }}
-        </gl-card>
-
-        <gl-card class="col-3" title="Subscriptions pending">
-          {{ sns.SubscriptionsPending }}
-        </gl-card>
-        <gl-card class="col-3" title="Subscriptions deleted">
-          {{ sns.SubscriptionsDeleted }}
-        </gl-card>
-      </div>
-      <div class="row justify-content-around mt-3">
-        <gl-card class="col-3" title="Display name">
-          {{ sns.DisplayName }}
-        </gl-card>
-        <gl-card class="col-3" title="Arn">
-          {{ sns.topicArn }}
-        </gl-card>
-        <gl-card class="col-3" title="Owner">
-          {{ sns.Owner }}
-        </gl-card>
-      </div>
+      <DrawerCards :cards="cards" />
 
       <h5 class="mt-2">Tags</h5>
       <!--I use key to force a rerender, I should study Vue reactivity better ¯\_(ツ)_/¯ -->
@@ -141,10 +119,13 @@ import { TopicWithRegion } from "@/components/messages/SNS/sns";
 import hljs from "highlight.js/lib/core";
 import json from "highlight.js/lib/languages/json";
 import SNSClient, { SubscriptionsList } from "aws-sdk/clients/sns";
+import DrawerCards from "@/components/common/DrawerCards.vue";
+import { CardContent } from "@/components/common/cardContent";
 hljs.registerLanguage("json", json);
 
 @Component({
   components: {
+    DrawerCards,
     TagsTable,
     GlTabs,
     GlTab,
@@ -170,6 +151,39 @@ export default class SNSTopic extends mixins(Formatters, Notifications) {
   cancelProps = {
     text: "Cancel",
   };
+
+  get cards(): CardContent[] {
+    return [
+      {
+        title: "Number of subscriptions",
+        value: this.sns.SubscriptionsConfirmed,
+        helpText: "The number of confirmed subscriptions for the topic.",
+      },
+      {
+        title: "Subscriptions pending",
+        value: this.sns.SubscriptionsPending,
+        helpText:
+          "The number of subscriptions pending confirmation for the topic.",
+      },
+      {
+        title: "Subscriptions deleted",
+        value: this.sns.SubscriptionsDeleted,
+        helpText: "The number of deleted subscriptions for the topic.",
+      },
+      {
+        title: "Display name",
+        value: this.sns.DisplayName,
+        helpText:
+          "The human-readable name used in the From field for notifications to email and email-json endpoints.",
+      },
+      { title: "Arn", value: this.sns.topicArn, helpText: "The topic's ARN." },
+      {
+        title: "Owner",
+        value: this.sns.Owner,
+        helpText: "The AWS account ID of the topic's owner.",
+      },
+    ];
+  }
 
   get highlightedAccessPolicy() {
     if (!this.sns.Policy) {

@@ -32,8 +32,32 @@
       <code v-else-if="card.isCode">
         {{ card.value }}
       </code>
+      <StateText v-else-if="card.isState" :state="card.value" />
+      <gl-progress-bar
+        v-else-if="card.isProgress"
+        :value="parseInt(card.value)"
+        :variant="parseInt(card.value) === 100 ? 'success' : 'primary'"
+      />
+      <ul v-else-if="card.linksTo" class="gl-list-style-none">
+        <li v-for="link in card.linksTo" :key="link.text" class="ml-n2">
+          <gl-link :to="link.to" class="pb-2">
+            {{ link.text }}
+          </gl-link>
+        </li>
+      </ul>
+      <span v-else-if="card.azs">
+        <RegionText
+          v-for="az in card.azs"
+          :key="az"
+          :region="az"
+          :is-az="true"
+          class="pb-2"
+        />
+      </span>
       <span v-else>
         {{ card.value }}
+
+        <span v-if="card.value === accountId">(this account)</span>
       </span>
     </gl-card>
   </div>
@@ -47,28 +71,43 @@ import {
   GlBadge,
   GlIcon,
   GlTooltipDirective,
+  GlProgressBar,
 } from "@gitlab/ui";
 import RegionText from "./RegionText.vue";
 import { CardContent } from "@/components/common/cardContent";
+import StateText from "@/components/common/StateText.vue";
+import { mapGetters } from "vuex";
 @Component({
   components: {
+    StateText,
     GlCard,
     GlBadge,
     GlLink,
     RegionText,
     GlIcon,
+    GlProgressBar,
   },
   directives: {
     "gl-tooltip": GlTooltipDirective,
+  },
+  computed: {
+    ...mapGetters("sts", {
+      accountId: "account",
+    }),
   },
 })
 export default class DrawerCards extends Vue {
   @Prop(Array) readonly cards!: CardContent[];
 
+  accountId!: string | undefined;
+
   get filteredCards(): CardContent[] {
     return this.cards.filter(
       (card) =>
-        (card.value !== undefined && card.value !== "") || card.showIfEmpty
+        (card.value !== undefined && card.value !== "") ||
+        card.showIfEmpty ||
+        (card.linksTo && card.linksTo.length > 0) ||
+        (card.azs && card.azs.length > 0)
     );
   }
 }

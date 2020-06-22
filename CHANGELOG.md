@@ -9,14 +9,19 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## Added
 
 - Add support for ECS tasks
+- Improve the layout of the cards in pages about single resources, now it is responsive
+- Add help text to a lot of resources' attributes
 
 ## Changed
 
 - Refactored the tags table to use more modern Javascript
+- Highlight when the owner of a resource is the logged user
 
 ### Fixed
 
 - Fix `The filter 'vpc' is invalid` error when checking route tables associated to a VPC
+- Fix broken link to instance from elastic ip page
+- Remove warning about expired credentials after login
 
 ## [0.6.0]
 

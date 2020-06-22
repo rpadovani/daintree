@@ -28,30 +28,7 @@
         </gl-button-group>
       </div>
 
-      <div class="row justify-content-around mt-2">
-        <gl-card class="col-3" title="Endpoint">
-          {{ sns.Endpoint }}
-        </gl-card>
-
-        <gl-card class="col-3" title="Protocol">
-          {{ sns.Protocol }}
-        </gl-card>
-
-        <gl-card class="col-3" title="Pending confirmation?">
-          {{ sns.PendingConfirmation }}
-        </gl-card>
-      </div>
-      <div class="row justify-content-around mt-3">
-        <gl-card class="col-3" title="Raw delivery?">
-          {{ sns.RawMessageDelivery }}
-        </gl-card>
-        <gl-card class="col-3" title="Topic Arn">
-          {{ sns.TopicArn }}
-        </gl-card>
-        <gl-card class="col-3" title="Owner">
-          {{ sns.Owner }}
-        </gl-card>
-      </div>
+      <DrawerCards :cards="cards" />
     </gl-tab>
 
     <gl-tab title="Delivery Policy">
@@ -157,6 +134,8 @@ import { SubscriptionWithRegion } from "@/components/messages/SNS/sns";
 
 import hljs from "highlight.js/lib/core";
 import json from "highlight.js/lib/languages/json";
+import DrawerCards from "@/components/common/DrawerCards.vue";
+import { CardContent } from "@/components/common/cardContent";
 hljs.registerLanguage("json", json);
 
 @Component({
@@ -172,6 +151,7 @@ hljs.registerLanguage("json", json);
     GlModal,
     GlButtonGroup,
     GlIcon,
+    DrawerCards,
   },
   directives: { "gl-modal-directive": GlModalDirective },
 })
@@ -185,6 +165,54 @@ export default class SNSSubscription extends mixins(Formatters, Notifications) {
   cancelProps = {
     text: "Cancel",
   };
+
+  get endpointCard(): CardContent {
+    if (this.sns.Protocol === "sqs") {
+      return {
+        title: "Endpoint",
+        value: this.sns.Endpoint,
+        linkTo: `/messages/sqs?arn=${this.sns.Endpoint}`,
+      };
+    }
+
+    return {
+      title: "Endpoint",
+      value: this.sns.Endpoint,
+    };
+  }
+
+  get cards(): CardContent[] {
+    return [
+      {
+        ...this.endpointCard,
+        helpText:
+          "The endpoint that you want to receive notifications. Endpoints vary by protocol.",
+      },
+      { title: "Protocol", value: this.sns.Protocol },
+      {
+        title: "Pending confirmation?",
+        value: this.sns.PendingConfirmation,
+        helpText:
+          "true if the subscription hasn't been confirmed. To confirm a pending subscription, call the ConfirmSubscription action with a confirmation token.",
+      },
+      {
+        title: "Raw delivery?",
+        value: this.sns.RawMessageDelivery,
+        helpText:
+          "true if raw message delivery is enabled for the subscription. Raw messages are free of JSON formatting and can be sent to HTTP/S and Amazon SQS endpoints.",
+      },
+      {
+        title: "Topic Arn",
+        value: this.sns.TopicArn,
+        helpText: "The topic ARN that the subscription is associated with.",
+      },
+      {
+        title: "Owner",
+        value: this.sns.Owner,
+        helpText: "The AWS account ID of the subscription's owner.",
+      },
+    ];
+  }
 
   get highlightedDeliveryPolicy() {
     if (!this.sns.EffectiveDeliveryPolicy) {

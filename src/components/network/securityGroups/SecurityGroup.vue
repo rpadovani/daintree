@@ -7,7 +7,7 @@
     >
       {{ alertMessage }}
     </gl-alert>
-    <gl-tabs theme="blue">
+    <gl-tabs theme="blue" lazy>
       <gl-tab title="Overview">
         <gl-modal
           modal-id="delete-security-group-modal"
@@ -23,20 +23,7 @@
           >)?
         </gl-modal>
 
-        <div class="row justify-content-around mt-2">
-          <gl-card class="col-3" title="VPC Id">
-            <router-link :to="`/network/vpcs?vpcId=${securityGroup.VpcId}`">
-              {{ securityGroup.VpcId }}
-            </router-link>
-          </gl-card>
-
-          <gl-card class="col-3" title="Description">
-            {{ securityGroup.Description }}
-          </gl-card>
-          <gl-card class="col-3" title="Owner ID">
-            {{ securityGroup.OwnerId }}
-          </gl-card>
-        </div>
+        <DrawerCards :cards="cards" />
 
         <h5 class="mt-2">Tags</h5>
         <!--I use key to force a rerender, I should study Vue reactivity better ¯\_(ツ)_/¯ -->
@@ -94,16 +81,16 @@ import {
 } from "@gitlab/ui";
 import EC2Client from "aws-sdk/clients/ec2";
 import { Component, Prop } from "vue-property-decorator";
-import { Formatters } from "@/mixins/formatters";
 import TagsTable from "@/components/common/TagsTable.vue";
-import { mixins } from "vue-class-component";
-import Notifications from "@/mixins/notifications";
 import FlowLogsTab from "@/components/network/flowLogs/FlowLogsTab.vue";
 import { securityGroups } from "@/components/network/securityGroups/securityGroup";
 import SecurityGroupWithRegion = securityGroups.SecurityGroupWithRegion;
 import SubnetTab from "@/components/network/subnets/SubnetTab.vue";
 import ListOfRules from "@/components/network/securityGroups/ListOfRules.vue";
 import RelatedInstances from "@/components/EC2/instances/RelatedInstances.vue";
+import { CardContent } from "@/components/common/cardContent";
+import { DaintreeComponent } from "@/mixins/DaintreeComponent";
+import DrawerCards from "@/components/common/DrawerCards.vue";
 
 @Component({
   components: {
@@ -122,10 +109,11 @@ import RelatedInstances from "@/components/EC2/instances/RelatedInstances.vue";
     FlowLogsTab,
     GlButtonGroup,
     SubnetTab,
+    DrawerCards,
   },
   directives: { "gl-modal-directive": GlModalDirective },
 })
-export default class SecurityGroup extends mixins(Formatters, Notifications) {
+export default class SecurityGroup extends DaintreeComponent {
   @Prop(Object) readonly securityGroup!: SecurityGroupWithRegion;
   @Prop(String) readonly mainRouteAssociationId: string | undefined;
 
@@ -140,6 +128,27 @@ export default class SecurityGroup extends mixins(Formatters, Notifications) {
   cancelProps = {
     text: "Cancel",
   };
+
+  get cards(): CardContent[] {
+    return [
+      {
+        title: "VPC ID",
+        value: this.securityGroup.VpcId,
+        linkTo: `/network/vpcs?vpcId=${this.securityGroup.VpcId}`,
+        helpText: "The ID of the VPC for the security group.",
+      },
+      {
+        title: "Description",
+        value: this.securityGroup.Description,
+        helpText: "A description of the security group.",
+      },
+      {
+        title: "Owner ID",
+        value: this.securityGroup.OwnerId,
+        helpText: "The AWS account ID of the owner of the security group.",
+      },
+    ];
+  }
 
   get EC2() {
     return new EC2Client({

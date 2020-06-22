@@ -163,6 +163,7 @@ export default class Login extends DaintreeComponent {
   async loginWithAccessKey() {
     this.isLoading = true;
     this.dismissAlertByKey("login");
+    this.dismissAlertByKey("credentialsExpired");
 
     try {
       await this.$store.dispatch("sts/loginWithAccessKey", {
@@ -192,6 +193,8 @@ export default class Login extends DaintreeComponent {
   }
 
   loginWithCognito() {
+    this.dismissAlertByKey("credentialsExpired");
+
     //We need to remember the identity pool for when we are redirected to Daintree
     localStorage.setItem("cognitoIdentityPoolId", this.cognitoIdentityPoolId);
     if (this.cognitoRemember) {

@@ -2,36 +2,7 @@
   <div v-if="targetGroup">
     <gl-tabs theme="blue">
       <gl-tab title="Overview">
-        <div class="row justify-content-around mt-3">
-          <gl-card class="col-3" title="Protocol">{{
-            targetGroup.Protocol
-          }}</gl-card>
-          <gl-card class="col-3" title="Port">{{ targetGroup.Port }}</gl-card>
-          <gl-card class="col-3" title="Target type">{{
-            targetGroup.TargetType
-          }}</gl-card>
-        </div>
-
-        <div class="row justify-content-around mt-3">
-          <gl-card class="col-3" title="Region">
-            <RegionText :region="targetGroup.region" />
-          </gl-card>
-          <gl-card class="col-3" title="VPC ID">
-            <router-link :to="`/network/vpcs?vpcId=${targetGroup.VpcId}`">
-              {{ targetGroup.VpcId }}
-            </router-link>
-          </gl-card>
-          <gl-card class="col-3" title="Load balancers">
-            <router-link
-              v-for="lb in targetGroup.LoadBalancerArns"
-              :key="lb"
-              :to="`/ec2/loadBalancers?loadBalancerArn=${lb}`"
-              class="pt-2"
-            >
-              {{ extractLBName(lb) }}
-            </router-link>
-          </gl-card>
-        </div>
+        <DrawerCards :cards="overviewCards" />
 
         <h5 class="mt-2">Tags</h5>
         <TagsTable
@@ -69,57 +40,7 @@
         />
       </gl-tab>
       <gl-tab title="Health checks">
-        <div class="row justify-content-around mt-3">
-          <gl-card class="col-3" title="Protocol" v-if="targetGroup.Protocol">
-            {{ targetGroup.Protocol }}
-          </gl-card>
-
-          <gl-card
-            class="col-3"
-            title="Status"
-            v-if="targetGroup.HealthCheckEnabled !== undefined"
-          >
-            {{ targetGroup.HealthCheckEnabled ? "Enabled" : "Disabled" }}
-          </gl-card>
-
-          <gl-card
-            class="col-3"
-            title="Path"
-            v-if="targetGroup.HealthCheckPath"
-          >
-            {{ targetGroup.HealthCheckPath }}
-          </gl-card>
-        </div>
-        <div class="row justify-content-around mt-3">
-          <gl-card
-            class="col-3"
-            title="Health check port"
-            v-if="targetGroup.HealthCheckPort"
-          >
-            {{ targetGroup.HealthCheckPort }}
-          </gl-card>
-
-          <gl-card class="col-3" title="Healthy threshold">
-            {{ targetGroup.HealthyThresholdCount }}
-          </gl-card>
-
-          <gl-card class="col-3" title="Unhealthy threshold">
-            {{ targetGroup.UnhealthyThresholdCount }}
-          </gl-card>
-        </div>
-        <div class="row justify-content-around mt-3">
-          <gl-card class="col-3" title="Timeout">
-            {{ targetGroup.HealthCheckTimeoutSeconds }} seconds
-          </gl-card>
-
-          <gl-card class="col-3" title="Interval">
-            {{ targetGroup.HealthCheckIntervalSeconds }} seconds
-          </gl-card>
-
-          <gl-card class="col-3" title="Success codes">
-            {{ targetGroup.Matcher.HttpCode }}
-          </gl-card>
-        </div>
+        <DrawerCards :cards="healthCheckCards" />
       </gl-tab>
 
       <!--        TODO: we need to retrieve the type of the load balancer -->
@@ -165,6 +86,8 @@ import TagsTable from "@/components/common/TagsTable.vue";
 import { Formatters } from "@/mixins/formatters";
 import ELBv2Client, { TargetHealthDescriptions } from "aws-sdk/clients/elbv2";
 import StateText from "@/components/common/StateText.vue";
+import DrawerCards from "@/components/common/DrawerCards.vue";
+import { CardContent } from "@/components/common/cardContent";
 
 @Component({
   components: {
@@ -181,6 +104,7 @@ import StateText from "@/components/common/StateText.vue";
     CloudwatchWidget,
     TagsTable,
     StateText,
+    DrawerCards,
   },
 })
 export default class TargetGroup extends Formatters {
@@ -189,6 +113,103 @@ export default class TargetGroup extends Formatters {
   targets: TargetHealthDescriptions | undefined = [];
   targetsState: "loading" | "loaded" | "empty" | "error" = "loading";
   targetsError: string | undefined;
+
+  get overviewCards(): CardContent[] {
+    let htmlLoadBalancers: { to: string; text: string }[] = [];
+
+    this.targetGroup.LoadBalancerArns?.forEach((arn) => {
+      htmlLoadBalancers.push({
+        to: `/ec2/loadBalancers?loadBalancerArn=${arn}`,
+        text: this.extractLBName(arn),
+      });
+    });
+
+    return [
+      {
+        title: "Protocol",
+        value: this.targetGroup.Protocol,
+        helpText: "The protocol to use for routing traffic to the targets.",
+      },
+      {
+        title: "Port",
+        value: this.targetGroup.Port,
+        helpText: "The port on which the targets are listening.",
+      },
+      {
+        title: "Target type",
+        value: this.targetGroup.TargetType,
+        helpText: "Are targets instances, IP addresses, or lambda functions?",
+      },
+      { title: "Region", value: this.targetGroup.region, isRegion: true },
+      {
+        title: "VPC ID",
+        linkTo: `/network/vpcs?vpcId=${this.targetGroup.VpcId}`,
+        value: this.targetGroup.VpcId,
+        helpText: "The ID of the VPC for the targets.",
+      },
+      {
+        title: "Load balancers",
+        linksTo: htmlLoadBalancers,
+        helpText:
+          "The Amazon Resource Names (ARN) of the load balancers that route traffic to this target group.",
+      },
+    ];
+  }
+
+  get healthCheckCards(): CardContent[] {
+    return [
+      {
+        title: "Protocol",
+        value: this.targetGroup.Protocol,
+        helpText: `The protocol to use for routing traffic to the targets.`,
+      },
+      {
+        title: "Status",
+        value:
+          this.targetGroup.HealthCheckEnabled !== undefined
+            ? this.targetGroup.HealthCheckEnabled
+              ? "Enabled"
+              : "Disabled"
+            : undefined,
+        helpText: `Indicates whether health checks are enabled.`,
+      },
+      {
+        title: "Path",
+        value: this.targetGroup.HealthCheckPath,
+        helpText: `The destination for the health check request.`,
+      },
+      {
+        title: "Health check port",
+        value: this.targetGroup.HealthCheckPort,
+        helpText: `Indicates whether health checks are enabled.`,
+      },
+      {
+        title: "Healthy threshold",
+        value: this.targetGroup.HealthyThresholdCount,
+        helpText: `The number of consecutive health checks successes required before considering an unhealthy target healthy.`,
+      },
+      {
+        title: "Unhealthy threshold",
+        value: this.targetGroup.UnhealthyThresholdCount,
+        helpText: `The number of consecutive health check failures required before considering the target unhealthy.`,
+      },
+      {
+        title: "Timeout",
+        value: `${this.targetGroup.HealthCheckTimeoutSeconds} seconds`,
+        helpText: `The amount of time, in seconds, during which no response means a failed health check.`,
+      },
+      {
+        title: "Interval",
+        value: `${this.targetGroup.HealthCheckIntervalSeconds} seconds`,
+        helpText: `The approximate amount of time, in seconds, between health checks of an individual target.`,
+      },
+      {
+        title: "Success codes",
+        value: this.targetGroup.Matcher?.HttpCode,
+        helpText: `The HTTP codes. For Application Load Balancers, you can specify values between 200 and 499, and the default value is 200. You can specify multiple values (for example, "200,202") or a range of values (for example, "200-299"). For Network Load Balancers, this is 200–399.`,
+      },
+    ];
+  }
 
   get targetsFlatten() {
     return this.targets?.map((t) => {

@@ -99,44 +99,53 @@ export default class Peering extends DaintreeComponent {
       {
         title: "Requester VPC CIDR",
         value: this.peering.RequesterVpcInfo?.CidrBlock,
+        helpText: "The IPv4 CIDR block for the requester's VPC.",
       },
       {
         title: "Requester VPC ID",
         value: this.peering.RequesterVpcInfo?.VpcId,
         linkTo: `/network/vpcs?vpcId=${this.peering.RequesterVpcInfo?.VpcId}`,
+        helpText: "The ID of the requester's VPC.",
       },
       {
         title: "Requester Owner ID",
         value: this.peering.RequesterVpcInfo?.OwnerId,
+        helpText: "The AWS account ID of the requester's VPC owner",
       },
       {
         title: "Requester region",
         value: this.peering.RequesterVpcInfo?.Region,
         isRegion: true,
+        helpText: "The region in which the requester's VPC is located.",
       },
       {
         title: "Accepter VPC CIDR",
         value: this.peering.AccepterVpcInfo?.CidrBlock,
+        helpText: "The IPv4 CIDR block for the accepter's VPC.",
       },
       {
         title: "Accepter VPC ID",
         value: this.peering.AccepterVpcInfo?.VpcId,
         linkTo: `/network/vpcs?vpcId=${this.peering.AccepterVpcInfo?.VpcId}`,
+        helpText: "The ID of the accepter's VPC.",
       },
       {
         title: "Accepter Owner ID",
         value: this.peering.AccepterVpcInfo?.OwnerId,
+        helpText: "The AWS account ID of the accepter's VPC owner",
       },
       {
         title: "Accepter region",
         value: this.peering.AccepterVpcInfo?.Region,
         isRegion: true,
+        helpText: "The region in which the accepter's VPC is located.",
       },
-
       {
         title: "Allow DNS resolution from remote VPC?",
         value: this.peering.AccepterVpcInfo?.PeeringOptions
           ?.AllowDnsResolutionFromRemoteVpc,
+        helpText:
+          "Indicates whether a local VPC can resolve public DNS hostnames to private IP addresses when queried from instances in a peer VPC.",
       },
     ];
   }

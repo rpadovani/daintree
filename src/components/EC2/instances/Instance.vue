@@ -13,32 +13,7 @@
     </div>
     <gl-tabs theme="blue" lazy>
       <gl-tab title="Overview">
-        <div class="row justify-content-around mt-3">
-          <gl-card class="col-3" title="Availability zone">
-            <RegionText :region="instance.Placement.AvailabilityZone" is-az />
-          </gl-card>
-          <gl-card class="col-3" title="VPC ID">
-            <router-link :to="`/network/vpcs?vpcId=${instance.VpcId}`">
-              {{ instance.VpcId }}
-            </router-link>
-          </gl-card>
-          <gl-card class="col-3" title="Subnet ID">
-            <router-link :to="`/network/subnets?subnetId=${instance.SubnetId}`">
-              {{ instance.SubnetId }}
-            </router-link>
-          </gl-card>
-        </div>
-        <div class="row justify-content-around mt-3">
-          <gl-card class="col-3" title="Image-ID"
-            >{{ instance.ImageId }}
-          </gl-card>
-          <gl-card class="col-3" title="Launch time"
-            >{{ instance.LaunchTime }}
-          </gl-card>
-          <gl-card class="col-3" title="Key name"
-            >{{ instance.KeyName }}
-          </gl-card>
-        </div>
+        <DrawerCards :cards="overviewCards" />
 
         <h5 class="mt-2">Tags</h5>
         <!--I use key to force a rerender, I should study Vue reactivity better ¯\_(ツ)_/¯ -->
@@ -50,40 +25,7 @@
         />
       </gl-tab>
       <gl-tab title="Network">
-        <div
-          class="row justify-content-around mt-3"
-          v-if="instance.PublicIpAddress || instance.PublicDnsName"
-        >
-          <gl-card
-            class="col-5"
-            v-if="instance.PublicIpAddress"
-            title="Public IP"
-            >{{ instance.PublicIpAddress }}
-          </gl-card>
-          <gl-card
-            class="col-5"
-            v-if="instance.PublicDnsName"
-            title="Public DNS Name"
-            >{{ instance.PublicDnsName }}
-          </gl-card>
-        </div>
-        <div
-          class="row justify-content-around mt-3"
-          v-if="instance.PrivateIpAddress || instance.PrivateDnsName"
-        >
-          <gl-card
-            class="col-5"
-            v-if="instance.PrivateIpAddress"
-            title="Private IP"
-            >{{ instance.PrivateIpAddress }}
-          </gl-card>
-          <gl-card
-            class="col-5"
-            v-if="instance.PrivateDnsName"
-            title="Private DNS Name"
-            >{{ instance.PrivateDnsName }}
-          </gl-card>
-        </div>
+        <DrawerCards :cards="networkCards" />
 
         <h5 class="mt-2">Network interfaces</h5>
         <gl-tabs theme="blue">
@@ -128,20 +70,7 @@
         </ul>
       </gl-tab>
       <gl-tab title="Storage">
-        <div class="row justify-content-around mt-3">
-          <gl-card class="col-3" title="Root device type"
-            >{{ instance.RootDeviceType }}
-          </gl-card>
-          <gl-card class="col-3" title="Root device name"
-            >{{ instance.RootDeviceName }}
-          </gl-card>
-          <gl-card class="col-3" title="EBS optimized?"
-            >{{ instance.EbsOptimized }}
-          </gl-card>
-          <gl-card class="col-3" title="Virtualization type"
-            >{{ instance.VirtualizationType }}
-          </gl-card>
-        </div>
+        <DrawerCards :cards="storageCards" />
 
         <h5 class="mt-2">Attached devices</h5>
 
@@ -327,7 +256,7 @@
 
 <script lang="ts">
 import { GlBadge, GlTab, GlTable, GlTabs, GlCard } from "@gitlab/ui";
-import { Component, Prop, Vue } from "vue-property-decorator";
+import { Component, Prop } from "vue-property-decorator";
 import { instances } from "@/components/EC2/instances/instance";
 import InstanceWithRegion = instances.InstanceWithRegion;
 import RegionText from "@/components/common/RegionText.vue";
@@ -335,9 +264,13 @@ import { Metric } from "aws-sdk/clients/cloudwatch";
 import CloudwatchWidget from "@/components/cloudwatch/CloudwatchWidget.vue";
 import TagsTable from "@/components/common/TagsTable.vue";
 import RelatedRoutesTable from "@/components/network/routeTables/RelatedRoutesTable.vue";
+import { CardContent } from "@/components/common/cardContent";
+import { DaintreeComponent } from "@/mixins/DaintreeComponent";
+import DrawerCards from "@/components/common/DrawerCards.vue";
 
 @Component({
   components: {
+    DrawerCards,
     RelatedRoutesTable,
     GlBadge,
     GlTabs,
@@ -349,10 +282,10 @@ import RelatedRoutesTable from "@/components/network/routeTables/RelatedRoutesTa
     TagsTable,
   },
 })
-export default class Instance extends Vue {
+export default class Instance extends DaintreeComponent {
   @Prop(Object) readonly instance!: InstanceWithRegion;
 
-  storageFields = [
+  readonly storageFields = [
     {
       key: "DeviceName",
     },
@@ -373,6 +306,102 @@ export default class Instance extends Vue {
       label: "Volume ID",
     },
   ];
+
+  get overviewCards(): CardContent[] {
+    return [
+      {
+        title: "Availability zone",
+        value: this.instance.Placement?.AvailabilityZone,
+        isAz: true,
+        helpText: "The Availability Zone of the instance.",
+      },
+      {
+        title: "VPC ID",
+        linkTo: `/network/vpcs?vpcId=${this.instance.VpcId}`,
+        value: this.instance.VpcId,
+        helpText: "The ID of the VPC in which the instance is running.",
+      },
+      {
+        title: "Subnet ID",
+        linkTo: `/network/subnets?subnetId=${this.instance.SubnetId}`,
+        value: this.instance.SubnetId,
+        helpText: "The ID of the subnet in which the instance is running.",
+      },
+      {
+        title: "Image-ID",
+        value: this.instance.ImageId,
+        helpText: "The ID of the AMI used to launch the instance.",
+      },
+      {
+        title: "Launch time",
+        value: this.instance.LaunchTime
+          ? this.standardDate(this.instance.LaunchTime)
+          : undefined,
+        helpText: "The time the instance was launched.",
+      },
+      {
+        title: "Key name",
+        value: this.instance.KeyName,
+        helpText:
+          "The name of the key pair, if this instance was launched with an associated key pair.",
+      },
+    ];
+  }
+
+  get networkCards(): CardContent[] {
+    return [
+      {
+        title: "Public IP",
+        value: this.instance.PublicIpAddress,
+        helpText: "The public IPv4 address assigned to the instance",
+      },
+      {
+        title: "Public DNS Name",
+        value: this.instance.PublicDnsName,
+        helpText:
+          "(IPv4 only) The public DNS name assigned to the instance. This name is not available until the instance enters the running state.",
+      },
+      {
+        title: "Private IP",
+        value: this.instance.PrivateIpAddress,
+        helpText: "The private IPv4 address assigned to the instance.",
+      },
+      {
+        title: "Private DNS Name",
+        value: this.instance.PrivateDnsName,
+        helpText:
+          "The private DNS hostname name assigned to the instance. This DNS hostname can only be used inside the Amazon EC2 network. This name is not available until the instance enters the running state.",
+      },
+    ];
+  }
+
+  get storageCards(): CardContent[] {
+    return [
+      {
+        title: "Root device type",
+        value: this.instance.RootDeviceType,
+        helpText:
+          "The root device type used by the AMI. The AMI can use an EBS volume or an instance store volume.",
+      },
+      {
+        title: "Root device name",
+        value: this.instance.RootDeviceName,
+        helpText:
+          "The device name of the root device volume (for example, /dev/sda1).",
+      },
+      {
+        title: "EBS optimized?",
+        value: this.instance.EbsOptimized,
+        helpText:
+          "Indicates whether the instance is optimized for Amazon EBS I/O. This optimization provides dedicated throughput to Amazon EBS and an optimized configuration stack to provide optimal I/O performance. This optimization isn't available with all instance types. Additional usage charges apply when using an EBS Optimized instance.",
+      },
+      {
+        title: "Virtualization type",
+        value: this.instance.VirtualizationType,
+        helpText: "The virtualization type of the instance.",
+      },
+    ];
+  }
 
   get badgeVariant() {
     switch (this.instance.State?.Name) {

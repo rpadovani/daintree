@@ -64,23 +64,9 @@
         </gl-button>
       </gl-button-group>
     </div>
-    <div class="row justify-content-around mt-3">
-      <gl-card class="col-3" title="VPC ID">
-        <router-link v-if="!isDetached" :to="`/network/vpcs?vpcId=${vpcId}`">
-          {{ vpcId }}
-        </router-link>
-        <span v-else>N/A</span>
-      </gl-card>
 
-      <gl-card class="col-3" title="State">
-        <StateText :state="isDetached ? 'detached' : 'attached'" />
-      </gl-card>
+    <DrawerCards :cards="cards" />
 
-      <gl-card class="col-3" title="Owner Id">
-        {{ igw.OwnerId }}
-      </gl-card>
-    </div>
-    <div class="row mt-2 justify-content-around"></div>
     <h5 class="mt-3">Tags</h5>
     <TagsTable
       :key="igw.InternetGatewayId"
@@ -114,6 +100,8 @@ import { AlertVariant } from "@/store/notifications/state";
 import { mixins } from "vue-class-component";
 import { Formatters } from "@/mixins/formatters";
 import { VpcList } from "aws-sdk/clients/ec2";
+import DrawerCards from "@/components/common/DrawerCards.vue";
+import { CardContent } from "@/components/common/cardContent";
 
 @Component({
   components: {
@@ -127,6 +115,7 @@ import { VpcList } from "aws-sdk/clients/ec2";
     GlButtonGroup,
     GlFormGroup,
     GlFormSelect,
+    DrawerCards,
   },
   directives: { "gl-modal-directive": GlModalDirective },
 })
@@ -170,6 +159,29 @@ export default class Igw extends mixins(Notifications, Formatters) {
       }
     });
     return options;
+  }
+
+  get cards(): CardContent[] {
+    return [
+      {
+        title: "VPC ID",
+        linkTo: `/network/vpcs?vpcId=${this.vpcId}`,
+        value: this.vpcId,
+        helpText:
+          "The ID of the VPC to which the Internet Gateway is attached.",
+      },
+      {
+        title: "State",
+        value: this.isDetached ? "detached" : "attached",
+        helpText: "Is the Internet Gateway attached to any VPC?",
+        isState: true,
+      },
+      {
+        title: "Owner Id",
+        value: this.igw.OwnerId,
+        helpText: "The ID of the AWS account that owns the internet gateway.",
+      },
+    ];
   }
 
   get isDetached(): boolean {

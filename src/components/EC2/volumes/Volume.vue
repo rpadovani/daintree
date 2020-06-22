@@ -41,46 +41,7 @@
         </gl-button-group>
       </div>
 
-      <div class="row justify-content-around mt-2">
-        <gl-card
-          class="col-12 col-sm-5 col-md-3 mb-1 mb-sm-0"
-          title="Volume Size"
-        >
-          {{ volume.Size }} GiB
-        </gl-card>
-        <gl-card
-          class="col-12 col-sm-5 col-md-3 mb-1 mb-sm-0"
-          title="Volume type"
-        >
-          {{ volume.VolumeType }}
-        </gl-card>
-
-        <gl-card class="col-12 col-sm-5 col-md-3 mb-1 mb-sm-0" title="Iops">
-          {{ volume.Iops }}
-        </gl-card>
-      </div>
-
-      <div class="row justify-content-around mt-2">
-        <gl-card
-          class="col-12 col-sm-5 col-md-3 mb-1 mb-sm-0"
-          title="Availability zone"
-        >
-          <RegionText :region="volume.AvailabilityZone" is-az />
-        </gl-card>
-        <gl-card
-          class="col-12 col-sm-5 col-md-3 mb-1 mb-sm-0"
-          title="Creation time"
-        >
-          {{ volume.CreateTime | standardDate }}
-        </gl-card>
-
-        <gl-card
-          class="col-12 col-sm-5 col-md-3 mb-1 mb-sm-0"
-          title="Volume ID"
-        >
-          {{ volume.VolumeId }}
-        </gl-card>
-      </div>
+      <DrawerCards :cards="overviewCards" />
 
       <h5 class="mt-3">Tags</h5>
       <!--I use key to force a rerender, I should study Vue reactivity better ¯\_(ツ)_/¯ -->
@@ -161,28 +122,7 @@
     </gl-tab>
 
     <gl-tab title="Status check" @click="retrieveVolumeStatus">
-      <div class="row justify-content-around mt-2">
-        <gl-card
-          class="col-12 col-sm-5 col-md-3 mb-1 mb-sm-0"
-          title="Volume Status"
-        >
-          {{ volumeStatus.Status }}
-        </gl-card>
-
-        <gl-card
-          class="col-12 col-sm-5 col-md-3 mb-1 mb-sm-0"
-          title="IO enabled"
-        >
-          {{ ioEnabled }}
-        </gl-card>
-
-        <gl-card
-          class="col-12 col-sm-5 col-md-3 mb-1 mb-sm-0"
-          title="IO performance"
-        >
-          {{ ioPerformance }}
-        </gl-card>
-      </div>
+      <DrawerCards :cards="statusCards" />
     </gl-tab>
 
     <gl-tab title="Snapshots">
@@ -246,6 +186,8 @@ import RegionText from "@/components/common/RegionText.vue";
 import CloudwatchWidget from "@/components/cloudwatch/CloudwatchWidget.vue";
 import SnapshotTab from "@/components/EC2/snapshots/SnapshotTab.vue";
 import RelatedInstances from "@/components/EC2/instances/RelatedInstances.vue";
+import DrawerCards from "@/components/common/DrawerCards.vue";
+import { CardContent } from "@/components/common/cardContent";
 
 @Component({
   components: {
@@ -268,6 +210,7 @@ import RelatedInstances from "@/components/EC2/instances/RelatedInstances.vue";
     GlButtonGroup,
     GlLink,
     CloudwatchWidget,
+    DrawerCards,
   },
   directives: {
     "gl-modal-directive": GlModalDirective,
@@ -307,6 +250,54 @@ export default class Volume extends DaintreeComponent {
     const tagName = this.extractNameFromTags(this.volume.Tags || []);
 
     return tagName || this.volume.VolumeId || "";
+  }
+
+  get overviewCards(): CardContent[] {
+    return [
+      {
+        title: "Volume Size",
+        value: `${this.volume.Size} GiB`,
+        helpText: "The size of the volume, in GiBs.",
+      },
+      {
+        title: "Volume type",
+        value: this.volume.VolumeType,
+        helpText:
+          "The volume type. This can be gp2 for General Purpose SSD, io1 for Provisioned IOPS SSD, st1 for Throughput Optimized HDD, sc1 for Cold HDD, or standard for Magnetic volumes.",
+      },
+      {
+        title: "Iops",
+        value: this.volume.Iops,
+        helpText:
+          "The number of I/O operations per second (IOPS) that the volume supports.",
+      },
+      {
+        title: "Availability zone",
+        value: this.volume.AvailabilityZone,
+        isAz: true,
+        helpText: "The Availability Zone for the volume.",
+      },
+      {
+        title: "Creation time",
+        value: this.volume.CreateTime
+          ? this.standardDate(this.volume.CreateTime)
+          : undefined,
+        helpText: "The time stamp when volume creation was initiated.",
+      },
+      {
+        title: "Volume ID",
+        value: this.volume.VolumeId,
+        helpText: "The ID of the volume.",
+      },
+    ];
+  }
+
+  get statusCards(): CardContent[] {
+    return [
+      { title: "Volume Status", value: this.volumeStatus.Status },
+      { title: "IO enabled", value: this.ioEnabled },
+      { title: "IO performance", value: this.ioPerformance },
+    ];
   }
 
   get deleteButtonTitle(): string {

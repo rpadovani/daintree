@@ -111,6 +111,7 @@
       :data="lineData"
       :option="chartOptions"
       class="col-12 mt-4"
+      legend-layout="table"
     />
   </gl-modal>
 </template>

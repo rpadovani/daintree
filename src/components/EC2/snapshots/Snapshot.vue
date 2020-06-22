@@ -19,65 +19,7 @@
       </gl-button>
     </div>
 
-    <gl-card class="col-12 mt-2" title="Snapshot description">
-      {{ snapshot.Description }}
-    </gl-card>
-
-    <div class="row justify-content-around mt-2">
-      <gl-card
-        class="col-12 col-sm-5 col-md-3 mb-1 mb-sm-0"
-        title="Snapshot Size"
-      >
-        {{ snapshot.VolumeSize }} GiBs
-      </gl-card>
-      <gl-card class="col-12 col-sm-5 col-md-3 mb-1 mb-sm-0" title="Volume ID">
-        <gl-link :to="`/ec2/volumes?volumeId=${snapshot.VolumeId}`">{{
-          snapshot.VolumeId
-        }}</gl-link>
-      </gl-card>
-
-      <gl-card class="col-12 col-sm-5 col-md-3 mb-1 mb-sm-0" title="Encrypted">
-        {{ snapshot.Encrypted }}
-      </gl-card>
-    </div>
-
-    <div class="row justify-content-around mt-2">
-      <gl-card
-        class="col-12 col-sm-5 col-md-3 mb-1 mb-sm-0"
-        title="Snapshot state"
-      >
-        <StateText :state="snapshot.State" />
-      </gl-card>
-      <gl-card class="col-12 col-sm-5 col-md-3 mb-1 mb-sm-0" title="Progress">
-        <gl-progress-bar
-          :value="parseInt(snapshot.Progress)"
-          :variant="parseInt(snapshot.Progress) === 100 ? 'success' : 'primary'"
-        />
-      </gl-card>
-
-      <gl-card class="col-12 col-sm-5 col-md-3 mb-1 mb-sm-0" title="Owner ID">
-        {{ snapshot.OwnerId }}
-      </gl-card>
-    </div>
-
-    <div class="row justify-content-around mt-2">
-      <gl-card class="col-12 col-sm-5 col-md-3 mb-1 mb-sm-0" title="Region">
-        <RegionText :region="snapshot.region" />
-      </gl-card>
-      <gl-card
-        class="col-12 col-sm-5 col-md-3 mb-1 mb-sm-0"
-        title="Creation time"
-      >
-        {{ snapshot.StartTime | standardDate }}
-      </gl-card>
-
-      <gl-card
-        class="col-12 col-sm-5 col-md-3 mb-1 mb-sm-0"
-        title="Snapshot ID"
-      >
-        {{ snapshot.SnapshotId }}
-      </gl-card>
-    </div>
+    <DrawerCards :cards="cards" />
 
     <h5 class="mt-3">Tags</h5>
     <!--I use key to force a rerender, I should study Vue reactivity better ¯\_(ツ)_/¯ -->
@@ -107,7 +49,7 @@ import {
   GlProgressBar,
 } from "@gitlab/ui";
 import EC2Client from "aws-sdk/clients/ec2";
-import { Component, Prop, Watch } from "vue-property-decorator";
+import { Component, Prop } from "vue-property-decorator";
 import TagsTable from "@/components/common/TagsTable.vue";
 import SubnetTab from "@/components/network/subnets/SubnetTab.vue";
 import { snapshots } from "@/components/EC2/snapshots/snapshot";
@@ -115,9 +57,12 @@ import SnapshotWithRegion = snapshots.SnapshotWithRegion;
 import { DaintreeComponent } from "@/mixins/DaintreeComponent";
 import StateText from "@/components/common/StateText.vue";
 import RegionText from "@/components/common/RegionText.vue";
+import DrawerCards from "@/components/common/DrawerCards.vue";
+import { CardContent } from "@/components/common/cardContent";
 
 @Component({
   components: {
+    DrawerCards,
     TagsTable,
     GlTable,
     GlEmptyState,
@@ -153,7 +98,56 @@ export default class Snapshot extends DaintreeComponent {
     text: "Cancel",
   };
 
-  get snapshotName() {
+  get cards(): CardContent[] {
+    return [
+      {
+        title: "Snapshot description",
+        value: this.snapshot.Description,
+        helpText: "The description for the snapshot.",
+      },
+      {
+        title: "Snapshot Size",
+        value: `${this.snapshot.VolumeSize} GiBs`,
+        helpText: "The size of the volume, in GiB.",
+      },
+      {
+        title: "Volume ID",
+        value: this.snapshot.VolumeId,
+        linkTo: `/ec2/volumes?volumeId=${this.snapshot.VolumeId}`,
+        helpText:
+          "The ID of the volume that was used to create the snapshot. Snapshots created by the CopySnapshot action have an arbitrary volume ID that should not be used for any purpose.",
+      },
+      {
+        title: "Encrypted",
+        value: this.snapshot.Encrypted,
+        helpText: "Indicates whether the snapshot is encrypted.",
+      },
+      { title: "Snapshot state", isState: true, value: this.snapshot.State },
+      {
+        title: "Progress",
+        value: this.snapshot.Progress,
+        isProgress: true,
+        helpText: `The progress of the snapshot, as a percentage.`,
+      },
+      { title: "Owner ID", value: this.snapshot.OwnerId },
+      { title: "Region", isRegion: true, value: this.snapshot.region },
+      {
+        title: "Creation time",
+        value: this.snapshot.StartTime
+          ? this.standardDate(this.snapshot.StartTime)
+          : undefined,
+        helpText: `The time stamp when the snapshot was initiated.`,
+      },
+      {
+        title: "Snapshot ID",
+        value: this.snapshot.SnapshotId,
+        helpText:
+          "The ID of the snapshot. Each snapshot receives a unique identifier when it is created.",
+      },
+    ];
+  }
+
+  get snapshotName(): string | undefined {
     const tagName = this.extractNameFromTags(this.snapshot.Tags || []);
 
     return tagName || this.snapshot.SnapshotId;

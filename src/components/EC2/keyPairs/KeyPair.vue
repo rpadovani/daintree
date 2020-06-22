@@ -23,21 +23,7 @@
       </gl-button>
     </div>
 
-    <div class="row justify-content-around mt-2">
-      <gl-card class="col-12 col-sm-5 col-md-3 mb-1 mb-sm-0" title="Key name">
-        {{ keyPair.KeyName }}
-      </gl-card>
-      <gl-card
-        class="col-12 col-sm-5 col-md-3 mb-1 mb-sm-0"
-        title="Key fingerprint"
-      >
-        {{ keyPair.KeyFingerprint }}
-      </gl-card>
-
-      <gl-card class="col-12 col-sm-5 col-md-3 mb-1 mb-sm-0" title="Key ID">
-        {{ keyPair.KeyPairId }}
-      </gl-card>
-    </div>
+    <DrawerCards :cards="cards" />
 
     <h5 class="mt-3">Related EC2 instances</h5>
 
@@ -79,6 +65,8 @@ import KeyPairWithRegion = keyPairs.KeyPairWithRegion;
 import { DaintreeComponent } from "@/mixins/DaintreeComponent";
 import StateText from "@/components/common/StateText.vue";
 import RelatedInstances from "@/components/EC2/instances/RelatedInstances.vue";
+import { CardContent } from "@/components/common/cardContent";
+import DrawerCards from "@/components/common/DrawerCards.vue";
 
 @Component({
   components: {
@@ -94,6 +82,7 @@ import RelatedInstances from "@/components/EC2/instances/RelatedInstances.vue";
     FlowLogsTab,
     SubnetTab,
     StateText,
+    DrawerCards,
   },
   directives: { "gl-modal-directive": GlModalDirective },
 })
@@ -110,6 +99,27 @@ export default class KeyPair extends DaintreeComponent {
   cancelProps = {
     text: "Cancel",
   };
+
+  get cards(): CardContent[] {
+    return [
+      {
+        title: "Key name",
+        value: this.keyPair.KeyName,
+        helpText: "The name of the key pair.",
+      },
+      {
+        title: "Key fingerprint",
+        value: this.keyPair.KeyFingerprint,
+        isCode: true,
+        helpText: "The SHA-1 digest of the DER encoded private key.",
+      },
+      {
+        title: "Key ID",
+        value: this.keyPair.KeyPairId,
+        helpText: "The ID of the key pair.",
+      },
+    ];
+  }
 
   async EC2Client() {
     const credentials = await this.credentials();

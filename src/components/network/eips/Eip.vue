@@ -89,7 +89,7 @@
         <gl-button
           variant="success"
           category="secondary"
-          :disabled="eip.AssociationId"
+          :disabled="!!eip.AssociationId"
           v-gl-modal-directive="'associate-eip-modal'"
           >Associate
         </gl-button>
@@ -109,34 +109,9 @@
         </gl-button>
       </gl-button-group>
     </div>
-    <div class="row justify-content-around mt-3">
-      <gl-card class="col-3" title="Public IP">
-        {{ eip.PublicIp }}
-      </gl-card>
 
-      <gl-card class="col-3" title="Private IP">
-        {{ eip.PrivateIpAddress }}
-      </gl-card>
+    <DrawerCards :cards="cards" />
 
-      <gl-card class="col-3" title="Network Interface ID">
-        {{ eip.NetworkInterfaceId }}
-      </gl-card>
-    </div>
-    <div class="row mt-2 justify-content-around">
-      <gl-card class="col-3" title="Instance ID">
-        <router-link :to="`/network/eips?allocationId=${eip}`">
-          {{ eip.InstanceId }}
-        </router-link>
-      </gl-card>
-
-      <gl-card class="col-3" title="Association ID">
-        {{ eip.AssociationId }}
-      </gl-card>
-
-      <gl-card class="col-3" title="Scope">
-        {{ eip.Domain }}
-      </gl-card>
-    </div>
     <h5 class="mt-3">Tags</h5>
     <TagsTable
       :key="eip.AllocationId"
@@ -172,6 +147,8 @@ import {
   AssociateAddressRequest,
   DisassociateAddressRequest,
 } from "aws-sdk/clients/ec2";
+import { CardContent } from "@/components/common/cardContent";
+import DrawerCards from "@/components/common/DrawerCards.vue";
 
 @Component({
   components: {
@@ -185,6 +162,7 @@ import {
     GlFormGroup,
     GlFormSelect,
     GlIcon,
+    DrawerCards,
   },
   directives: { "gl-modal-directive": GlModalDirective },
 })
@@ -211,6 +189,47 @@ export default class Eip extends mixins(Formatters, Notifications) {
   cancelProps = {
     text: "Cancel",
   };
+
+  get cards(): CardContent[] {
+    return [
+      {
+        title: "Public IP",
+        value: this.eip.PublicIp,
+        helpText: "The Elastic IP address",
+      },
+      {
+        title: "Private IP",
+        value: this.eip.PrivateIpAddress,
+        helpText:
+          "The private IP address associated with the Elastic IP address.",
+      },
+      {
+        title: "Network Interface ID",
+        value: this.eip.NetworkInterfaceId,
+        helpText: "The ID of the network interface.",
+      },
+      {
+        title: "Instance ID",
+        linkTo: `/network/eips?allocationId=${this.eip.InstanceId}`,
+        helpText:
+          "The ID of the instance that the address is associated with (if any).",
+        value: this.eip.InstanceId,
+      },
+
+      {
+        title: "Association ID",
+        value: this.eip.AssociationId,
+        helpText:
+          "The ID representing the association of the address with an instance in a VPC.",
+      },
+      {
+        title: "Scope",
+        value: this.eip.Domain,
+        helpText:
+          "Indicates whether this Elastic IP address is for use with instances in EC2-Classic (standard) or instances in a VPC (vpc).",
+      },
+    ];
+  }
 
   get associateEipButtonProps() {
     return {

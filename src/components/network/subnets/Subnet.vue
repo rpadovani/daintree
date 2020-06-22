@@ -26,39 +26,7 @@
         >
       </div>
 
-      <div class="row justify-content-around mt-2">
-        <gl-card class="col-3" title="CIDR Block">
-          {{ subnet.CidrBlock }}
-        </gl-card>
-
-        <gl-card class="col-3" title="Availability zone">
-          {{ subnet.AvailabilityZone }}
-        </gl-card>
-        <gl-card class="col-3" title="VPC ID">
-          <router-link :to="`/network/vpcs?vpcId=${subnet.VpcId}`">
-            {{ subnet.VpcId }}
-          </router-link>
-        </gl-card>
-      </div>
-      <div class="row justify-content-around mt-3">
-        <gl-card class="col-3" title="Available IPs">
-          {{ subnet.AvailableIpAddressCount }}
-        </gl-card>
-        <gl-card class="col-3" title="Map public IPv4?">
-          {{ subnet.MapPublicIpOnLaunch }}
-        </gl-card>
-        <gl-card class="col-3" title="Assign IPv6?">
-          {{ subnet.AssignIpv6AddressOnCreation }}
-        </gl-card>
-      </div>
-      <div class="row justify-content-around mt-3">
-        <gl-card class="col-3" title="Default?">
-          {{ subnet.DefaultForAz }}
-        </gl-card>
-        <gl-card class="col-3" title="Owner ID">
-          {{ subnet.OwnerId }}
-        </gl-card>
-      </div>
+      <DrawerCards :cards="cards" />
 
       <h5 class="mt-3">Tags</h5>
       <!--I use key to force a rerender, I should study Vue reactivity better ¯\_(ツ)_/¯ -->
@@ -156,6 +124,8 @@ import StateText from "@/components/common/StateText.vue";
 import ListOfRoutes from "@/components/network/routeTables/ListOfRoutes.vue";
 import RelatedInstances from "@/components/EC2/instances/RelatedInstances.vue";
 import RelatedRoutesTable from "@/components/network/routeTables/RelatedRoutesTable.vue";
+import { CardContent } from "@/components/common/cardContent";
+import DrawerCards from "@/components/common/DrawerCards.vue";
 
 @Component({
   components: {
@@ -174,6 +144,7 @@ import RelatedRoutesTable from "@/components/network/routeTables/RelatedRoutesTa
     GlModal,
     StateText,
     RelatedInstances,
+    DrawerCards,
   },
   directives: { "gl-modal-directive": GlModalDirective },
 })
@@ -187,6 +158,57 @@ export default class Subnet extends mixins(Formatters, Notifications) {
   cancelProps = {
     text: "Cancel",
   };
+
+  get cards(): CardContent[] {
+    return [
+      {
+        title: "CIDR Block",
+        value: this.subnet.CidrBlock,
+        helpText: "The IPv4 CIDR block assigned to the subnet.",
+      },
+      {
+        title: "Availability zone",
+        value: this.subnet.AvailabilityZone,
+        isAz: true,
+        helpText: "The Availability Zone of the subnet.",
+      },
+      {
+        title: "VPC ID",
+        value: this.subnet.VpcId,
+        linkTo: `/network/vpcs?vpcId=${this.subnet.VpcId}`,
+        helpText: "The ID of the VPC the subnet is in.",
+      },
+      {
+        title: "Available IPs",
+        value: this.subnet.AvailableIpAddressCount,
+        helpText:
+          "The number of unused private IPv4 addresses in the subnet. The IPv4 addresses for any stopped instances are considered unavailable.",
+      },
+      {
+        title: "Map public IPv4?",
+        value: this.subnet.MapPublicIpOnLaunch,
+        helpText:
+          "Indicates whether instances launched in this subnet receive a public IPv4 address.",
+      },
+      {
+        title: "Assign IPv6?",
+        value: this.subnet.AssignIpv6AddressOnCreation,
+        helpText:
+          "Indicates whether a network interface created in this subnet (including a network interface created by RunInstances) receives an IPv6 address.",
+      },
+      {
+        title: "Default?",
+        value: this.subnet.DefaultForAz,
+        helpText:
+          "Indicates whether this is the default subnet for the Availability Zone.",
+      },
+      {
+        title: "Owner ID",
+        value: this.subnet.OwnerId,
+        helpText: "The ID of the AWS account that owns the subnet.",
+      },
+    ];
+  }
 
   get EC2() {
     return new EC2Client({

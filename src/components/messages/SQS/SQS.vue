@@ -42,41 +42,7 @@
         </gl-button-group>
       </div>
 
-      <div class="row justify-content-around mt-2">
-        <gl-card class="col-3" title="Number of messages">
-          {{ sqs.ApproximateNumberOfMessages }}
-        </gl-card>
-
-        <gl-card class="col-3" title="Messages delayed">
-          {{ sqs.ApproximateNumberOfMessagesDelayed }}
-        </gl-card>
-        <gl-card class="col-3" title="Messages not visible">
-          {{ sqs.ApproximateNumberOfMessagesNotVisible }}
-        </gl-card>
-      </div>
-      <div class="row justify-content-around mt-3">
-        <gl-card class="col-3" title="Deduplication?">
-          {{ sqs.ContentBasedDeduplication }}
-        </gl-card>
-        <gl-card class="col-3" title="Created">
-          {{ sqs.CreatedTimestamp | standardDateFromUnixSecondsString }}
-        </gl-card>
-        <gl-card class="col-3" title="Last modified">
-          {{ sqs.LastModifiedTimestamp | standardDateFromUnixSecondsString }}
-        </gl-card>
-      </div>
-
-      <div class="row justify-content-around mt-3">
-        <gl-card class="col-3" title="Retention period">
-          {{ sqs.MessageRetentionPeriod }} seconds
-        </gl-card>
-        <gl-card class="col-3" title="Wait time">
-          {{ sqs.ReceiveMessageWaitTimeSeconds }} seconds
-        </gl-card>
-        <gl-card class="col-3" title="Visibility">
-          {{ sqs.VisibilityTimeout }} seconds
-        </gl-card>
-      </div>
+      <DrawerCards :cards="cards" />
 
       <h5 class="mt-2">Tags</h5>
       <!--I use key to force a rerender, I should study Vue reactivity better ¯\_(ツ)_/¯ -->
@@ -232,6 +198,9 @@ import Notifications from "@/mixins/notifications";
 import { QueueWithRegion } from "@/components/messages/SQS/sqs";
 import CloudwatchWidget from "@/components/cloudwatch/CloudwatchWidget.vue";
 import { Metric } from "aws-sdk/clients/cloudwatch";
+import DrawerCards from "@/components/common/DrawerCards.vue";
+import { CardContent } from "@/components/common/cardContent";
+import { DaintreeComponent } from "@/mixins/DaintreeComponent";
 
 @Component({
   components: {
@@ -247,10 +216,11 @@ import { Metric } from "aws-sdk/clients/cloudwatch";
     GlButton,
     GlModal,
     GlButtonGroup,
+    DrawerCards,
   },
   directives: { "gl-modal-directive": GlModalDirective },
 })
-export default class SQS extends mixins(Formatters, Notifications) {
+export default class SQS extends DaintreeComponent {
   @Prop(Object) readonly sqs!: QueueWithRegion;
 
   deleteSqsButtonProps = {
@@ -264,6 +234,65 @@ export default class SQS extends mixins(Formatters, Notifications) {
   cancelProps = {
     text: "Cancel",
   };
+
+  get cards(): CardContent[] {
+    return [
+      {
+        title: "Number of messages",
+        value: this.sqs.ApproximateNumberOfMessages,
+        helpText:
+          "The approximate number of messages available for retrieval from the queue.",
+      },
+      {
+        title: "Messages delayed",
+        value: this.sqs.ApproximateNumberOfMessagesDelayed,
+        helpText:
+          "The approximate number of messages in the queue that are delayed and not available for reading immediately. This can happen when the queue is configured as a delay queue or when a message has been sent with a delay parameter.",
+      },
+      {
+        title: "Messages not visible",
+        value: this.sqs.ApproximateNumberOfMessagesNotVisible,
+        helpText:
+          "The approximate number of messages that are in flight. Messages are considered to be in flight if they have been sent to a client but have not yet been deleted or have not yet reached the end of their visibility window.",
+      },
+      {
+        title: "Deduplication?",
+        value: this.sqs.ContentBasedDeduplication,
+        helpText: "Is content-based deduplication enabled for the queue?",
+      },
+      {
+        title: "Created",
+        value: this.sqs.CreatedTimestamp
+          ? this.standardDateFromUnixSecondsString(this.sqs.CreatedTimestamp)
+          : undefined,
+      },
+      {
+        title: "Last modified",
+        value: this.sqs.LastModifiedTimestamp
+          ? this.standardDateFromUnixSecondsString(
+              this.sqs.LastModifiedTimestamp
+            )
+          : undefined,
+      },
+      {
+        title: "Retention period",
+        value: `${this.sqs.MessageRetentionPeriod} seconds`,
+        helpText:
+          "The length of time, in seconds, for which Amazon SQS retains a message.",
+      },
+      {
+        title: "Wait time",
+        value: `${this.sqs.ReceiveMessageWaitTimeSeconds} seconds`,
+        helpText:
+          "The length of time, in seconds, for which the ReceiveMessage action waits for a message to arrive. ",
+      },
+      {
+        title: "Visibility",
+        value: `${this.sqs.VisibilityTimeout} seconds`,
+        helpText: "The visibility timeout for the queue",
+      },
+    ];
+  }
 
   get metricsNumberOfMessagesSent(): Metric[] {
     return [

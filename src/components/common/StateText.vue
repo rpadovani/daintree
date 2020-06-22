@@ -1,6 +1,6 @@
 <template>
   <div class="container">
-    <div class="row" :class="color">
+    <div class="row justify-content-center" :class="color">
       <gl-loading-icon
         class="mr-1"
         inline

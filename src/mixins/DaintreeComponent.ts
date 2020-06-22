@@ -92,6 +92,10 @@ export class DaintreeComponent extends Vue {
     return standardDate(date);
   }
 
+  standardDateFromUnixSecondsString(unix: string): string {
+    return standardDateFromUnixSecondsString(unix);
+  }
+
   extractNameFromTags(tags: TagList): string | undefined {
     const nameTag = tags.filter((v) => v.Key === "Name");
 

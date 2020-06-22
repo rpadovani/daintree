@@ -7,7 +7,7 @@
     >
       {{ alertMessage }}
     </gl-alert>
-    <gl-tabs theme="blue">
+    <gl-tabs theme="blue" lazy>
       <gl-tab title="Overview">
         <gl-modal
           modal-id="delete-route-table-modal"
@@ -41,20 +41,7 @@
           </gl-button-group>
         </div>
 
-        <div class="row justify-content-around mt-2">
-          <gl-card class="col-3" title="VPC Id">
-            <router-link :to="`/network/vpcs?vpcId=${routeTable.VpcId}`">
-              {{ routeTable.VpcId }}
-            </router-link>
-          </gl-card>
-
-          <gl-card class="col-3" title="Main">
-            {{ isMain }}
-          </gl-card>
-          <gl-card class="col-3" title="Owner ID">
-            {{ routeTable.OwnerId }}
-          </gl-card>
-        </div>
+        <DrawerCards :cards="cards" />
 
         <h5 class="mt-2">Tags</h5>
         <!--I use key to force a rerender, I should study Vue reactivity better ¯\_(ツ)_/¯ -->
@@ -107,6 +94,8 @@ import RouteTableWithRegion = routeTables.RouteTableWithRegion;
 import SubnetTab from "@/components/network/subnets/SubnetTab.vue";
 import { isString } from "@/utils/isString";
 import ListOfRoutes from "@/components/network/routeTables/ListOfRoutes.vue";
+import DrawerCards from "@/components/common/DrawerCards.vue";
+import { CardContent } from "@/components/common/cardContent";
 
 @Component({
   components: {
@@ -124,6 +113,7 @@ import ListOfRoutes from "@/components/network/routeTables/ListOfRoutes.vue";
     FlowLogsTab,
     GlButtonGroup,
     SubnetTab,
+    DrawerCards,
   },
   directives: { "gl-modal-directive": GlModalDirective },
 })
@@ -142,6 +132,27 @@ export default class RouteTable extends mixins(Formatters, Notifications) {
   cancelProps = {
     text: "Cancel",
   };
+
+  get cards(): CardContent[] {
+    return [
+      {
+        title: "VPC ID",
+        value: this.routeTable.VpcId,
+        linkTo: `/network/vpcs?vpcId=${this.routeTable.VpcId}`,
+        helpText: "The ID of the VPC for the route table.",
+      },
+      {
+        title: "Main",
+        value: this.isMain,
+        helpText: "Is the main route table for the VPC?",
+      },
+      {
+        title: "Owner ID",
+        value: this.routeTable.OwnerId,
+        helpText: "The ID of the AWS account that owns the route table.",
+      },
+    ];
+  }
 
   get EC2() {
     return new EC2Client({

@@ -27,43 +27,7 @@
     </div>
     <gl-tabs theme="blue">
       <gl-tab title="Overview">
-        <div class="row justify-content-around mt-3">
-          <gl-card class="col-3" title="Availability zones">
-            <RegionText
-              v-for="az in loadBalancer.AvailabilityZones"
-              :key="az.ZoneName"
-              :region="az.ZoneName"
-              is-az
-              class="pt-2"
-            />
-          </gl-card>
-          <gl-card class="col-3" title="VPC ID">
-            <router-link :to="`/network/vpcs?vpcId=${loadBalancer.VpcId}`">
-              {{ loadBalancer.VpcId }}
-            </router-link>
-          </gl-card>
-          <gl-card class="col-3" title="Subnet IDs">
-            <router-link
-              v-for="az in loadBalancer.AvailabilityZones"
-              :key="az.ZoneName"
-              :to="`/network/subnets?subnetId=${az.SubnetId}`"
-              class="pt-2"
-            >
-              {{ az.SubnetId }}
-            </router-link>
-          </gl-card>
-        </div>
-        <div class="row justify-content-around mt-3">
-          <gl-card class="col-3" title="DNS Name">{{
-            loadBalancer.DNSName
-          }}</gl-card>
-          <gl-card class="col-3" title="Creation time">{{
-            loadBalancer.CreatedTime | standardDate
-          }}</gl-card>
-          <gl-card class="col-3" title="Hosted Zone ID">{{
-            loadBalancer.CanonicalHostedZoneId
-          }}</gl-card>
-        </div>
+        <DrawerCards :cards="cards" />
 
         <h5 class="mt-2">Tags</h5>
         <TagsTable
@@ -179,9 +143,13 @@ import ELBv2Client, {
   RedirectActionConfig,
 } from "aws-sdk/clients/elbv2";
 import { BvModal } from "bootstrap-vue";
+import DrawerCards from "@/components/common/DrawerCards.vue";
+import { CardContent } from "@/components/common/cardContent";
+import { isString } from "@/utils/isString";
 
 @Component({
   components: {
+    DrawerCards,
     GlBadge,
     GlTabs,
     GlTab,
@@ -213,6 +181,56 @@ export default class LoadBalancer extends Formatters {
       default:
         return "neutral";
     }
+  }
+
+  get cards(): CardContent[] {
+    let availabilityZones: string[] = [];
+    let subnets: { to: string; text: string }[] = [];
+
+    this.loadBalancer.AvailabilityZones?.forEach((az) => {
+      if (isString(az.ZoneName)) {
+        availabilityZones.push(az.ZoneName);
+      }
+
+      if (isString(az.SubnetId)) {
+        subnets.push({
+          to: `/network/subnets?subnetId=${az.SubnetId}`,
+          text: az.SubnetId,
+        });
+      }
+    });
+
+    return [
+      {
+        title: "Availability zones",
+        azs: availabilityZones,
+      },
+      {
+        title: "VPC ID",
+        linkTo: `/network/vpcs?vpcId=${this.loadBalancer.VpcId}`,
+        value: this.loadBalancer.VpcId,
+        helpText: "The ID of the VPC for the load balancer.",
+      },
+      { title: "Subnet IDs", linksTo: subnets },
+      {
+        title: "DNS Name",
+        value: this.loadBalancer.DNSName,
+        helpText: "The public DNS name of the load balancer.",
+      },
+      {
+        title: "Creation time",
+        value: this.loadBalancer.CreatedTime
+          ? this.standardDate(this.loadBalancer.CreatedTime)
+          : undefined,
+        helpText: "The date and time the load balancer was created.",
+      },
+      {
+        title: "Hosted Zone ID",
+        value: this.loadBalancer.CanonicalHostedZoneId,
+        helpText:
+          "The ID of the Amazon Route 53 hosted zone associated with the load balancer.",
+      },
+    ];
   }
 
   listeners: Listener[] | undefined = [];

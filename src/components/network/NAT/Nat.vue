@@ -25,48 +25,9 @@
           >Delete this NAT Gateway</gl-button
         >
       </div>
-      <div class="row justify-content-around mt-3">
-        <gl-card class="col-3" title="VPC ID">
-          <router-link :to="`/network/vpcs?vpcId=${nat.VpcId}`">
-            {{ nat.VpcId }}
-          </router-link>
-        </gl-card>
 
-        <gl-card class="col-3" title="Subnet ID">
-          <router-link :to="`/network/subnets?subnetId=${nat.SubnetId}`">
-            {{ nat.SubnetId }}
-          </router-link>
-        </gl-card>
+      <DrawerCards :cards="cards" />
 
-        <gl-card class="col-3" title="Create time">
-          {{ nat.CreateTime | standardDate }}
-        </gl-card>
-      </div>
-      <div class="row mt-2 justify-content-around">
-        <gl-card class="col-3" title="Public IP">
-          <router-link
-            :to="`/network/eips?allocationId=${nat.NatGatewayAddresses[0].AllocationId}`"
-          >
-            {{ nat.NatGatewayAddresses[0].PublicIp }}
-          </router-link>
-        </gl-card>
-
-        <gl-card class="col-3" title="Private Ip">
-          <router-link
-            :to="`/network/eips?allocationId=${nat.NatGatewayAddresses[0].AllocationId}`"
-          >
-            {{ nat.NatGatewayAddresses[0].PrivateIp }}
-          </router-link>
-        </gl-card>
-
-        <gl-card class="col-3" title="Network Interface ID">
-          <router-link
-            :to="`/network/interfaces?interfaceId=${nat.NatGatewayAddresses[0].NetworkInterfaceId}`"
-          >
-            {{ nat.NatGatewayAddresses[0].NetworkInterfaceId }}
-          </router-link>
-        </gl-card>
-      </div>
       <h5 class="mt-3">Tags</h5>
       <TagsTable
         :key="nat.NatGatewayId"
@@ -220,6 +181,8 @@ import Notifications from "@/mixins/notifications";
 import CloudwatchWidget from "@/components/cloudwatch/CloudwatchWidget.vue";
 import { Metric } from "aws-sdk/clients/cloudwatch";
 import RelatedRoutesTable from "@/components/network/routeTables/RelatedRoutesTable.vue";
+import { CardContent } from "@/components/common/cardContent";
+import DrawerCards from "@/components/common/DrawerCards.vue";
 
 @Component({
   components: {
@@ -233,6 +196,7 @@ import RelatedRoutesTable from "@/components/network/routeTables/RelatedRoutesTa
     GlTabs,
     GlTab,
     CloudwatchWidget,
+    DrawerCards,
   },
   directives: { "gl-modal-directive": GlModalDirective },
 })
@@ -246,6 +210,105 @@ export default class Nat extends mixins(Formatters, Notifications) {
   cancelProps = {
     text: "Cancel",
   };
+
+  get createTime(): string | undefined {
+    if (this.nat.CreateTime) {
+      return this.standardDate(this.nat.CreateTime);
+    }
+
+    return undefined;
+  }
+
+  get allocationId(): string | undefined {
+    if (
+      this.nat.NatGatewayAddresses &&
+      this.nat.NatGatewayAddresses?.length > 0 &&
+      this.nat.NatGatewayAddresses[0].AllocationId
+    ) {
+      return this.nat.NatGatewayAddresses[0].AllocationId;
+    }
+
+    return undefined;
+  }
+
+  get publicIp(): string | undefined {
+    if (
+      this.nat.NatGatewayAddresses &&
+      this.nat.NatGatewayAddresses?.length > 0 &&
+      this.nat.NatGatewayAddresses[0].AllocationId
+    ) {
+      return this.nat.NatGatewayAddresses[0].PublicIp;
+    }
+
+    return undefined;
+  }
+
+  get privateIp(): string | undefined {
+    if (
+      this.nat.NatGatewayAddresses &&
+      this.nat.NatGatewayAddresses?.length > 0 &&
+      this.nat.NatGatewayAddresses[0].AllocationId
+    ) {
+      return this.nat.NatGatewayAddresses[0].PrivateIp;
+    }
+
+    return undefined;
+  }
+
+  get networkInterfaceId(): string | undefined {
+    if (
+      this.nat.NatGatewayAddresses &&
+      this.nat.NatGatewayAddresses?.length > 0 &&
+      this.nat.NatGatewayAddresses[0].AllocationId
+    ) {
+      return this.nat.NatGatewayAddresses[0].NetworkInterfaceId;
+    }
+
+    return undefined;
+  }
+
+  get cards(): CardContent[] {
+    return [
+      {
+        title: "VPC ID",
+        linkTo: `/network/vpcs?vpcId=${this.nat.VpcId}`,
+        value: this.nat.VpcId,
+        helpText: "The ID of the VPC in which the NAT gateway is located.",
+      },
+      {
+        title: "Subnet ID",
+        linkTo: `/network/subnets?subnetId=${this.nat.SubnetId}`,
+        value: this.nat.SubnetId,
+        helpText: "The ID of the subnet in which the NAT gateway is located.",
+      },
+      {
+        title: "Create time",
+        value: this.createTime,
+        helpText: "The date and time the NAT gateway was created.",
+      },
+      {
+        title: "Public IP",
+        linkTo: `/network/eips?allocationId=${this.allocationId}`,
+
+        value: this.publicIp,
+        helpText: "The Elastic IP address associated with the NAT gateway.",
+      },
+      {
+        title: "Private Ip",
+        linkTo: `/network/eips?allocationId=${this.allocationId}`,
+        value: this.privateIp,
+        helpText:
+          "The private IP address associated with the Elastic IP address.",
+      },
+      {
+        title: "Network Interface ID",
+        linkTo: `/network/interfaces?interfaceId=${this.networkInterfaceId}`,
+        value: this.networkInterfaceId,
+        helpText:
+          "The ID of the network interface associated with the NAT gateway.",
+      },
+    ];
+  }
 
   get metricsPacketsOutToDestination(): Metric[] {
     return [

@@ -26,26 +26,7 @@
         >
       </div>
 
-      <div class="row justify-content-around mt-2">
-        <gl-card class="col-3" title="CIDR Block">
-          {{ vpc.CidrBlock }}
-        </gl-card>
-
-        <gl-card class="col-3" title="DHCP Options ID">
-          {{ vpc.DhcpOptionsId }}
-        </gl-card>
-        <gl-card class="col-3" title="Owner ID">
-          {{ vpc.OwnerId }}
-        </gl-card>
-      </div>
-      <div class="row justify-content-around mt-3">
-        <gl-card class="col-3" title="Default?">
-          {{ vpc.IsDefault }}
-        </gl-card>
-        <gl-card class="col-3" title="Instance Tenancy">
-          {{ vpc.InstanceTenancy }}
-        </gl-card>
-      </div>
+      <DrawerCards :cards="cards" />
 
       <h5 class="mt-3" v-if="vpc.CidrBlockAssociationSet.length > 0">
         CIDR Block Associations
@@ -178,7 +159,6 @@ import { Component, Prop, Watch } from "vue-property-decorator";
 import {
   FilterList,
   InternetGatewayList,
-  RouteTableList,
   NatGatewayList,
 } from "aws-sdk/clients/ec2";
 import { vpcs } from "@/components/network/VPC/vpc";
@@ -191,6 +171,8 @@ import FlowLogsTab from "@/components/network/flowLogs/FlowLogsTab.vue";
 import SubnetTab from "@/components/network/subnets/SubnetTab.vue";
 import RelatedInstances from "@/components/EC2/instances/RelatedInstances.vue";
 import RelatedRoutesTable from "@/components/network/routeTables/RelatedRoutesTable.vue";
+import { CardContent } from "@/components/common/cardContent";
+import DrawerCards from "@/components/common/DrawerCards.vue";
 
 @Component({
   components: {
@@ -208,6 +190,7 @@ import RelatedRoutesTable from "@/components/network/routeTables/RelatedRoutesTa
     FlowLogsTab,
     SubnetTab,
     RelatedInstances,
+    DrawerCards,
   },
   directives: { "gl-modal-directive": GlModalDirective },
 })
@@ -231,6 +214,39 @@ export default class VPC extends mixins(Formatters, Notifications) {
       region: this.vpc.region,
       credentials: this.$store.getters["sts/credentials"],
     });
+  }
+
+  get cards(): CardContent[] {
+    return [
+      {
+        title: "CIDR Block",
+        value: this.vpc.CidrBlock,
+        helpText: "The primary IPv4 CIDR block for the VPC.",
+      },
+      {
+        title: "DHCP Options ID",
+        value: this.vpc.DhcpOptionsId,
+        helpText:
+          "The ID of the set of DHCP options you've associated with the VPC (or default if the default options are associated with the VPC).",
+      },
+      {
+        title: "Owner ID",
+        value: this.vpc.OwnerId,
+        helpText: "The ID of the AWS account that owns the VPC.",
+      },
+      {
+        title: "Default?",
+        value: this.vpc.IsDefault,
+        helpText:
+          "Indicates whether the VPC is the default VPC for the region.",
+      },
+      {
+        title: "Instance Tenancy",
+        value: this.vpc.InstanceTenancy,
+        helpText: "The allowed tenancy of instances launched into the VPC.",
+      },
+      { title: "Region", value: this.vpc.region, isRegion: true },
+    ];
   }
 
   //Internet gateways tab

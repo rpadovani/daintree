@@ -6,13 +6,15 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
-## Added
+## [0.7.0]
+
+### Added
 
 - Add support for ECS tasks
 - Improve the layout of the cards in pages about single resources, now it is responsive
 - Add help text to a lot of resources' attributes
 
-## Changed
+### Changed
 
 - Refactored the tags table to use more modern Javascript
 - Highlight when the owner of a resource is the logged user
@@ -133,7 +135,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 - First public release, with basic support for Networking, EC2, SQS, and SNS.
 
-[Unreleased]: https://gitlab.com/rpadovani/daintree/-/compare/v0.6.0...master
+[Unreleased]: https://gitlab.com/rpadovani/daintree/-/compare/v0.7.0...master
+[0.7.0]: https://gitlab.com/rpadovani/daintree/-/compare/v0.6.0...v0.7.0
 [0.6.0]: https://gitlab.com/rpadovani/daintree/-/compare/v0.5.0...v0.6.0
 [0.5.0]: https://gitlab.com/rpadovani/daintree/-/compare/v0.4.0...v0.5.0
 [0.4.0]: https://gitlab.com/rpadovani/daintree/-/compare/v0.3.0...v0.4.0

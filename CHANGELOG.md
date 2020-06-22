@@ -16,6 +16,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 - Refactored the tags table to use more modern Javascript
 - Highlight when the owner of a resource is the logged user
+- Improve legend of graphs including minimum and current
 
 ### Fixed
 

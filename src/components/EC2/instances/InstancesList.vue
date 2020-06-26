@@ -1,21 +1,19 @@
 <template>
   <div>
-    <Header v-on:refresh="getAllInstances" :loading="loadingCount > 0" />
-
     <gl-drawer
-      :open="drawerOpened && selectedInstance !== {}"
+      :open="drawerOpened && selectedResourceKey !== ''"
       @close="close"
       style="min-width: 80%;"
     >
-      <template #header>{{ selectedInstanceTitle }}</template>
+      <template #header>{{ selectedResourceTitle }}</template>
 
-      <Instance :instance="selectedInstance" />
+      <Instance :instance="selectedResource" />
     </gl-drawer>
 
     <div class="container-fluid">
       <div
         class="row justify-content-between mt-3 mb-2 ml-2 mr-2"
-        v-if="instancesAsList.length > 0"
+        v-if="resourcesAsList.length > 0"
       >
         <gl-form-input
           class="col-12 col-sm-8 col-lg-9 mb-3 mb-sm-0"
@@ -36,16 +34,18 @@
       </div>
 
       <gl-table
-        ref="instancesTable"
-        :items="instancesAsList"
+        :items="resourcesAsList"
         :fields="fields"
         :filter="filter"
-        :busy="loadingCount > 0"
+        :busy="isLoading"
+        ref="resourcesTable"
+        :primary-key="resourceUniqueKey"
         selectable
         select-mode="single"
         @row-selected="onRowSelected"
-        v-show="instancesAsList.length > 0"
+        v-show="resourcesAsList.length > 0"
         show-empty
+        hover
       >
         <template v-slot:emptyfiltered="">
           <gl-empty-state
@@ -80,12 +80,12 @@
     <div class="container">
       <gl-skeleton-loading
         class="mt-5"
-        v-if="loadingCount > 0 && instancesAsList.length < 1"
+        v-if="isLoading && resourcesAsList.length < 1"
       />
 
       <gl-empty-state
         class="mt-5"
-        v-if="loadingCount === 0 && instancesAsList.length === 0"
+        v-else-if="!isLoading && resourcesAsList.length === 0"
         title="No instances found in the selected regions!"
         svg-path="/assets/undraw_empty_xct9.svg"
         :description="emptyStateDescription"
@@ -113,31 +113,28 @@
 </template>
 
 <script lang="ts">
-import EC2Client from "aws-sdk/clients/ec2";
-import Header from "../../Header/Header.vue";
+import {
+  DescribeInstancesRequest,
+  Instance as EC2Instance,
+  Placement,
+} from "aws-sdk/clients/ec2";
 import Instance from "./Instance.vue";
 import {
-  GlTable,
-  GlDrawer,
-  GlFormInput,
   GlButton,
-  GlSkeletonLoading,
+  GlDrawer,
   GlEmptyState,
+  GlFormInput,
   GlModalDirective,
+  GlSkeletonLoading,
+  GlTable,
 } from "@gitlab/ui";
-import { Component, Watch } from "vue-property-decorator";
-import { Formatters } from "@/mixins/formatters";
+import { Component } from "vue-property-decorator";
 import StateText from "@/components/common/StateText.vue";
 import RegionText from "@/components/common/RegionText.vue";
-import { instances } from "@/components/EC2/instances/instance";
-import InstanceWithRegion = instances.InstanceWithRegion;
-import { DescribeInstancesRequest, Placement } from "aws-sdk/clients/ec2";
-import { mixins } from "vue-class-component";
-import Notifications from "@/mixins/notifications";
+import { NetworkComponent } from "@/components/network/networkComponent";
 
 @Component({
   components: {
-    Header,
     GlTable,
     GlDrawer,
     GlFormInput,
@@ -152,17 +149,15 @@ import Notifications from "@/mixins/notifications";
     "gl-modal-directive": GlModalDirective,
   },
 })
-export default class Instances extends mixins(Formatters, Notifications) {
-  instances: { [key: string]: InstanceWithRegion } = {};
-  selectedInstance: InstanceWithRegion = {};
-  drawerOpened = false;
-
-  filter = "";
-  loadingCount = 0;
-
-  //A list of instances that are being created or deleted by region. We poll over them.
-  wipInstances: { [key: string]: string[] } = {};
-  isPolling = false;
+export default class Instances extends NetworkComponent<
+  EC2Instance,
+  "InstanceId" | "State"
+> {
+  resourceName = "instance";
+  canCreate = true;
+  resourceUniqueKey: "InstanceId" = "InstanceId";
+  resourceStateKey: "State" = "State";
+  workingStates = ["pending", "stopping", "shutting-down"];
 
   fields = [
     {
@@ -194,50 +189,19 @@ export default class Instances extends mixins(Formatters, Notifications) {
     { key: "SubnetId", sortable: true },
   ];
 
-  get instancesAsList(): InstanceWithRegion[] {
-    return Object.values(this.instances);
+  getResourceState(resource: EC2Instance): string | null {
+    return resource.State?.Name || null;
   }
 
-  get regionsEnabled(): string[] {
-    return this.$store.getters["sts/regions"];
-  }
-
-  get currentRoleIndex(): number {
-    return this.$store.getters["sts/currentRoleIndex"];
-  }
-
-  get emptyStateDescription(): string {
-    return (
-      "Daintree hasn't found any instance in the selected regions! You can change selected regions in the settings. We have looked in " +
-      this.$store.getters["sts/regions"].join(", ") +
-      "."
-    );
-  }
-
-  get selectedInstanceTitle(): string | undefined {
-    const nameTag = this.selectedInstance?.Tags?.filter(
-      (v) => v.Key === "Name"
-    );
-
-    if (nameTag && nameTag.length > 0) {
-      return `${nameTag[0].Value} (${this.selectedInstance.InstanceId})`;
-    }
-    return this.selectedInstance.InstanceId;
-  }
-
-  getAllInstances() {
-    this.regionsEnabled.forEach((region) => this.getInstanceForRegion(region));
-  }
-  getInstanceForRegion(region: string, filterByInstanceIds?: string[]) {
-    //While polling we do not set the loading state 'cause it is annoying
-    if (!filterByInstanceIds) {
-      this.loadingCount++;
+  async getResourcesForRegion(
+    region: string,
+    filterByInstanceIds?: string[]
+  ): Promise<EC2Instance[]> {
+    const EC2 = await this.client(region);
+    if (!EC2) {
+      return [];
     }
 
-    const EC2 = new EC2Client({
-      region,
-      credentials: this.$store.getters["sts/credentials"],
-    });
     const params: DescribeInstancesRequest = {};
     if (filterByInstanceIds) {
       params.Filters = [
@@ -248,189 +212,14 @@ export default class Instances extends mixins(Formatters, Notifications) {
       ];
     }
 
-    EC2.describeInstances(params, (err, data) => {
-      if (!filterByInstanceIds) {
-        this.loadingCount--;
-        Object.keys(this.instances).forEach((key) => {
-          //Keep track if the instances of this region are still available
-          if (this.instances[key].region === region) {
-            this.instances[key].stillPresent = false;
-          }
-        });
-      }
+    const data = await EC2.describeInstances(params).promise();
+    const instances: EC2Instance[] = [];
 
-      if (err) {
-        this.showError(`[${region}] ` + err, "loadingInstance");
-        return;
-      }
-
-      data.Reservations?.forEach((r) => {
-        r.Instances?.forEach((instance) => {
-          if (instance.InstanceId) {
-            this.$set(this.instances, instance.InstanceId, {
-              ...instance,
-              region,
-              stillPresent: true,
-            });
-
-            //If instances are pending or deleting we save them in the wip instances, so we can poll over them
-            //Otherwise, if they are not pending nor deleting, we remove them from the wip state
-            if (
-              instance.State &&
-              instance.State.Name &&
-              ["pending", "stopping", "shutting-down"].includes(
-                instance.State.Name
-              )
-            ) {
-              if (!this.wipInstances[region]) {
-                this.$set(this.wipInstances, region, [instance.InstanceId]);
-              } else if (
-                !this.wipInstances[region].includes(instance.InstanceId)
-              ) {
-                this.wipInstances[region].push(instance.InstanceId);
-              }
-              this.startPolling();
-            } else if (
-              this.wipInstances[region] &&
-              this.wipInstances[region].includes(instance.InstanceId)
-            ) {
-              const instanceIndex = this.wipInstances[region].findIndex(
-                (v) => v === instance.InstanceId
-              );
-              //If we were creating or deleting a instance on our own, we dismiss the creating / deleting alert
-              this.dismissAlertByResourceID(instance.InstanceId);
-              this.wipInstances[region].slice(instanceIndex, instanceIndex + 1);
-            }
-          }
-        });
-      });
-
-      //Remove instance we don't find anymore
-      if (!filterByInstanceIds) {
-        Object.keys(this.instances).forEach((key) => {
-          if (
-            this.instances[key].region === region &&
-            !this.instances[key].stillPresent
-          ) {
-            this.$delete(this.instances, key);
-          }
-        });
-      }
-
-      //We wait until all the data have been loaded and then we select the row on the table.
-      //This is necessary because every time the data of the table is updated, a row selected event with
-      //0 elements is emitted, removing our selection
-      if (this.$route.query.instanceId && this.loadingCount === 0) {
-        this.$nextTick().then(() => {
-          const filteredInstances = this.instancesAsList.filter(
-            (instance) => instance.InstanceId === this.$route.query.instanceId
-          );
-          if (filteredInstances && filteredInstances.length > 0) {
-            this.selectedInstance = filteredInstances[0];
-            this.drawerOpened = true;
-            const index = this.instancesAsList.findIndex(
-              (instance) => instance.InstanceId === this.$route.query.instanceId
-            );
-            // eslint-disable-next-line @typescript-eslint/ban-ts-comment
-            //@ts-ignore
-            this.$refs.instancesTable["$children"][0].selectRow(index);
-          }
-        });
-      }
+    data.Reservations?.forEach((r) => {
+      r.Instances?.forEach((instance) => instances.push(instance));
     });
-  }
 
-  close(update?: boolean) {
-    this.drawerOpened = false;
-
-    if (
-      update &&
-      this.selectedInstance.region &&
-      this.selectedInstance.InstanceId
-    ) {
-      this.getInstanceForRegion(this.selectedInstance.region, [
-        this.selectedInstance.InstanceId,
-      ]);
-    }
-
-    //We silence the error: it's a "NavigationDuplicate" because we aren't changing component
-    // eslint-disable-next-line @typescript-eslint/no-empty-function
-    this.$router.push({ path: "/ec2/instances", query: {} }).catch(() => {});
-    this.selectedInstance = {};
-
-    //Do not do this at home!
-    // eslint-disable-next-line @typescript-eslint/ban-ts-comment
-    //@ts-ignore
-    this.$refs.instancesTable["$children"][0].clearSelected();
-  }
-
-  onRowSelected(instances: InstanceWithRegion[]) {
-    if (instances.length > 0) {
-      this.selectedInstance = instances[0];
-      this.drawerOpened = true;
-      this.$router
-        .push({
-          path: "/ec2/instances",
-          query: { instanceId: instances[0].InstanceId },
-        })
-        // eslint-disable-next-line @typescript-eslint/no-empty-function
-        .catch(() => {});
-    } else {
-      this.close();
-    }
-  }
-
-  @Watch("regionsEnabled")
-  onRegionsEnabledChanged(newValue: string[], oldValue: string[]) {
-    const addedRegions = [...newValue.filter((d) => !oldValue.includes(d))];
-    const removedRegions = [...oldValue.filter((d) => !newValue.includes(d))];
-
-    if (removedRegions.length > 0) {
-      this.instancesAsList.forEach((instance) => {
-        if (
-          instance.region &&
-          removedRegions.includes(instance.region) &&
-          instance.InstanceId
-        ) {
-          this.$delete(this.instances, instance.InstanceId);
-        }
-      });
-    }
-
-    addedRegions.forEach((region) => this.getInstanceForRegion(region));
-  }
-
-  startPolling() {
-    if (this.isPolling) {
-      return;
-    }
-
-    this.isPolling = true;
-    window.setTimeout(() => {
-      this.isPolling = false;
-
-      Object.keys(this.wipInstances).forEach((region) => {
-        if (this.wipInstances[region].length > 0) {
-          this.getInstanceForRegion(region, this.wipInstances[region]);
-        }
-      });
-    }, 5000);
-  }
-
-  beforeMount() {
-    this.getAllInstances();
-  }
-
-  @Watch("currentRoleIndex")
-  onCurrentRoleIndexChanged() {
-    this.instances = {};
-    this.getAllInstances();
-  }
-
-  destroyed() {
-    this.$store.commit("notifications/dismissByKey", "loadingInstance");
+    return instances;
   }
 }
 </script>
-
-<style scoped></style>

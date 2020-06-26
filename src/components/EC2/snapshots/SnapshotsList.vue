@@ -1,7 +1,5 @@
 <template>
   <div>
-    <Header v-on:refresh="getAllResources" :loading="loadingCount > 0" />
-
     <gl-drawer
       :open="drawerOpened && selectedResourceKey !== ''"
       @close="close"
@@ -37,7 +35,7 @@
         :items="resourcesAsList"
         :fields="fields"
         :filter="filter"
-        :busy="loadingCount > 0"
+        :busy="isLoading"
         ref="resourcesTable"
         selectable
         select-mode="single"
@@ -81,12 +79,12 @@
       <div class="container">
         <gl-skeleton-loading
           class="mt-5"
-          v-if="loadingCount > 0 && resourcesAsList.length < 1"
+          v-if="isLoading && resourcesAsList.length < 1"
         />
 
         <gl-empty-state
           class="mt-5"
-          v-if="loadingCount === 0 && resourcesAsList.length === 0"
+          v-if="!isLoading && resourcesAsList.length === 0"
           title="No snapshot found in the selected regions!"
           svg-path="/assets/undraw_empty_xct9.svg"
           :description="emptyStateDescription"
@@ -116,7 +114,6 @@ import {
   Snapshot as AWSSnapshot,
 } from "aws-sdk/clients/ec2";
 
-import Header from "@/components/Header/Header.vue";
 import RegionText from "@/components/common/RegionText.vue";
 import {
   GlButton,
@@ -138,7 +135,6 @@ import StateText from "@/components/common/StateText.vue";
 @Component({
   components: {
     Snapshot,
-    Header,
     GlTable,
     RegionText,
     GlIcon,
@@ -202,30 +198,18 @@ export default class SnapshotsList extends NetworkComponent<
     };
 
     if (filterBySnapshotsId) {
-      params.SnapshotIds = filterBySnapshotsId;
+      params.Filters?.push({
+        Name: "snapshot-id",
+        Values: filterBySnapshotsId,
+      });
     }
 
-    try {
-      const data = await EC2.describeSnapshots(params).promise();
-      if (data.Snapshots === undefined) {
-        return [];
-      }
-
-      return data.Snapshots;
-    } catch (err) {
-      if (err.code === "InvalidSnapshot.NotFound") {
-        //We were looking for a snapshot that doesn't exist anymore, it's not an error
-        return [];
-      }
-      this.showError(`[${region}] ` + err, `${region}#loadingSnapshots`);
+    const data = await EC2.describeSnapshots(params).promise();
+    if (data.Snapshots === undefined) {
       return [];
     }
-  }
 
-  destroyed(): void {
-    this.$store.commit("notifications/dismissByKey", "loadingSnapshots");
+    return data.Snapshots;
   }
 }
 </script>
-
-<style scoped></style>

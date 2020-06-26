@@ -73,5 +73,3 @@ export default class FlowLogsTab extends Vue {
   }
 }
 </script>
-
-<style scoped></style>

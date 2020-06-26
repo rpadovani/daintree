@@ -113,5 +113,3 @@ export default class SubnetTab extends Formatters {
   }
 }
 </script>
-
-<style scoped></style>

@@ -1,20 +1,14 @@
 <template>
-  <ResourceMainMenu
-    :entries="entries"
-    :only-content="onlyContent"
-    resource-name="Network"
-  />
+  <ResourceMainMenu :entries="entries" resource-name="Network" />
 </template>
 
 <script lang="ts">
-import { Component, Prop, Vue } from "vue-property-decorator";
+import { Component, Vue } from "vue-property-decorator";
 import { MenuEntry } from "@/components/common/menuEntry";
 import ResourceMainMenu from "@/components/common/ResourceMainMenu.vue";
 
 @Component({ components: { ResourceMainMenu } })
 export default class NetworkMain extends Vue {
-  @Prop(Boolean) readonly onlyContent: boolean | undefined;
-
   readonly entries: MenuEntry[] = [
     {
       target: "/network/vpcs",
@@ -69,5 +63,3 @@ export default class NetworkMain extends Vue {
   ];
 }
 </script>
-
-<style scoped></style>

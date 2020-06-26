@@ -8,9 +8,13 @@ export const NotificationMutations = {
   show(state: NotificationState, notification: AppNotification) {
     //Remove the same notification if it happened before
     if (notification.key) {
-      state.notifications = state.notifications.filter(
-        (n) => n.key != notification.key
-      );
+      state.notifications = state.notifications.filter((n) => {
+        return (
+          n.key !== notification.key ||
+          n.region !== notification.region ||
+          n.text !== notification.text
+        );
+      });
     }
     state.notifications.push(notification);
   },

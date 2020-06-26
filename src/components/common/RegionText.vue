@@ -80,5 +80,3 @@ export default class RegionText extends Vue {
   }
 }
 </script>
-
-<style scoped></style>

@@ -15,27 +15,28 @@ const routes = [
     path: "/",
     name: "Home",
     component: Home,
+    meta: { hideSubHeader: true },
   },
   {
     path: "/login",
     name: "Login",
     component: () =>
       import(/* webpackChunkName: "login" */ "@/components/Login.vue"),
-    meta: { title: "Login" },
+    meta: { title: "Login", hideSubHeader: true },
   },
   {
     path: "/changelog",
     name: "Changelog",
     component: () =>
       import(/* webpackChunkName: "changelog" */ "@/views/Changelog.vue"),
-    meta: { title: "Changelog" },
+    meta: { title: "Changelog", hideSubHeader: true },
   },
   {
     path: "/security",
     name: "Security",
     component: () =>
       import(/* webpackChunkName: "security" */ "@/views/Security.vue"),
-    meta: { title: "Security" },
+    meta: { title: "Security", hideSubHeader: true },
   },
   {
     path: "/cognito_callback",
@@ -44,11 +45,12 @@ const routes = [
       import(
         /* webpackChunkName: "cognito_callback" */ "@/components/CognitoCallback.vue"
       ),
+    meta: { title: "Logging in...", hideSubHeader: true },
   },
   {
     path: "/about",
     name: "About",
-    meta: { title: "Features" },
+    meta: { title: "Features", hideSubHeader: true },
     component: () =>
       import(/* webpackChunkName: "about" */ "@/views/About.vue"),
   },
@@ -57,21 +59,21 @@ const routes = [
     name: "OAuth Instruction",
     component: () =>
       import(/* webpackChunkName: "oauth_instruction" */ "@/views/OAuth.vue"),
-    meta: { title: "OAuth instructions" },
+    meta: { title: "OAuth instructions", hideSubHeader: true },
   },
   {
     path: "/contribute",
     name: "Contribute",
     component: () =>
       import(/* webpackChunkName: "contribute" */ "@/views/Contribute.vue"),
-    meta: { title: "Contribute" },
+    meta: { title: "Contribute", hideSubHeader: true },
   },
   {
     path: "/home",
     name: "Main menu",
     component: () =>
       import(/* webpackChunkName: "main_menu" */ "@/components/MainMenu.vue"),
-    meta: { title: "Main Menu", requiresLogin: true },
+    meta: { title: "Main Menu", requiresLogin: true, hideRefresher: true },
   },
   ...NetworkRoutes,
   ...EC2Routes,
@@ -82,7 +84,7 @@ const routes = [
     name: "Not Found",
     component: () =>
       import(/* webpackChunkName: "notFound" */ "@/views/404.vue"),
-    meta: { title: "404" },
+    meta: { title: "404", hideSubHeader: true },
   },
 ];
 
@@ -100,6 +102,18 @@ router.beforeEach((to, from, next) => {
 });
 
 router.afterEach((to) => {
+  if (to.meta.hideSubHeader === true) {
+    store.commit("header/hideSubHeader");
+  } else {
+    store.commit("header/showSubHeader");
+  }
+
+  if (to.meta.hideRefresher === true) {
+    store.commit("header/hideRefresher");
+  } else {
+    store.commit("header/showRefresher");
+  }
+
   // Use next tick to handle router history correctly
   // see: https://github.com/vuejs/vue-router/issues/914#issuecomment-384477609
   Vue.nextTick(() => {

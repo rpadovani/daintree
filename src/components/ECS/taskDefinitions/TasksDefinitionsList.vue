@@ -1,7 +1,5 @@
 <template>
   <div>
-    <Header v-on:refresh="getAllResources" :loading="loadingCount > 0" />
-
     <gl-drawer
       :open="drawerOpened && selectedResourceKey !== ''"
       @close="close"
@@ -41,7 +39,7 @@
         :items="resourcesAsList"
         :fields="fields"
         :filter="filter"
-        :busy="loadingCount > 0"
+        :busy="isLoading"
         ref="resourcesTable"
         primary-key="family"
         selectable
@@ -69,12 +67,12 @@
       <div class="container">
         <gl-skeleton-loading
           class="mt-5"
-          v-if="loadingCount > 0 && resourcesAsList.length < 1"
+          v-if="isLoading && resourcesAsList.length < 1"
         />
 
         <gl-empty-state
           class="mt-5"
-          v-if="loadingCount === 0 && resourcesAsList.length === 0"
+          v-else-if="!isLoading && resourcesAsList.length === 0"
           title="No ECS tasks found in the selected regions!"
           svg-path="/assets/undraw_empty_xct9.svg"
           :description="emptyStateDescription"
@@ -102,7 +100,6 @@
 </template>
 
 <script lang="ts">
-import Header from "@/components/Header/Header.vue";
 import RegionText from "@/components/common/RegionText.vue";
 import {
   GlButton,
@@ -127,7 +124,6 @@ import TasksDefinitionsForFamily from "@/components/ECS/taskDefinitions/TasksDef
   components: {
     TasksDefinitionsForFamily,
     StateText,
-    Header,
     GlTable,
     RegionText,
     GlIcon,
@@ -195,24 +191,13 @@ export default class TasksDefinitionsList extends EcsComponent<
 
     const params: ListTaskDefinitionFamiliesRequest = {};
 
-    try {
-      const data = await client.listTaskDefinitionFamilies(params).promise();
-      if (data.families === undefined) {
-        return [];
-      }
-      return data.families.map((s) => {
-        return { family: s };
-      });
-    } catch (err) {
-      this.showError(`[${region}] ` + err, `tasksDefinitions`);
+    const data = await client.listTaskDefinitionFamilies(params).promise();
+    if (data.families === undefined) {
       return [];
     }
-  }
-
-  destroyed(): void {
-    this.$store.commit("notifications/dismissByKey", "tasksDefinitions");
+    return data.families.map((s) => {
+      return { family: s };
+    });
   }
 }
 </script>
-
-<style scoped></style>

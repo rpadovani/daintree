@@ -11,6 +11,9 @@ import { STSActions } from "@/store/sts/actions";
 import { CloudwatchState } from "@/store/cloudwatch/state";
 import { CloudwatchMutations } from "@/store/cloudwatch/mutations";
 import { CloudwatchGetters } from "@/store/cloudwatch/getters";
+import { HeaderState } from "@/store/header/state";
+import { HeaderMutations } from "@/store/header/mutations";
+import { HeaderGetters } from "@/store/header/getters";
 
 Vue.use(Vuex);
 export default new Vuex.Store({
@@ -34,6 +37,12 @@ export default new Vuex.Store({
       state: new CloudwatchState(),
       mutations: CloudwatchMutations,
       getters: CloudwatchGetters,
+    },
+    header: {
+      namespaced: true,
+      state: new HeaderState(),
+      mutations: HeaderMutations,
+      getters: HeaderGetters,
     },
   },
 });

@@ -1,21 +1,19 @@
 <template>
   <div>
-    <Header v-on:refresh="getAllQueues" :loading="loadingCount > 0" />
-
     <gl-drawer
-      :open="drawerOpened && selectedSqs !== {}"
+      :open="drawerOpened && selectedResourceKey !== ''"
       @close="close"
       style="min-width: 80%;"
     >
-      <template #header>{{ selectedSqsTitle }}</template>
+      <template #header>{{ selectedResourceTitle }}</template>
 
-      <SQS :sqs="selectedSqs" v-on:deleted="close" />
+      <SQS :sqs="selectedResource" v-on:deleted="close" />
     </gl-drawer>
 
     <div class="container-fluid">
       <div
         class="row justify-content-between mt-3 mb-2 ml-2 mr-2"
-        v-if="sqsAsList.length > 0"
+        v-if="resourcesAsList.length > 0"
       >
         <gl-form-input
           class="col-12 col-sm-8 col-lg-9 mb-3 mb-sm-0"
@@ -34,16 +32,18 @@
         </gl-button>
       </div>
       <gl-table
-        :items="sqsAsList"
-        :filter="filter"
-        :busy="loadingCount > 0"
+        :items="resourcesAsList"
         :fields="fields"
-        ref="sqsTable"
+        :filter="filter"
+        :busy="isLoading"
+        ref="resourcesTable"
+        :primary-key="resourceUniqueKey"
         selectable
         select-mode="single"
         @row-selected="onRowSelected"
-        v-show="sqsAsList.length > 0"
+        v-show="resourcesAsList.length > 0"
         show-empty
+        hover
       >
         <template v-slot:emptyfiltered="">
           <gl-empty-state
@@ -77,13 +77,13 @@
       <div class="container">
         <gl-skeleton-loading
           class="mt-5"
-          v-if="loadingCount > 0 && sqsAsList.length < 1"
+          v-if="isLoading && resourcesAsList.length < 1"
         />
 
         <gl-empty-state
           class="mt-5"
-          v-if="loadingCount === 0 && sqsAsList.length === 0"
-          title="No Sqs found in the selected regions!"
+          v-if="!isLoading && resourcesAsList.length === 0"
+          title="No queue found in the selected regions!"
           svg-path="/assets/undraw_empty_xct9.svg"
           :description="emptyStateDescription"
           compact
@@ -107,34 +107,28 @@
 </template>
 
 <script lang="ts">
-import SQSClient from "aws-sdk/clients/sqs";
-
-import Header from "@/components/Header/Header.vue";
+import { ListQueuesRequest } from "aws-sdk/clients/sqs";
 import RegionText from "@/components/common/RegionText.vue";
 import {
+  GlButton,
   GlDrawer,
+  GlEmptyState,
   GlFormInput,
   GlIcon,
-  GlButton,
-  GlTable,
-  GlEmptyState,
-  GlSkeletonLoading,
-  GlModalDirective,
   GlLoadingIcon,
+  GlModalDirective,
+  GlSkeletonLoading,
+  GlTable,
 } from "@gitlab/ui";
-import { Formatters } from "@/mixins/formatters";
-import Component, { mixins } from "vue-class-component";
+import Component from "vue-class-component";
 import StateText from "@/components/common/StateText.vue";
-import Notifications from "@/mixins/notifications";
-import { Watch } from "vue-property-decorator";
 import SQS from "@/components/messages/SQS/SQS.vue";
 import { QueueWithRegion } from "@/components/messages/SQS/sqs";
-import { ListQueuesRequest } from "aws-sdk/clients/sqs";
+import { SqsComponent } from "@/components/messages/SQS/sqsComponent";
 
 @Component({
   components: {
     StateText,
-    Header,
     GlTable,
     RegionText,
     GlIcon,
@@ -150,14 +144,10 @@ import { ListQueuesRequest } from "aws-sdk/clients/sqs";
     "gl-modal-directive": GlModalDirective,
   },
 })
-export default class SQSList extends mixins(Formatters, Notifications) {
-  sqs: { [key: string]: QueueWithRegion } = {};
-
-  drawerOpened = false;
-
-  selectedSqs: QueueWithRegion = {};
-  filter = "";
-  loadingCount = 0;
+export default class SQSList extends SqsComponent<QueueWithRegion, "queueUrl"> {
+  resourceName = "queue";
+  canCreate = true;
+  resourceUniqueKey: "queueUrl" = "queueUrl";
 
   fields = [
     {
@@ -187,214 +177,55 @@ export default class SQSList extends mixins(Formatters, Notifications) {
     },
   ];
 
-  get sqsAsList(): QueueWithRegion[] {
-    return Object.values(this.sqs);
-  }
-
-  get regionsEnabled(): string[] {
-    return this.$store.getters["sts/regions"];
-  }
-
-  get currentRoleIndex(): number {
-    return this.$store.getters["sts/currentRoleIndex"];
-  }
-
-  get emptyStateDescription(): string {
-    return (
-      "Daintree hasn't found any queue in the selected regions! You can create a new one, or change selected regions in the settings. We have looked in " +
-      this.regionsEnabled.join(", ") +
-      "."
-    );
-  }
-
-  get selectedSqsTitle() {
-    if (this.selectedSqs.queueUrl) {
-      return this.getQueueNameFromUrl(this.selectedSqs.queueUrl);
+  async getResourcesForRegion(
+    region: string,
+    filterBySqsURL?: string[]
+  ): Promise<QueueWithRegion[]> {
+    const SQS = await this.client(region);
+    if (!SQS) {
+      return [];
     }
-    return "";
-  }
-
-  getAllQueues() {
-    this.regionsEnabled.forEach((region) => this.getQueueForRegion(region));
-  }
-
-  getQueueForRegion(region: string, filterBySqsURL?: string) {
-    //While polling we do not set the loading state 'cause it is annoying
-    if (!filterBySqsURL) {
-      this.loadingCount++;
-    }
-
-    const SQS = new SQSClient({
-      region,
-      credentials: this.$store.getters["sts/credentials"],
-    });
 
     const params: ListQueuesRequest = {};
 
     if (filterBySqsURL) {
-      params.QueueNamePrefix = this.getQueueNameFromUrl(filterBySqsURL);
+      params.QueueNamePrefix = this.getQueueNameFromUrl(filterBySqsURL[0]);
     }
 
-    SQS.listQueues(params, (err, data) => {
-      if (!filterBySqsURL) {
-        this.loadingCount--;
-        Object.keys(this.sqs).forEach((key) => {
-          //Keep track if the sqs of this region are still available
-          if (this.sqs[key].region === region) {
-            this.sqs[key].stillPresent = false;
-          }
+    const data = await SQS.listQueues(params).promise();
+    if (data.QueueUrls === undefined) {
+      return [];
+    }
+
+    const response: QueueWithRegion[] = [];
+
+    data.QueueUrls?.forEach((queueUrl) => {
+      if (queueUrl) {
+        response.push({
+          queueUrl,
+          region,
+          stillPresent: true,
         });
-      }
 
-      if (err) {
-        this.showError(`[${region}] ` + err, "loadingSqs");
-        return;
-      }
-
-      //When we retrieve only some Sqs, if we don't retrieve them it means they have been deleted
-      if (filterBySqsURL) {
-        if (!data.QueueUrls || !data.QueueUrls.includes(filterBySqsURL)) {
-          this.$delete(this.sqs, filterBySqsURL);
-        }
-      }
-
-      data.QueueUrls?.forEach((queueUrl) => {
-        if (queueUrl) {
-          this.$set(this.sqs, queueUrl, {
-            queueUrl,
-            region,
-            stillPresent: true,
-          });
-
-          SQS.getQueueAttributes(
-            { QueueUrl: queueUrl, AttributeNames: ["All"] },
-            (err, data) => {
-              if (err) {
-                this.showError(`[${region}] ` + err, "loadingSqsQueue");
-              } else {
-                this.$set(this.sqs, queueUrl, {
-                  queueUrl,
-                  region,
-                  stillPresent: true,
-                  ...data.Attributes,
-                });
-              }
+        SQS.getQueueAttributes(
+          { QueueUrl: queueUrl, AttributeNames: ["All"] },
+          (err, data) => {
+            if (err) {
+              this.showError(err.message, this.resourceName, region);
+            } else {
+              this.$set(this.resources, queueUrl, {
+                queueUrl,
+                region,
+                stillPresent: true,
+                ...data.Attributes,
+              });
             }
-          );
-        }
-      });
-
-      //Remove Sqs we don't find anymore
-      if (!filterBySqsURL) {
-        Object.keys(this.sqs).forEach((key) => {
-          if (this.sqs[key].region === region && !this.sqs[key].stillPresent) {
-            this.$delete(this.sqs, key);
           }
-        });
-      }
-
-      //We wait until all the data have been loaded and then we select the row on the table.
-      //This is necessary because every time the data of the table is updated, a row selected event with
-      //0 elements is emitted, removing our selection
-      //We also accept ARNs, only because SNS subscriptions know them but not the Url
-      if (
-        (this.$route.query.queueUrl || this.$route.query.arn) &&
-        this.loadingCount === 0
-      ) {
-        this.$nextTick().then(() => {
-          const filteredSqs = this.sqsAsList.filter(
-            (sqs) =>
-              sqs.queueUrl === this.$route.query.queueUrl ||
-              sqs.QueueArn === this.$route.query.arn
-          );
-          if (filteredSqs && filteredSqs.length > 0) {
-            this.selectedSqs = filteredSqs[0];
-            this.drawerOpened = true;
-            const index = this.sqsAsList.findIndex(
-              (sqs) =>
-                sqs.queueUrl === this.$route.query.queueUrl ||
-                sqs.QueueArn === this.$route.query.arn
-            );
-            // eslint-disable-next-line @typescript-eslint/ban-ts-comment
-            //@ts-ignore
-            this.$refs.sqsTable["$children"][0].selectRow(index);
-          }
-        });
+        );
       }
     });
-  }
 
-  getQueueNameFromUrl(queueUrl: string): string {
-    const queuePieces = queueUrl.split("/");
-    return queuePieces[queuePieces.length - 1];
-  }
-
-  close() {
-    this.drawerOpened = false;
-
-    if (this.selectedSqs.region && this.selectedSqs.queueUrl) {
-      this.getQueueForRegion(
-        this.selectedSqs.region,
-        this.selectedSqs.queueUrl
-      );
-    }
-
-    // eslint-disable-next-line @typescript-eslint/no-empty-function
-    this.$router.push({ path: "/messages/sqs", query: {} }).catch(() => {});
-    this.selectedSqs = {};
-
-    //Do not do this at home!
-    // eslint-disable-next-line @typescript-eslint/ban-ts-comment
-    //@ts-ignore
-    this.$refs.sqsTable["$children"][0].clearSelected();
-  }
-
-  onRowSelected(sqs: QueueWithRegion[]) {
-    if (sqs.length > 0) {
-      this.selectedSqs = sqs[0];
-      this.drawerOpened = true;
-      this.$router
-        .push({
-          path: "/messages/sqs",
-          query: { queueUrl: sqs[0].queueUrl },
-        })
-        // eslint-disable-next-line @typescript-eslint/no-empty-function
-        .catch(() => {});
-    } else {
-      this.close();
-    }
-  }
-
-  @Watch("regionsEnabled")
-  onRegionsEnabledChanged(newValue: string[], oldValue: string[]) {
-    const addedRegions = [...newValue.filter((d) => !oldValue.includes(d))];
-    const removedRegions = [...oldValue.filter((d) => !newValue.includes(d))];
-
-    if (removedRegions.length > 0) {
-      this.sqsAsList.forEach((sqs) => {
-        if (sqs.region && removedRegions.includes(sqs.region) && sqs.queueUrl) {
-          this.$delete(this.sqs, sqs.queueUrl);
-        }
-      });
-    }
-
-    addedRegions.forEach((region) => this.getQueueForRegion(region));
-  }
-
-  @Watch("currentRoleIndex")
-  onCurrentRoleIndexChanged() {
-    this.sqs = {};
-    this.getAllQueues();
-  }
-
-  beforeMount() {
-    this.getAllQueues();
-  }
-
-  destroyed() {
-    this.$store.commit("notifications/dismissByKey", "loadingSqs");
+    return response;
   }
 }
 </script>
-
-<style scoped></style>

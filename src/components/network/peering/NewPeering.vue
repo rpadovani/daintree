@@ -1,139 +1,131 @@
 <template>
-  <div>
-    <Header @refresh="refresh" :loading="loadingCount > 0" />
-    <div class="container mt-2">
-      <h2>Create a new VPC peering connection</h2>
-      <gl-alert variant="tip" class="mb-2 mt-2" :dismissible="false">
-        A VPC peering connection is a networking connection between two VPCs
-        that enables you to route traffic between them using private IPv4
-        addresses or IPv6 addresses. Instances in either VPC can communicate
-        with each other as if they are within the same network. You can create a
-        VPC peering connection between your own VPCs, or with a VPC in another
-        AWS account. The VPCs can be in different regions (also known as an
-        inter-region VPC peering connection).
-      </gl-alert>
+  <div class="container mt-2">
+    <h2>Create a new VPC peering connection</h2>
+    <gl-alert variant="tip" class="mb-2 mt-2" :dismissible="false">
+      A VPC peering connection is a networking connection between two VPCs that
+      enables you to route traffic between them using private IPv4 addresses or
+      IPv6 addresses. Instances in either VPC can communicate with each other as
+      if they are within the same network. You can create a VPC peering
+      connection between your own VPCs, or with a VPC in another AWS account.
+      The VPCs can be in different regions (also known as an inter-region VPC
+      peering connection).
+    </gl-alert>
 
-      <gl-form @submit="createPeering">
-        <gl-form-input-group
-          class="mt-3"
-          v-model="form.name"
-          placeholder="Create a tag with key 'Name' and the value you insert."
-        >
-          <template #prepend>
-            <b-input-group-text>Name</b-input-group-text>
-          </template>
-        </gl-form-input-group>
+    <gl-form @submit="createPeering">
+      <gl-form-input-group
+        class="mt-3"
+        v-model="form.name"
+        placeholder="Create a tag with key 'Name' and the value you insert."
+      >
+        <template #prepend>
+          <b-input-group-text>Name</b-input-group-text>
+        </template>
+      </gl-form-input-group>
 
-        <h5 class="mt-2">Local VPC to peer with</h5>
-        <gl-form-group
-          id="region-id"
-          label="Requester region:"
-          label-size="sm"
-          description="To see other regions, enable them in the settings"
-          label-for="region-input"
-        >
-          <gl-form-select
-            id="region-input"
-            v-model="form.requesterRegion"
-            :options="this.$store.getters['sts/regions']"
-            @change="getVPCsForRequesterRegion"
-          />
-        </gl-form-group>
-
-        <gl-form-group
-          id="vpc-id"
-          label="Requester VPC:"
-          label-size="sm"
-          label-for="vpc-input"
-          class="mt-2"
-        >
-          <gl-form-select
-            id="vpc-input"
-            :disabled="form.requesterRegion === '' || loadingCount > 0"
-            v-model="form.requesterVpc"
-            :options="requesterVPCs"
-            value-field="VpcId"
-            text-field="VpcId"
-          />
-        </gl-form-group>
-
-        <h5 class="mt-2">Peer VPC options</h5>
-        <gl-form-input-group
-          id="accepter-account-id"
-          class="mt-2"
-          :predefined-options="accountIdPredefinedOptions"
-          v-model="form.accepterAccount"
+      <h5 class="mt-2">Local VPC to peer with</h5>
+      <gl-form-group
+        id="region-id"
+        label="Requester region:"
+        label-size="sm"
+        description="To see other regions, enable them in the settings"
+        label-for="region-input"
+      >
+        <gl-form-select
+          id="region-input"
+          v-model="form.requesterRegion"
+          :options="this.$store.getters['sts/regions']"
+          @change="getVPCsForRequesterRegion"
         />
+      </gl-form-group>
 
-        <gl-form-group
-          id="accepter-region"
-          label="Accepter Region:"
-          label-size="sm"
-          label-for="accepter-region-input"
-          class="mt-2"
-        >
-          <gl-form-select
-            id="accepter-region-input"
-            v-model="form.accepterRegion"
-            :options="allRegions"
-            value-field="value"
-            text-field="text"
-            @change="getVPCsForAccepterRegion"
-          />
-        </gl-form-group>
+      <gl-form-group
+        id="vpc-id"
+        label="Requester VPC:"
+        label-size="sm"
+        label-for="vpc-input"
+        class="mt-2"
+      >
+        <gl-form-select
+          id="vpc-input"
+          :disabled="form.requesterRegion === '' || isLoading"
+          v-model="form.requesterVpc"
+          :options="requesterVPCs"
+          value-field="VpcId"
+          text-field="VpcId"
+        />
+      </gl-form-group>
 
-        <gl-form-group
-          id="accepter-vpc-id"
-          label="Accepter VPC:"
-          label-size="sm"
-          label-for="vpc-input"
-          class="mt-2"
-          v-if="accountId === form.accepterAccount"
-        >
-          <gl-form-select
-            id="accepter-vpc-input"
-            :disabled="form.accepterRegion === '' || loadingCount > 0"
-            v-model="form.accepterVpc"
-            :options="accepterVPCs"
-            value-field="VpcId"
-            text-field="VpcId"
-          />
-        </gl-form-group>
+      <h5 class="mt-2">Peer VPC options</h5>
+      <gl-form-input-group
+        id="accepter-account-id"
+        class="mt-2"
+        :predefined-options="accountIdPredefinedOptions"
+        v-model="form.accepterAccount"
+      />
 
-        <gl-form-input-group
-          class="mt-3"
+      <gl-form-group
+        id="accepter-region"
+        label="Accepter Region:"
+        label-size="sm"
+        label-for="accepter-region-input"
+        class="mt-2"
+      >
+        <gl-form-select
+          id="accepter-region-input"
+          v-model="form.accepterRegion"
+          :options="allRegions"
+          value-field="value"
+          text-field="text"
+          @change="getVPCsForAccepterRegion"
+        />
+      </gl-form-group>
+
+      <gl-form-group
+        id="accepter-vpc-id"
+        label="Accepter VPC:"
+        label-size="sm"
+        label-for="vpc-input"
+        class="mt-2"
+        v-if="accountId === form.accepterAccount"
+      >
+        <gl-form-select
+          id="accepter-vpc-input"
+          :disabled="form.accepterRegion === '' || isLoading"
           v-model="form.accepterVpc"
-          v-if="accountId !== form.accepterAccount"
-        >
-          <template #prepend>
-            <b-input-group-text>Accepter VPC ID</b-input-group-text>
-          </template>
-        </gl-form-input-group>
+          :options="accepterVPCs"
+          value-field="VpcId"
+          text-field="VpcId"
+        />
+      </gl-form-group>
 
-        <div class="row justify-content-between mt-3">
-          <gl-button
-            category="secondary"
-            variant="danger"
-            to="/network/peerings"
-          >
-            Cancel
-          </gl-button>
-          <gl-button
-            class="float-right"
-            type="submit"
-            category="primary"
-            variant="success"
-            :disabled="createButtonDisabled"
-            >Create new peering connection
-          </gl-button>
-        </div>
-      </gl-form>
-    </div>
+      <gl-form-input-group
+        class="mt-3"
+        v-model="form.accepterVpc"
+        v-if="accountId !== form.accepterAccount"
+      >
+        <template #prepend>
+          <b-input-group-text>Accepter VPC ID</b-input-group-text>
+        </template>
+      </gl-form-input-group>
+
+      <div class="row justify-content-between mt-3">
+        <gl-button category="secondary" variant="danger" to="/network/peerings">
+          Cancel
+        </gl-button>
+        <gl-button
+          class="float-right"
+          type="submit"
+          category="primary"
+          variant="success"
+          :disabled="createButtonDisabled"
+          >Create new peering connection
+        </gl-button>
+      </div>
+    </gl-form>
   </div>
 </template>
 
 <script lang="ts">
-import Header from "@/components/Header/Header.vue";
 import {
   GlAlert,
   GlFormGroup,
@@ -153,7 +145,6 @@ import { ALL_REGIONS } from "@/components/common/regions";
 
 @Component({
   components: {
-    Header,
     GlFormSelect,
     GlFormGroup,
     GlAlert,
@@ -220,7 +211,7 @@ export default class NewPeering extends DaintreeComponent {
         return;
       }
 
-      this.loadingCount++;
+      this.incrementLoadingCount();
       try {
         const data = await EC2.describeVpcs().promise();
         if (data.Vpcs) {
@@ -229,7 +220,7 @@ export default class NewPeering extends DaintreeComponent {
       } catch (err) {
         this.showError(err.message, "createPeeringConnection");
       } finally {
-        this.loadingCount--;
+        this.decreaseLoadingCount();
       }
     }
   }
@@ -247,7 +238,7 @@ export default class NewPeering extends DaintreeComponent {
         return;
       }
 
-      this.loadingCount++;
+      this.incrementLoadingCount();
       try {
         const data = await EC2.describeVpcs().promise();
         if (data.Vpcs) {
@@ -256,7 +247,7 @@ export default class NewPeering extends DaintreeComponent {
       } catch (err) {
         this.showError(err.message, "createPeeringConnection");
       } finally {
-        this.loadingCount--;
+        this.decreaseLoadingCount();
       }
     }
   }
@@ -284,12 +275,18 @@ export default class NewPeering extends DaintreeComponent {
         await EC2.createTags(params).promise();
       }
       this.hideErrors("createPeeringConnection");
-      this.$router.push("/network/peerings");
+      this.$router.push("/network/peeringConnections");
     } catch (err) {
       this.showError(err.message, "createPeeringConnection");
     }
   }
+
+  mounted(): void {
+    this.$root.$on("refresh", this.refresh);
+  }
+
+  beforeDestroy(): void {
+    this.$root.$off("refresh");
+  }
 }
 </script>
-
-<style scoped></style>

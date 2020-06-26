@@ -1,6 +1,5 @@
 <template>
   <div>
-    <Header hide-sub-header hide-refresher />
     <gl-empty-state
       v-if="!failedLogin"
       class="mt-5"
@@ -10,7 +9,7 @@
       compact
     />
     <gl-empty-state
-      v-if="failedLogin"
+      v-else-if="failedLogin"
       class="mt-5"
       title="Something went wrong"
       svg-path="/assets/undraw_access_denied_6w73.svg"
@@ -21,12 +20,11 @@
 </template>
 
 <script lang="ts">
-import Header from "./Header/Header.vue";
 import { Component } from "vue-property-decorator";
 import Notifications from "@/mixins/notifications";
 import { GlEmptyState } from "@gitlab/ui";
 @Component({
-  components: { Header, GlEmptyState },
+  components: { GlEmptyState },
 })
 export default class CognitoCallback extends Notifications {
   failedLogin = false;
@@ -105,5 +103,3 @@ export default class CognitoCallback extends Notifications {
   }
 }
 </script>
-
-<style scoped></style>

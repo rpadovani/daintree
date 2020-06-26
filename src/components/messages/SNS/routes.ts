@@ -12,9 +12,9 @@ const SNSSubscriptionsList = () =>
 
 export const snsRoutes = [
   {
-    path: "/messages/sns/new",
+    path: "/messages/sns_topics/new",
     component: NewSNS,
-    meta: { title: "New topic", requiresLogin: true },
+    meta: { title: "New topic", requiresLogin: true, hideRefresher: true },
   },
   {
     path: "/messages/sns_topics",

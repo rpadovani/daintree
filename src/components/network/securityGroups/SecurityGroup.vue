@@ -183,5 +183,3 @@ export default class SecurityGroup extends DaintreeComponent {
   }
 }
 </script>
-
-<style scoped></style>

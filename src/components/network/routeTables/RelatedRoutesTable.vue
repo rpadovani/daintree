@@ -36,6 +36,8 @@ import { DaintreeComponent } from "@/mixins/DaintreeComponent";
 import { Component, Prop, Watch } from "vue-property-decorator";
 import EC2Client, { RouteTableList } from "aws-sdk/clients/ec2";
 import { GlTable, GlSkeletonLoading, GlLink, GlAlert } from "@gitlab/ui";
+import { Formatters } from "@/mixins/formatters";
+import { mixins } from "vue-class-component";
 
 @Component({
   components: {
@@ -45,7 +47,10 @@ import { GlTable, GlSkeletonLoading, GlLink, GlAlert } from "@gitlab/ui";
     GlAlert,
   },
 })
-export default class RelatedRoutesTable extends DaintreeComponent {
+export default class RelatedRoutesTable extends mixins(
+  DaintreeComponent,
+  Formatters
+) {
   @Prop(String) readonly region!: string;
   @Prop(String) readonly filterKey!: string;
   @Prop(String) readonly filterValue!: string;
@@ -117,5 +122,3 @@ export default class RelatedRoutesTable extends DaintreeComponent {
   }
 }
 </script>
-
-<style scoped></style>

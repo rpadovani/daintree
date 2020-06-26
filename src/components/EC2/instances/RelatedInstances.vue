@@ -38,6 +38,7 @@ import EC2Client, {
   DescribeInstancesRequest,
   Instance,
   InstanceState,
+  TagList,
 } from "aws-sdk/clients/ec2";
 import { GlTable, GlSkeletonLoading, GlLink, GlAlert } from "@gitlab/ui";
 import StateText from "@/components/common/StateText.vue";
@@ -120,6 +121,16 @@ export default class RelatedInstances extends DaintreeComponent {
       this.instancesError = err.message;
       this.instancesState = "error";
     }
+  }
+
+  extractNameFromTags(tags: TagList): string | undefined {
+    const nameTag = tags.filter((v) => v.Key === "Name");
+
+    if (nameTag.length > 0) {
+      return nameTag[0].Value;
+    }
+
+    return "";
   }
 
   @Watch("filterValue")

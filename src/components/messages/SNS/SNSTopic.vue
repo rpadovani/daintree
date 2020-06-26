@@ -302,5 +302,3 @@ export default class SNSTopic extends mixins(Formatters, Notifications) {
   }
 }
 </script>
-
-<style scoped></style>

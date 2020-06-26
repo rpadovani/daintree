@@ -439,5 +439,3 @@ export default class CloudwatchModal extends Notifications {
   }
 }
 </script>
-
-<style scoped></style>

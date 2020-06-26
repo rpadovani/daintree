@@ -2,35 +2,22 @@ import { ActionContext } from "vuex";
 import { Role, STSState } from "@/store/sts/state";
 import STSClient from "aws-sdk/clients/sts";
 import { CognitoIdentityCredentials, Credentials } from "aws-sdk/lib/core";
-import { AppNotification } from "@/store/notifications/state";
 import CognitoIdentityClient from "aws-sdk/clients/cognitoidentity";
 
 async function getCallerIdentity(
   loginMethod: "cognito" | "accessKey",
   context: ActionContext<STSState, any>,
   credentials: Credentials
-): Promise<boolean> {
+): Promise<void> {
   const STS = new STSClient({ credentials });
 
-  try {
-    const response = await STS.getCallerIdentity({}).promise();
-    context.commit("login", {
-      arn: response.Arn,
-      account: response.Account,
-      credentials,
-      loginMethod,
-    });
-
-    return true;
-  } catch (err) {
-    const notification: AppNotification = {
-      key: "login",
-      text: err.message,
-      variant: "danger",
-    };
-    context.commit("notifications/show", notification, { root: true });
-    return false;
-  }
+  const response = await STS.getCallerIdentity({}).promise();
+  context.commit("login", {
+    arn: response.Arn,
+    account: response.Account,
+    credentials,
+    loginMethod,
+  });
 }
 
 export const STSActions = {

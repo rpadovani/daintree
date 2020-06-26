@@ -6,6 +6,20 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Changed
+
+- Refactor header and subheader to render just once and increase performance
+- Move all components to new-ish Daintree classes to have coherent codebase
+- Delete a lot of useless code
+- Hovering the reload icon now shows the date of the last refresh
+- Improve the alerts UI
+
+### Fixed
+
+- Remove internal error notification on login
+- Fix 404 after creating a new peering connection
+- Fix title and cancel button in the new sns topic page
+
 ## [0.7.0]
 
 ### Added

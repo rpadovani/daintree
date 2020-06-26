@@ -1,7 +1,5 @@
 <template>
   <div>
-    <Header v-on:refresh="getAllResources" :loading="loadingCount > 0" />
-
     <gl-drawer
       :open="drawerOpened && selectedResourceKey !== ''"
       @close="close"
@@ -37,7 +35,7 @@
         :items="resourcesAsList"
         :fields="fields"
         :filter="filter"
-        :busy="loadingCount > 0"
+        :busy="isLoading"
         ref="resourcesTable"
         primary-key="VpcPeeringConnectionId"
         selectable
@@ -91,12 +89,12 @@
       <div class="container">
         <gl-skeleton-loading
           class="mt-5"
-          v-if="loadingCount > 0 && resourcesAsList.length < 1"
+          v-if="isLoading && resourcesAsList.length < 1"
         />
 
         <gl-empty-state
           class="mt-5"
-          v-if="loadingCount === 0 && resourcesAsList.length === 0"
+          v-if="!isLoading && resourcesAsList.length === 0"
           title="No peering connections found in the selected regions!"
           svg-path="/assets/undraw_empty_xct9.svg"
           :description="emptyStateDescription"
@@ -231,26 +229,15 @@ export default class PeeringList extends NetworkComponent<
       ];
     }
 
-    try {
-      const data = await EC2.describeVpcPeeringConnections(params).promise();
-      if (data.VpcPeeringConnections === undefined) {
-        return [];
-      }
-      return data.VpcPeeringConnections;
-    } catch (err) {
-      this.showError(`[${region}] ` + err, `${region}#loadingPeering`);
+    const data = await EC2.describeVpcPeeringConnections(params).promise();
+    if (data.VpcPeeringConnections === undefined) {
       return [];
     }
+    return data.VpcPeeringConnections;
   }
 
   getResourceState(resource: VpcPeeringConnection): string | null {
     return resource.Status?.Code || null;
   }
-
-  destroyed(): void {
-    this.$store.commit("notifications/dismissByKey", "loadingPeering");
-  }
 }
 </script>
-
-<style scoped></style>

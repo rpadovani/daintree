@@ -26,7 +26,7 @@
       <span v-if="data.item.cidr">{{ data.item.cidr }}</span>
       <router-link
         v-if="data.item.groupId"
-        :to="`/network/securityGroups?securityGroupId=${data.item.groupId}`"
+        :to="`/network/securityGroups?GroupId=${data.item.groupId}`"
         >{{ data.item.groupId }}</router-link
       >
     </template>
@@ -95,5 +95,3 @@ export default class ListOfRules extends Vue {
   }
 }
 </script>
-
-<style scoped></style>

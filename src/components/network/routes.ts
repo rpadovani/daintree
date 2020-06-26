@@ -16,6 +16,7 @@ const mainRoute = {
   meta: {
     title: "Network",
     requiresLogin: true,
+    hideRefresher: true,
   },
 };
 export const NetworkRoutes = [

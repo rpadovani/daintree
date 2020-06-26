@@ -1,7 +1,5 @@
 <template>
   <div>
-    <Header v-on:refresh="getAllResources" :loading="loadingCount > 0" />
-
     <gl-drawer
       :open="drawerOpened && selectedResourceKey !== ''"
       @close="close"
@@ -37,7 +35,7 @@
         :items="resourcesAsList"
         :fields="fields"
         :filter="filter"
-        :busy="loadingCount > 0"
+        :busy="isLoading"
         ref="resourcesTable"
         selectable
         select-mode="single"
@@ -90,12 +88,12 @@
       <div class="container">
         <gl-skeleton-loading
           class="mt-5"
-          v-if="loadingCount > 0 && resourcesAsList.length < 1"
+          v-if="isLoading && resourcesAsList.length < 1"
         />
 
         <gl-empty-state
           class="mt-5"
-          v-if="loadingCount === 0 && resourcesAsList.length === 0"
+          v-if="!isLoading && resourcesAsList.length === 0"
           title="No volume found in the selected regions!"
           svg-path="/assets/undraw_empty_xct9.svg"
           :description="emptyStateDescription"
@@ -125,7 +123,6 @@ import {
   Volume as AWSVolume,
 } from "aws-sdk/clients/ec2";
 
-import Header from "@/components/Header/Header.vue";
 import RegionText from "@/components/common/RegionText.vue";
 import {
   GlButton,
@@ -147,7 +144,6 @@ import StateText from "@/components/common/StateText.vue";
 @Component({
   components: {
     Volume,
-    Header,
     GlTable,
     RegionText,
     GlIcon,
@@ -194,7 +190,10 @@ export default class VolumesList extends NetworkComponent<
     { key: "AvailabilityZone", sortable: true },
   ];
 
-  async getResourcesForRegion(region: string, filterByVolumesId?: string[]) {
+  async getResourcesForRegion(
+    region: string,
+    filterByVolumesId?: string[]
+  ): Promise<AWSVolume[]> {
     const EC2 = await this.client(region);
     if (!EC2) {
       return [];
@@ -202,30 +201,20 @@ export default class VolumesList extends NetworkComponent<
 
     const params: DescribeVolumesRequest = {};
     if (filterByVolumesId) {
-      params.VolumeIds = filterByVolumesId;
+      params.Filters = [
+        {
+          Name: "volume-id",
+          Values: filterByVolumesId,
+        },
+      ];
     }
 
-    try {
-      const data = await EC2.describeVolumes(params).promise();
-      if (data.Volumes === undefined) {
-        return [];
-      }
-
-      return data.Volumes;
-    } catch (err) {
-      if (err.code === "InvalidVolume.NotFound") {
-        //We were looking for a volume that doesn't exist anymore, it's not an error
-        return [];
-      }
-      this.showError(`[${region}] ` + err, `${region}#loadingVolumes`);
+    const data = await EC2.describeVolumes(params).promise();
+    if (data.Volumes === undefined) {
       return [];
     }
-  }
 
-  destroyed() {
-    this.$store.commit("notifications/dismissByKey", "loadingVolumes");
+    return data.Volumes;
   }
 }
 </script>
-
-<style scoped></style>

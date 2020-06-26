@@ -1,7 +1,5 @@
 <template>
   <div>
-    <Header v-on:refresh="getAllResources" :loading="loadingCount > 0" />
-
     <gl-drawer
       :open="drawerOpened && selectedResourceKey !== ''"
       @close="close"
@@ -37,7 +35,7 @@
         :items="resourcesAsList"
         :fields="fields"
         :filter="filter"
-        :busy="loadingCount > 0"
+        :busy="isLoading"
         ref="resourcesTable"
         selectable
         select-mode="single"
@@ -63,12 +61,12 @@
       <div class="container">
         <gl-skeleton-loading
           class="mt-5"
-          v-if="loadingCount > 0 && resourcesAsList.length < 1"
+          v-if="isLoading && resourcesAsList.length < 1"
         />
 
         <gl-empty-state
           class="mt-5"
-          v-if="loadingCount === 0 && resourcesAsList.length === 0"
+          v-if="!isLoading && resourcesAsList.length === 0"
           title="No key pair found in the selected regions!"
           svg-path="/assets/undraw_empty_xct9.svg"
           :description="emptyStateDescription"
@@ -98,7 +96,6 @@ import {
   KeyPair as AWSKeyPair,
 } from "aws-sdk/clients/ec2";
 
-import Header from "@/components/Header/Header.vue";
 import RegionText from "@/components/common/RegionText.vue";
 import {
   GlButton,
@@ -117,7 +114,6 @@ import KeyPair from "@/components/EC2/keyPairs/KeyPair.vue";
 @Component({
   components: {
     KeyPair,
-    Header,
     GlTable,
     RegionText,
     GlIcon,
@@ -168,22 +164,11 @@ export default class KeyPairsList extends NetworkComponent<
       ];
     }
 
-    try {
-      const data = await EC2.describeKeyPairs(params).promise();
-      if (data.KeyPairs === undefined) {
-        return [];
-      }
-      return data.KeyPairs;
-    } catch (err) {
-      this.showError(`[${region}] ` + err, `${region}#loadingKeyPairs`);
+    const data = await EC2.describeKeyPairs(params).promise();
+    if (data.KeyPairs === undefined) {
       return [];
     }
-  }
-
-  destroyed() {
-    this.$store.commit("notifications/dismissByKey", "loadingKeyPairs");
+    return data.KeyPairs;
   }
 }
 </script>
-
-<style scoped></style>

@@ -174,7 +174,7 @@ import {
   GlLink,
 } from "@gitlab/ui";
 import EC2Client, { VolumeStatusInfo } from "aws-sdk/clients/ec2";
-import { Component, Prop, Watch } from "vue-property-decorator";
+import { Component, Prop } from "vue-property-decorator";
 import TagsTable from "@/components/common/TagsTable.vue";
 import FlowLogsTab from "@/components/network/flowLogs/FlowLogsTab.vue";
 import SubnetTab from "@/components/network/subnets/SubnetTab.vue";
@@ -188,6 +188,8 @@ import SnapshotTab from "@/components/EC2/snapshots/SnapshotTab.vue";
 import RelatedInstances from "@/components/EC2/instances/RelatedInstances.vue";
 import DrawerCards from "@/components/common/DrawerCards.vue";
 import { CardContent } from "@/components/common/cardContent";
+import { Formatters } from "@/mixins/formatters";
+import { mixins } from "vue-class-component";
 
 @Component({
   components: {
@@ -217,7 +219,7 @@ import { CardContent } from "@/components/common/cardContent";
     "gl-tooltip": GlTooltipDirective,
   },
 })
-export default class Volume extends DaintreeComponent {
+export default class Volume extends mixins(DaintreeComponent, Formatters) {
   @Prop(Object) readonly volume!: VolumeWithRegion;
 
   deleteVolumeButtonProps = {

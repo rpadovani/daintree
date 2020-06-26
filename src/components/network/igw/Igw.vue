@@ -347,5 +347,3 @@ export default class Igw extends mixins(Notifications, Formatters) {
   }
 }
 </script>
-
-<style scoped></style>

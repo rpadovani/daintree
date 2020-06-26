@@ -467,5 +467,3 @@ export default class Nat extends mixins(Formatters, Notifications) {
   }
 }
 </script>
-
-<style scoped></style>

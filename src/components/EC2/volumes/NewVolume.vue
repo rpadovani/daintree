@@ -1,117 +1,113 @@
 <template>
-  <div>
-    <Header :loading="this.loadingCount > 0" />
-    <div class="container mt-2">
-      <h2>Create a new EBS</h2>
-      <gl-alert variant="tip" class="mb-2 mt-2" :dismissible="false">
-        Amazon Elastic Block Store (EBS) is an easy to use, high performance
-        block storage service designed for use with Amazon Elastic Compute Cloud
-        (EC2) for both throughput and transaction intensive workloads at any
-        scale. You can choose from four different volume types to balance
-        optimal price and performance.
-      </gl-alert>
-      <gl-form @submit="createVolume">
-        <gl-form-group
-          id="region-id"
-          label="Region"
-          label-size="sm"
-          description="To see other regions, enable them in the settings"
-          label-for="region-input"
-          required
-        >
-          <gl-form-select
-            id="region-input"
-            v-model="selectedRegion"
-            :options="regionsEnabled"
-            @change="regionChanged"
-          />
-        </gl-form-group>
+  <div class="container mt-2">
+    <h2>Create a new EBS</h2>
+    <gl-alert variant="tip" class="mb-2 mt-2" :dismissible="false">
+      Amazon Elastic Block Store (EBS) is an easy to use, high performance block
+      storage service designed for use with Amazon Elastic Compute Cloud (EC2)
+      for both throughput and transaction intensive workloads at any scale. You
+      can choose from four different volume types to balance optimal price and
+      performance.
+    </gl-alert>
+    <gl-form @submit="createVolume">
+      <gl-form-group
+        id="region-id"
+        label="Region"
+        label-size="sm"
+        description="To see other regions, enable them in the settings"
+        label-for="region-input"
+        required
+      >
+        <gl-form-select
+          id="region-input"
+          v-model="selectedRegion"
+          :options="regionsEnabled"
+          @change="regionChanged"
+        />
+      </gl-form-group>
 
-        <gl-form-group
-          id="az-id"
-          label="Availability zone"
-          label-size="sm"
-          label-for="az-input"
-        >
-          <gl-form-select
-            id="az-input"
-            v-model="availabilityZone"
-            :options="azsAsList"
-            :disabled="!selectedRegion"
-          />
-        </gl-form-group>
+      <gl-form-group
+        id="az-id"
+        label="Availability zone"
+        label-size="sm"
+        label-for="az-input"
+      >
+        <gl-form-select
+          id="az-input"
+          v-model="availabilityZone"
+          :options="azsAsList"
+          :disabled="!selectedRegion"
+        />
+      </gl-form-group>
 
-        <gl-form-input-group
-          class="mt-3"
-          v-model="volumeName"
-          placeholder="Create a tag with key 'Name' and the value you insert."
-        >
-          <template #prepend>
-            <b-input-group-text>Name</b-input-group-text>
-          </template>
-        </gl-form-input-group>
+      <gl-form-input-group
+        class="mt-3"
+        v-model="volumeName"
+        placeholder="Create a tag with key 'Name' and the value you insert."
+      >
+        <template #prepend>
+          <b-input-group-text>Name</b-input-group-text>
+        </template>
+      </gl-form-input-group>
 
-        <gl-form-group
-          id="volume-type-id"
-          class="mt-2"
-          label="Volume type"
-          label-size="sm"
-          label-for="volume-type-input"
-          description="Gp2 for General Purpose SSD, io1 for Provisioned IOPS SSD, st1 for Throughput Optimized HDD, sc1 for Cold HDD, or standard for Magnetic volumes."
-          required
-        >
-          <gl-form-select
-            id="volume-type-input"
-            v-model="volumeType"
-            :options="volumeTypes"
-          />
-        </gl-form-group>
+      <gl-form-group
+        id="volume-type-id"
+        class="mt-2"
+        label="Volume type"
+        label-size="sm"
+        label-for="volume-type-input"
+        description="Gp2 for General Purpose SSD, io1 for Provisioned IOPS SSD, st1 for Throughput Optimized HDD, sc1 for Cold HDD, or standard for Magnetic volumes."
+        required
+      >
+        <gl-form-select
+          id="volume-type-input"
+          v-model="volumeType"
+          :options="volumeTypes"
+        />
+      </gl-form-group>
 
-        <gl-form-input-group
-          class="mt-3"
-          v-model="volumeSize"
-          type="number"
-          placeholder="Select a size for your EBS."
-          :min="minSize"
-          :max="maxSize"
-          :state="sizeValidationState"
-        >
-          <template #prepend>
-            <b-input-group-text>Size</b-input-group-text>
-          </template>
-          <template #append>
-            <b-input-group-text>GiB</b-input-group-text>
-          </template>
-        </gl-form-input-group>
-        <p>{{ descriptionForSize }}</p>
+      <gl-form-input-group
+        class="mt-3"
+        v-model="volumeSize"
+        type="number"
+        placeholder="Select a size for your EBS."
+        :min="minSize"
+        :max="maxSize"
+        :state="sizeValidationState"
+      >
+        <template #prepend>
+          <b-input-group-text>Size</b-input-group-text>
+        </template>
+        <template #append>
+          <b-input-group-text>GiB</b-input-group-text>
+        </template>
+      </gl-form-input-group>
+      <p>{{ descriptionForSize }}</p>
 
-        <div class="row justify-content-between mt-3">
-          <gl-button category="secondary" variant="danger" to="/ec2/volumes">
-            Cancel
-          </gl-button>
-          <gl-button
-            class="float-right"
-            type="submit"
-            category="primary"
-            variant="success"
-            :disabled="createButtonDisabled"
-            >Create new EBS
-          </gl-button>
-        </div>
-      </gl-form>
-    </div>
+      <div class="row justify-content-between mt-3">
+        <gl-button category="secondary" variant="danger" to="/ec2/volumes">
+          Cancel
+        </gl-button>
+        <gl-button
+          class="float-right"
+          type="submit"
+          category="primary"
+          variant="success"
+          :disabled="createButtonDisabled"
+          >Create new EBS
+        </gl-button>
+      </div>
+    </gl-form>
   </div>
 </template>
 
 <script lang="ts">
-import Header from "@/components/Header/Header.vue";
 import {
   GlAlert,
+  GlButton,
+  GlForm,
   GlFormGroup,
   GlFormInputGroup,
   GlFormSelect,
-  GlButton,
-  GlForm,
 } from "@gitlab/ui";
 import { BInputGroupText } from "bootstrap-vue";
 import EC2Client, {
@@ -124,7 +120,6 @@ import { isString } from "@/utils/isString";
 
 @Component({
   components: {
-    Header,
     GlFormSelect,
     GlFormGroup,
     GlAlert,
@@ -138,7 +133,6 @@ export default class NewVolume extends DaintreeComponent {
   selectedRegion = "";
   volumeName = "";
   azs: AvailabilityZoneList | undefined = [];
-  loadingCount = 0;
   availabilityZone = "";
   volumeSize = 0;
 
@@ -211,7 +205,7 @@ export default class NewVolume extends DaintreeComponent {
     if (this.selectedRegion === "") {
       this.azs = [];
     } else {
-      this.loadingCount++;
+      this.incrementLoadingCount();
 
       const credentials = await this.credentials();
 
@@ -226,7 +220,7 @@ export default class NewVolume extends DaintreeComponent {
       } catch (err) {
         this.showError(err, "createEbs");
       } finally {
-        this.loadingCount--;
+        this.decreaseLoadingCount();
       }
     }
   }
@@ -274,5 +268,3 @@ export default class NewVolume extends DaintreeComponent {
   }
 }
 </script>
-
-<style scoped></style>

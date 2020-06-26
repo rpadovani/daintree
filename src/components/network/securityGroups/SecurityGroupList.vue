@@ -1,24 +1,19 @@
 <template>
   <div>
-    <Header v-on:refresh="getAllSecurityGroups" :loading="loadingCount > 0" />
-
     <gl-drawer
-      :open="drawerOpened && selectedSecurityGroup !== {}"
+      :open="drawerOpened && selectedResourceKey !== ''"
       @close="close"
       style="min-width: 80%;"
     >
-      <template #header>{{ selectedSecurityGroupTitle }}</template>
+      <template #header>{{ selectedResourceTitle }}</template>
 
-      <SecurityGroup
-        :securityGroup="selectedSecurityGroup"
-        v-on:deleted="close"
-      />
+      <SecurityGroup :securityGroup="selectedResource" v-on:deleted="close" />
     </gl-drawer>
 
     <div class="container-fluid">
       <div
         class="row justify-content-between mt-3 mb-2 ml-2 mr-2"
-        v-if="securityGroupsAsList.length > 0"
+        v-if="resourcesAsList.length > 0"
       >
         <gl-form-input
           class="col-12 col-sm-8 col-lg-9 mb-3 mb-sm-0"
@@ -37,16 +32,18 @@
         </gl-button>
       </div>
       <gl-table
-        :items="securityGroupsAsList"
+        :items="resourcesAsList"
         :fields="fields"
         :filter="filter"
-        :busy="loadingCount > 0"
-        ref="securityGroupsTable"
+        :busy="isLoading"
+        ref="resourcesTable"
+        :primary-key="resourceUniqueKey"
         selectable
         select-mode="single"
         @row-selected="onRowSelected"
-        v-show="securityGroupsAsList.length > 0"
+        v-show="resourcesAsList.length > 0"
         show-empty
+        hover
       >
         <template v-slot:emptyfiltered="">
           <gl-empty-state
@@ -70,13 +67,13 @@
       <div class="container">
         <gl-skeleton-loading
           class="mt-5"
-          v-if="loadingCount > 0 && securityGroupsAsList.length < 1"
+          v-if="isLoading && resourcesAsList.length < 1"
         />
 
         <gl-empty-state
           class="mt-5"
-          v-if="loadingCount === 0 && securityGroupsAsList.length === 0"
-          title="No SecurityGroup found in the selected regions!"
+          v-if="!isLoading && resourcesAsList.length === 0"
+          title="No security group found in the selected regions!"
           svg-path="/assets/undraw_empty_xct9.svg"
           :description="emptyStateDescription"
           compact
@@ -103,38 +100,30 @@
 </template>
 
 <script lang="ts">
-import EC2Client from "aws-sdk/clients/ec2";
-
-import Header from "@/components/Header/Header.vue";
-import RegionText from "@/components/common/RegionText.vue";
-import {
-  GlDrawer,
-  GlFormInput,
-  GlIcon,
-  GlButton,
-  GlTable,
-  GlEmptyState,
-  GlSkeletonLoading,
-  GlModalDirective,
-} from "@gitlab/ui";
-import { Formatters } from "@/mixins/formatters";
-import Component, { mixins } from "vue-class-component";
-import StateText from "@/components/common/StateText.vue";
 import {
   DescribeSecurityGroupsRequest,
   IpPermission,
+  SecurityGroup as EC2SecurityGroup,
 } from "aws-sdk/clients/ec2";
-import Notifications from "@/mixins/notifications";
-import { Watch } from "vue-property-decorator";
-import { securityGroups } from "@/components/network/securityGroups/securityGroup";
-import SecurityGroupWithRegion = securityGroups.SecurityGroupWithRegion;
+import RegionText from "@/components/common/RegionText.vue";
+import {
+  GlButton,
+  GlDrawer,
+  GlEmptyState,
+  GlFormInput,
+  GlIcon,
+  GlModalDirective,
+  GlSkeletonLoading,
+  GlTable,
+} from "@gitlab/ui";
+import Component from "vue-class-component";
+import StateText from "@/components/common/StateText.vue";
 import SecurityGroup from "@/components/network/securityGroups/SecurityGroup.vue";
-import { Route } from "vue-router";
+import { NetworkComponent } from "@/components/network/networkComponent";
 
 @Component({
   components: {
     StateText,
-    Header,
     GlTable,
     RegionText,
     GlIcon,
@@ -149,17 +138,13 @@ import { Route } from "vue-router";
     "gl-modal-directive": GlModalDirective,
   },
 })
-export default class SecurityGroupList extends mixins(
-  Formatters,
-  Notifications
-) {
-  securityGroups: { [key: string]: SecurityGroupWithRegion } = {};
-
-  drawerOpened = false;
-
-  selectedSecurityGroup: SecurityGroupWithRegion = {};
-  filter = "";
-  loadingCount = 0;
+export default class SecurityGroupList extends NetworkComponent<
+  EC2SecurityGroup,
+  "GroupId"
+> {
+  resourceName = "security group";
+  canCreate = true;
+  resourceUniqueKey: "GroupId" = "GroupId";
 
   fields = [
     {
@@ -182,202 +167,36 @@ export default class SecurityGroupList extends mixins(
     },
   ];
 
-  get securityGroupsAsList(): SecurityGroupWithRegion[] {
-    return Object.values(this.securityGroups);
-  }
-
-  get regionsEnabled(): string[] {
-    return this.$store.getters["sts/regions"];
-  }
-
-  get currentRoleIndex(): number {
-    return this.$store.getters["sts/currentRoleIndex"];
-  }
-
-  get credentials() {
-    return this.$store.getters["sts/credentials"];
-  }
-
-  get emptyStateDescription(): string {
-    return (
-      "Daintree hasn't found any security group in the selected regions! You can create a new one, or change selected regions in the settings. We have looked in " +
-      this.regionsEnabled.join(", ") +
-      "."
-    );
-  }
-
-  get selectedSecurityGroupTitle() {
-    if (this.selectedSecurityGroup.GroupName) {
-      return `${this.selectedSecurityGroup.GroupName} (${this.selectedSecurityGroup?.GroupId})`;
+  get selectedResourceTitle(): string {
+    if (!this.selectedResource) {
+      return "";
     }
 
-    return this.selectedSecurityGroup?.GroupId;
-  }
-
-  getAllSecurityGroups() {
-    this.regionsEnabled.forEach((region) =>
-      this.getSecurityGroupForRegion(region)
-    );
-  }
-
-  getSecurityGroupForRegion(region: string) {
-    this.loadingCount++;
-
-    const EC2 = new EC2Client({ region, credentials: this.credentials });
-    const params: DescribeSecurityGroupsRequest = {};
-
-    EC2.describeSecurityGroups(params, (err, data) => {
-      this.loadingCount--;
-
-      if (err) {
-        this.showError(`[${region}] ` + err, "loadingSecurityGroup");
-        return;
-      }
-
-      Object.keys(this.securityGroups).forEach((key) => {
-        //Keep track if the securityGroups of this region are still available
-        if (this.securityGroups[key].region === region) {
-          this.securityGroups[key].stillPresent = false;
-        }
-      });
-
-      data.SecurityGroups?.forEach((securityGroup) => {
-        if (securityGroup.GroupId) {
-          this.$set(this.securityGroups, securityGroup.GroupId, {
-            ...securityGroup,
-            region,
-            stillPresent: true,
-          });
-        }
-      });
-
-      //Remove SecurityGroups we don't find anymore
-      Object.keys(this.securityGroups).forEach((key) => {
-        if (
-          this.securityGroups[key].region === region &&
-          !this.securityGroups[key].stillPresent
-        ) {
-          this.$delete(this.securityGroups, key);
-        }
-      });
-
-      //We wait until all the data have been loaded and then we select the row on the table.
-      //This is necessary because every time the data of the table is updated, a row selected event with
-      //0 elements is emitted, removing our selection
-      if (this.$route.query.securityGroupId && this.loadingCount === 0) {
-        this.$nextTick().then(() => {
-          this.selectSecurityGroupBasedOnParameter();
-        });
-      }
-    });
-  }
-
-  selectSecurityGroupBasedOnParameter() {
-    if (!this.$route.query.securityGroupId) {
-      return;
+    if (this.selectedResource.GroupName) {
+      return `${this.selectedResource.GroupName} (${this.selectedResource?.GroupId})`;
     }
 
-    const filteredSecurityGroups = this.securityGroupsAsList.filter(
-      (securityGroup) =>
-        securityGroup.GroupId === this.$route.query.securityGroupId
-    );
-    if (
-      filteredSecurityGroups &&
-      filteredSecurityGroups.length > 0 &&
-      filteredSecurityGroups[0].GroupId !== this.selectedSecurityGroup.GroupId
-    ) {
-      this.selectedSecurityGroup = filteredSecurityGroups[0];
-      this.drawerOpened = true;
-      const index = this.securityGroupsAsList.findIndex(
-        (securityGroup) =>
-          securityGroup.GroupId === this.$route.query.securityGroupId
-      );
-      // eslint-disable-next-line @typescript-eslint/ban-ts-comment
-      //@ts-ignore
-      this.$refs.securityGroupsTable["$children"][0].selectRow(index);
-    }
+    return this.selectedResource.GroupId || "";
   }
 
-  close() {
-    this.drawerOpened = false;
+  async getResourcesForRegion(
+    region: string,
+    filterByGroupId?: string[]
+  ): Promise<EC2SecurityGroup[]> {
+    const EC2 = await this.client(region);
+    if (!EC2) {
+      return [];
+    }
+    const params: DescribeSecurityGroupsRequest = {
+      GroupIds: filterByGroupId,
+    };
 
-    if (
-      this.selectedSecurityGroup.region &&
-      this.selectedSecurityGroup.GroupId
-    ) {
-      //We do not filter by table id because it could be that the main table has changed
-      this.getSecurityGroupForRegion(this.selectedSecurityGroup.region);
+    const data = await EC2.describeSecurityGroups(params).promise();
+    if (data.SecurityGroups === undefined) {
+      return [];
     }
 
-    this.$router
-      .push({ path: "/network/securityGroups", query: {} })
-      // eslint-disable-next-line @typescript-eslint/no-empty-function
-      .catch(() => {});
-    this.selectedSecurityGroup = {};
-
-    //Do not do this at home!s
-    // eslint-disable-next-line @typescript-eslint/ban-ts-comment
-    //@ts-ignore
-    this.$refs.securityGroupsTable["$children"][0].clearSelected();
-  }
-
-  onRowSelected(securityGroups: SecurityGroupWithRegion[]) {
-    if (securityGroups.length > 0) {
-      this.selectedSecurityGroup = securityGroups[0];
-      this.drawerOpened = true;
-      this.$router
-        .push({
-          path: "/network/securityGroups",
-          query: { securityGroupId: securityGroups[0].GroupId },
-        })
-        // eslint-disable-next-line @typescript-eslint/no-empty-function
-        .catch(() => {});
-    } else {
-      this.close();
-    }
-  }
-
-  @Watch("regionsEnabled")
-  onRegionsEnabledChanged(newValue: string[], oldValue: string[]) {
-    const addedRegions = [...newValue.filter((d) => !oldValue.includes(d))];
-    const removedRegions = [...oldValue.filter((d) => !newValue.includes(d))];
-
-    if (removedRegions.length > 0) {
-      this.securityGroupsAsList.forEach((securityGroup) => {
-        if (
-          securityGroup.region &&
-          removedRegions.includes(securityGroup.region) &&
-          securityGroup.GroupId
-        ) {
-          this.$delete(this.securityGroups, securityGroup.GroupId);
-        }
-      });
-    }
-
-    addedRegions.forEach((region) => this.getSecurityGroupForRegion(region));
-  }
-
-  @Watch("currentRoleIndex")
-  onCurrentRoleIndexChanged() {
-    this.securityGroups = {};
-    this.getAllSecurityGroups();
-  }
-
-  @Watch("$route")
-  onRouteChanged(newRoute: Route, oldRoute: Route) {
-    if (newRoute.query.securityGroupId !== oldRoute.query.securityGroupId) {
-      this.selectSecurityGroupBasedOnParameter();
-    }
-  }
-
-  beforeMount() {
-    this.getAllSecurityGroups();
-  }
-
-  destroyed() {
-    this.$store.commit("notifications/dismissByKey", "loadingSecurityGroup");
+    return data.SecurityGroups;
   }
 }
 </script>
-
-<style scoped></style>

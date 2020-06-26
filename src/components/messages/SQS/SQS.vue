@@ -191,10 +191,7 @@ import {
 } from "@gitlab/ui";
 import SQSClient from "aws-sdk/clients/sqs";
 import { Component, Prop } from "vue-property-decorator";
-import { Formatters } from "@/mixins/formatters";
 import TagsTable from "@/components/common/TagsTable.vue";
-import { mixins } from "vue-class-component";
-import Notifications from "@/mixins/notifications";
 import { QueueWithRegion } from "@/components/messages/SQS/sqs";
 import CloudwatchWidget from "@/components/cloudwatch/CloudwatchWidget.vue";
 import { Metric } from "aws-sdk/clients/cloudwatch";
@@ -446,5 +443,3 @@ export default class SQS extends DaintreeComponent {
   }
 }
 </script>
-
-<style scoped></style>

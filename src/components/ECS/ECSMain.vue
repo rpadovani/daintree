@@ -1,13 +1,9 @@
 <template>
-  <ResourceMainMenu
-    :entries="entries"
-    :only-content="onlyContent"
-    resource-name="ECS"
-  />
+  <ResourceMainMenu :entries="entries" resource-name="ECS" />
 </template>
 
 <script lang="ts">
-import { Component, Prop, Vue } from "vue-property-decorator";
+import { Component, Vue } from "vue-property-decorator";
 import ResourceMainMenu from "@/components/common/ResourceMainMenu.vue";
 import { MenuEntry } from "@/components/common/menuEntry";
 
@@ -17,8 +13,6 @@ import { MenuEntry } from "@/components/common/menuEntry";
   },
 })
 export default class ECSMain extends Vue {
-  @Prop(Boolean) readonly onlyContent: boolean | undefined;
-
   readonly entries: MenuEntry[] = [
     {
       target: "/ecs/tasksDefinitions",
@@ -30,5 +24,3 @@ export default class ECSMain extends Vue {
   ];
 }
 </script>
-
-<style scoped></style>

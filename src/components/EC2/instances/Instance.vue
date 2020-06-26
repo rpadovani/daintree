@@ -41,6 +41,13 @@
                 <li>Status: {{ eni.Status }}</li>
                 <li>Mac Address: {{ eni.MacAddress }}</li>
                 <li>Description: {{ eni.Description }}</li>
+                <li>
+                  IPv6:
+                  {{
+                    eni.Ipv6Addresses.map((i) => i.Ipv6Address).join(", ") ||
+                    "N/A"
+                  }}
+                </li>
               </ul>
 
               <div class="col-5">
@@ -48,7 +55,7 @@
                 <ul>
                   <li v-for="s in eni.Groups" :key="s.GroupId">
                     <router-link
-                      :to="`/network/securityGroups?securityGroupId=${s.GroupId}`"
+                      :to="`/network/securityGroups?GroupId=${s.GroupId}`"
                       >{{ s.GroupId }} {{ s.GroupName }}
                     </router-link>
                   </li>
@@ -62,8 +69,7 @@
         <h6>Associated security groups</h6>
         <ul>
           <li v-for="s in instance.SecurityGroups" :key="s.GroupId">
-            <router-link
-              :to="`/network/securityGroups?securityGroupId=${s.GroupId}`"
+            <router-link :to="`/network/securityGroups?GroupId=${s.GroupId}`"
               >{{ s.GroupId }} {{ s.GroupName }}
             </router-link>
           </li>
@@ -351,7 +357,7 @@ export default class Instance extends DaintreeComponent {
   get networkCards(): CardContent[] {
     return [
       {
-        title: "Public IP",
+        title: "Public IPv4",
         value: this.instance.PublicIpAddress,
         helpText: "The public IPv4 address assigned to the instance",
       },
@@ -567,5 +573,3 @@ export default class Instance extends DaintreeComponent {
   }
 }
 </script>
-
-<style scoped></style>

@@ -491,5 +491,3 @@ export default class TargetGroup extends Formatters {
   // }
 }
 </script>
-
-<style scoped></style>

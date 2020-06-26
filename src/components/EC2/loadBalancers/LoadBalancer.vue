@@ -41,7 +41,7 @@
         <h6>Associated security groups</h6>
         <ul>
           <li v-for="s in loadBalancer.SecurityGroups" :key="s">
-            <router-link :to="`/network/securityGroups?securityGroupId=${s}`">
+            <router-link :to="`/network/securityGroups?GroupId=${s}`">
               {{ s }}
             </router-link>
           </li>
@@ -562,5 +562,3 @@ export default class LoadBalancer extends Formatters {
   }
 }
 </script>
-
-<style scoped></style>

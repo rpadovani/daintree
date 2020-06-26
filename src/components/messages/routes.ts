@@ -10,6 +10,7 @@ const mainRoute = {
   meta: {
     title: "Messages",
     requiresLogin: true,
+    hideRefresher: true,
   },
 };
 export const MessagesRoutes = [mainRoute, ...sqsRoutes, ...snsRoutes];

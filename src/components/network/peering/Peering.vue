@@ -224,5 +224,3 @@ export default class Peering extends DaintreeComponent {
   }
 }
 </script>
-
-<style scoped></style>

@@ -167,5 +167,3 @@ export default class RegionModal extends Vue {
   }
 }
 </script>
-
-<style scoped></style>

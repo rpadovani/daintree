@@ -1,111 +1,106 @@
 <template>
-  <div>
-    <Header :hide-sub-header="true" />
+  <gl-tabs
+    theme="blue"
+    class="mx-auto mt-5"
+    style="max-width: 600px; width: 99%;"
+  >
+    <gl-tab title="Login with Access Key">
+      <gl-form-group
+        id="access-key-id"
+        label="Access Key ID"
+        label-size="sm"
+        description="You can create an AWS Access Key on the AWS Console"
+        label-for="access-key"
+      >
+        <gl-form-input
+          id="access-key"
+          v-model="accessKey"
+          :disabled="isLoading"
+        />
+      </gl-form-group>
 
-    <gl-tabs
-      theme="blue"
-      class="mx-auto mt-5"
-      style="max-width: 600px; width: 99%;"
-    >
-      <gl-tab title="Login with Access Key">
-        <gl-form-group
-          id="access-key-id"
-          label="Access Key ID"
-          label-size="sm"
-          description="You can create an AWS Access Key on the AWS Console"
-          label-for="access-key"
+      <gl-form-group
+        id="secret-id"
+        label="Secret Access Key"
+        label-size="sm"
+        label-for="secret"
+      >
+        <gl-form-input
+          id="secret"
+          type="password"
+          v-model="secretKey"
+          :disabled="isLoading"
+        />
+      </gl-form-group>
+
+      <gl-button
+        :disabled="accessKeyButtonDisabled"
+        category="primary"
+        variant="success"
+        @click="loginWithAccessKey"
+        block
+        :loading="isLoading"
+        >Login with Access Key
+      </gl-button>
+    </gl-tab>
+    <gl-tab title="Login with OAuth">
+      <p>
+        <router-link to="/oauth_instructions"
+          >Read how to configure</router-link
         >
-          <gl-form-input
-            id="access-key"
-            v-model="accessKey"
-            :disabled="isLoading"
-          />
-        </gl-form-group>
+        your OAuth Server and Identity Pool to work with Daintree.
+      </p>
+      <gl-form-group
+        id="cognito_domain"
+        label="OAuth domain"
+        label-size="sm"
+        label-for="cognito-domain"
+        description="The URL of your OAuth server login page"
+      >
+        <gl-form-input id="cognito-domain" v-model="cognitoDomain" />
+      </gl-form-group>
 
-        <gl-form-group
-          id="secret-id"
-          label="Secret Access Key"
-          label-size="sm"
-          label-for="secret"
-        >
-          <gl-form-input
-            id="secret"
-            type="password"
-            v-model="secretKey"
-            :disabled="isLoading"
-          />
-        </gl-form-group>
+      <gl-form-group
+        id="cognito_client"
+        label="OAuth Client ID"
+        label-size="sm"
+        label-for="cognito-client"
+        description="The ID of the OAuth Client dedicated to Daintree"
+      >
+        <gl-form-input id="cognito-client" v-model="cognitoClientId" />
+      </gl-form-group>
 
-        <gl-button
-          :disabled="accessKeyButtonDisabled"
-          category="primary"
-          variant="success"
-          @click="loginWithAccessKey"
-          block
-          :loading="isLoading"
-          >Login with Access Key
-        </gl-button>
-      </gl-tab>
-      <gl-tab title="Login with OAuth">
-        <p>
-          <router-link to="/oauth_instructions"
-            >Read how to configure</router-link
-          >
-          your OAuth Server and Identity Pool to work with Daintree.
-        </p>
-        <gl-form-group
-          id="cognito_domain"
-          label="OAuth domain"
-          label-size="sm"
-          label-for="cognito-domain"
-          description="The URL of your OAuth server login page"
-        >
-          <gl-form-input id="cognito-domain" v-model="cognitoDomain" />
-        </gl-form-group>
+      <gl-form-group
+        id="cognito_identity-pool"
+        label="Cognito Identity Pool ID"
+        label-size="sm"
+        label-for="cognito-identity-pool"
+        description="The ID of the AWS Identity Pool used to obtain a IAM Role."
+      >
+        <gl-form-input
+          id="cognito-identity-pool"
+          v-model="cognitoIdentityPoolId"
+        />
+      </gl-form-group>
 
-        <gl-form-group
-          id="cognito_client"
-          label="OAuth Client ID"
-          label-size="sm"
-          label-for="cognito-client"
-          description="The ID of the OAuth Client dedicated to Daintree"
-        >
-          <gl-form-input id="cognito-client" v-model="cognitoClientId" />
-        </gl-form-group>
+      <gl-form-checkbox v-model="cognitoRemember"
+        >Remember data for next login</gl-form-checkbox
+      >
 
-        <gl-form-group
-          id="cognito_identity-pool"
-          label="Cognito Identity Pool ID"
-          label-size="sm"
-          label-for="cognito-identity-pool"
-          description="The ID of the AWS Identity Pool used to obtain a IAM Role."
-        >
-          <gl-form-input
-            id="cognito-identity-pool"
-            v-model="cognitoIdentityPoolId"
-          />
-        </gl-form-group>
-
-        <gl-form-checkbox v-model="cognitoRemember"
-          >Remember data for next login</gl-form-checkbox
-        >
-
-        <gl-button
-          :disabled="isCognitoButtonDisabled"
-          category="primary"
-          variant="success"
-          @click="loginWithCognito"
-          :loading="isLoading"
-          block
-          >Login with OAuth
-        </gl-button>
-      </gl-tab>
-    </gl-tabs>
-  </div>
+      <gl-button
+        :disabled="isCognitoButtonDisabled"
+        category="primary"
+        variant="success"
+        @click="loginWithCognito"
+        :loading="isLoading"
+        block
+        >Login with OAuth
+      </gl-button>
+    </gl-tab>
+  </gl-tabs>
 </template>
 
 <script lang="ts">
-import Header from "./Header/Header.vue";
 import {
   GlAlert,
   GlFormGroup,
@@ -123,7 +118,6 @@ import { DaintreeComponent } from "@/mixins/DaintreeComponent";
 
 @Component({
   components: {
-    Header,
     GlFormGroup,
     GlTabs,
     GlTab,
@@ -224,5 +218,3 @@ export default class Login extends DaintreeComponent {
   }
 }
 </script>
-
-<style scoped></style>

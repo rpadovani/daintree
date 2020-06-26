@@ -86,5 +86,3 @@ export default class StateText extends Vue {
   }
 }
 </script>
-
-<style scoped></style>

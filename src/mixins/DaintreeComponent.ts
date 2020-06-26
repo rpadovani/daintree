@@ -1,13 +1,12 @@
 import { Component, Vue } from "vue-property-decorator";
 
-import { TagList } from "aws-sdk/clients/ec2";
 import { Credentials } from "aws-sdk/lib/core";
 
 import {
   standardDate,
   standardDateFromUnixSecondsString,
 } from "@/mixins/formatters";
-import { mapActions, mapGetters } from "vuex";
+import { mapActions, mapGetters, mapMutations } from "vuex";
 import { AppNotification } from "@/store/notifications/state";
 import store from "@/store";
 
@@ -22,6 +21,10 @@ import store from "@/store";
       "dismissAlertByKey",
       "dismissAlertByResourceID",
     ]),
+    ...mapMutations("header", [
+      "incrementLoadingCount",
+      "decreaseLoadingCount",
+    ]),
   },
   computed: {
     ...mapGetters("sts", {
@@ -30,6 +33,7 @@ import store from "@/store";
       currentRoleIndex: "currentRoleIndex",
       accountId: "account",
     }),
+    ...mapGetters("header", ["isLoading"]),
   },
 })
 export class DaintreeComponent extends Vue {
@@ -76,11 +80,16 @@ export class DaintreeComponent extends Vue {
     ) => void;
   };
 
-  showError(msg: string, key: string) {
+  isLoading!: boolean;
+  incrementLoadingCount!: () => void;
+  decreaseLoadingCount!: () => void;
+
+  showError(msg: string, key: string, region?: string) {
     this.showAlert({
       key: key,
       text: msg,
       variant: "danger",
+      region,
     });
   }
 
@@ -94,16 +103,6 @@ export class DaintreeComponent extends Vue {
 
   standardDateFromUnixSecondsString(unix: string): string {
     return standardDateFromUnixSecondsString(unix);
-  }
-
-  extractNameFromTags(tags: TagList): string | undefined {
-    const nameTag = tags.filter((v) => v.Key === "Name");
-
-    if (nameTag.length > 0) {
-      return nameTag[0].Value;
-    }
-
-    return "";
   }
 
   async credentials(): Promise<Credentials | undefined> {

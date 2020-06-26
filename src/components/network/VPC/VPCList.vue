@@ -1,7 +1,5 @@
 <template>
   <div>
-    <Header v-on:refresh="getAllResources" :loading="loadingCount > 0" />
-
     <gl-drawer
       :open="drawerOpened && selectedResourceKey !== ''"
       @close="close"
@@ -37,7 +35,7 @@
         :items="resourcesAsList"
         :fields="fields"
         :filter="filter"
-        :busy="loadingCount > 0"
+        :busy="isLoading"
         ref="resourcesTable"
         :primary-key="resourceUniqueKey"
         selectable
@@ -70,12 +68,12 @@
       <div class="container">
         <gl-skeleton-loading
           class="mt-5"
-          v-if="loadingCount > 0 && resourcesAsList.length < 1"
+          v-if="isLoading && resourcesAsList.length < 1"
         />
 
         <gl-empty-state
           class="mt-5"
-          v-if="loadingCount === 0 && resourcesAsList.length === 0"
+          v-else-if="!isLoading && resourcesAsList.length === 0"
           title="No Vpc found in the selected regions!"
           svg-path="/assets/undraw_empty_xct9.svg"
           :description="emptyStateDescription"
@@ -102,7 +100,6 @@
 <script lang="ts">
 import { DescribeVpcsRequest, Vpc } from "aws-sdk/clients/ec2";
 
-import Header from "@/components/Header/Header.vue";
 import RegionText from "@/components/common/RegionText.vue";
 import {
   GlButton,
@@ -122,7 +119,6 @@ import { NetworkComponent } from "@/components/network/networkComponent";
 @Component({
   components: {
     StateText,
-    Header,
     GlTable,
     RegionText,
     GlIcon,
@@ -163,7 +159,10 @@ export default class VPCList extends NetworkComponent<Vpc, "VpcId" | "State"> {
     { key: "DhcpOptionsId", sortable: true },
   ];
 
-  async getResourcesForRegion(region: string, filterByVpcsId?: string[]) {
+  async getResourcesForRegion(
+    region: string,
+    filterByVpcsId?: string[]
+  ): Promise<Vpc[]> {
     const EC2 = await this.client(region);
     if (!EC2) {
       return [];
@@ -179,22 +178,11 @@ export default class VPCList extends NetworkComponent<Vpc, "VpcId" | "State"> {
       ];
     }
 
-    try {
-      const data = await EC2.describeVpcs(params).promise();
-      if (data.Vpcs === undefined) {
-        return [];
-      }
-      return data.Vpcs;
-    } catch (err) {
-      this.showError(`[${region}] ` + err, `${region}#loadingVpc`);
+    const data = await EC2.describeVpcs(params).promise();
+    if (data.Vpcs === undefined) {
       return [];
     }
-  }
-
-  destroyed() {
-    this.$store.commit("notifications/dismissByKey", "loadingVpc");
+    return data.Vpcs;
   }
 }
 </script>
-
-<style scoped></style>

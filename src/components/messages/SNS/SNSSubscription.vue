@@ -277,5 +277,3 @@ export default class SNSSubscription extends mixins(Formatters, Notifications) {
   }
 }
 </script>
-
-<style scoped></style>

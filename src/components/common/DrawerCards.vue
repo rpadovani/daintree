@@ -112,5 +112,3 @@ export default class DrawerCards extends Vue {
   }
 }
 </script>
-
-<style scoped></style>

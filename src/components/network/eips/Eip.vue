@@ -370,5 +370,3 @@ export default class Eip extends mixins(Formatters, Notifications) {
   }
 }
 </script>
-
-<style scoped></style>

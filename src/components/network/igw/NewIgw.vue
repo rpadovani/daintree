@@ -1,71 +1,67 @@
 <template>
-  <div>
-    <Header @refresh="regionChanged" :loading="loadingCount > 0" />
-    <div class="container mt-2">
-      <h2>Create a new Internet Gateway</h2>
-      <gl-alert variant="tip" class="mb-2 mt-2" :dismissible="false">
-        An internet gateway is a virtual router that connects a VPC to the
-        internet. To create a new internet gateway specify the name for the
-        gateway below.
-      </gl-alert>
-      <gl-form-group
-        id="region-id"
-        label="Region"
-        label-size="sm"
-        description="To see other regions, enable them in the settings, in the top right of the page."
-        label-for="region-input"
-      >
-        <gl-form-select
-          id="region-input"
-          v-model="selectedRegion"
-          :options="this.$store.getters['sts/regions']"
-          @change="regionChanged"
-        />
-      </gl-form-group>
-      <gl-form-input-group
-        class="mt-3"
-        v-model="igwName"
-        placeholder="Create a tag with key 'Name' and the value you insert."
-      >
-        <template #prepend>
-          <b-input-group-text>Name</b-input-group-text>
-        </template>
-      </gl-form-input-group>
+  <div class="container mt-2">
+    <h2>Create a new Internet Gateway</h2>
+    <gl-alert variant="tip" class="mb-2 mt-2" :dismissible="false">
+      An internet gateway is a virtual router that connects a VPC to the
+      internet. To create a new internet gateway specify the name for the
+      gateway below.
+    </gl-alert>
+    <gl-form-group
+      id="region-id"
+      label="Region"
+      label-size="sm"
+      description="To see other regions, enable them in the settings, in the top right of the page."
+      label-for="region-input"
+    >
+      <gl-form-select
+        id="region-input"
+        v-model="selectedRegion"
+        :options="this.$store.getters['sts/regions']"
+        @change="regionChanged"
+      />
+    </gl-form-group>
+    <gl-form-input-group
+      class="mt-3"
+      v-model="igwName"
+      placeholder="Create a tag with key 'Name' and the value you insert."
+    >
+      <template #prepend>
+        <b-input-group-text>Name</b-input-group-text>
+      </template>
+    </gl-form-input-group>
 
-      <gl-form-group
-        id="vpc-id"
-        label="Vpc"
-        label-size="sm"
-        description="Optionally, select a VPC to which attach your new Internet Gateway. Only VPCs without already a Internet Gateway attached are shown."
-        label-for="vpc-input"
-        class="mt-2"
-      >
-        <gl-form-select
-          id="vpc-input"
-          :disabled="selectedRegion === '' || loadingCount > 0"
-          v-model="selectedVpc"
-          :options="vpcsOptions"
-        />
-      </gl-form-group>
+    <gl-form-group
+      id="vpc-id"
+      label="Vpc"
+      label-size="sm"
+      description="Optionally, select a VPC to which attach your new Internet Gateway. Only VPCs without already a Internet Gateway attached are shown."
+      label-for="vpc-input"
+      class="mt-2"
+    >
+      <gl-form-select
+        id="vpc-input"
+        :disabled="selectedRegion === '' || isLoading"
+        v-model="selectedVpc"
+        :options="vpcsOptions"
+      />
+    </gl-form-group>
 
-      <div class="row justify-content-between mt-3">
-        <gl-button category="secondary" variant="danger" to="/network/igws">
-          Cancel
-        </gl-button>
-        <gl-button
-          :disabled="!canClick"
-          category="primary"
-          variant="success"
-          @click="createIgw"
-          >Create
-        </gl-button>
-      </div>
+    <div class="row justify-content-between mt-3">
+      <gl-button category="secondary" variant="danger" to="/network/igws">
+        Cancel
+      </gl-button>
+      <gl-button
+        :disabled="!canClick"
+        category="primary"
+        variant="success"
+        @click="createIgw"
+        >Create
+      </gl-button>
     </div>
   </div>
 </template>
 
 <script lang="ts">
-import Header from "@/components/Header/Header.vue";
 import {
   GlAlert,
   GlFormGroup,
@@ -76,14 +72,13 @@ import {
 import { BInputGroupText } from "bootstrap-vue";
 import EC2Client from "aws-sdk/clients/ec2";
 import { Component, Watch } from "vue-property-decorator";
-import Notifications from "@/mixins/notifications";
 import { CreateInternetGatewayRequest, VpcList } from "aws-sdk/clients/ec2";
 import { mixins } from "vue-class-component";
 import { Formatters } from "@/mixins/formatters";
+import { DaintreeComponent } from "@/mixins/DaintreeComponent";
 
 @Component({
   components: {
-    Header,
     GlFormSelect,
     GlFormGroup,
     GlAlert,
@@ -92,7 +87,7 @@ import { Formatters } from "@/mixins/formatters";
     GlButton,
   },
 })
-export default class NewIgw extends mixins(Notifications, Formatters) {
+export default class NewIgw extends mixins(DaintreeComponent, Formatters) {
   selectedRegion = "";
   selectedVpc = "";
   igwName = "";
@@ -123,25 +118,27 @@ export default class NewIgw extends mixins(Notifications, Formatters) {
     this.getVpcsForCurrentRegion();
   }
 
-  get credentials() {
-    return this.$store.getters["sts/credentials"];
-  }
-
-  getVpcsForCurrentRegion() {
+  async getVpcsForCurrentRegion(): Promise<void> {
     this.hideErrors("createIgw");
     if (this.selectedRegion === "") {
       this.vpcs = [];
     } else {
+      const credentials = await this.credentials();
+
+      if (!credentials) {
+        return;
+      }
+
       const EC2 = new EC2Client({
         region: this.selectedRegion,
-        credentials: this.credentials,
+        credentials,
       });
 
-      this.loadingCount++;
+      this.incrementLoadingCount();
       EC2.describeVpcs(
         { Filters: [{ Name: "state", Values: ["available"] }] },
         (err, data) => {
-          this.loadingCount--;
+          this.decreaseLoadingCount();
           if (err) {
             this.showError(err.message, "createIgw");
           } else if (data.Vpcs) {
@@ -152,7 +149,7 @@ export default class NewIgw extends mixins(Notifications, Formatters) {
 
       //We need to see which VPCs aren't attached to any internet gateway, so we download them all.
       //We do it in parallel and then leave to VUE doing the difference between the two lists
-      this.loadingCount++;
+      this.incrementLoadingCount();
       EC2.describeInternetGateways(
         {
           Filters: [
@@ -163,7 +160,7 @@ export default class NewIgw extends mixins(Notifications, Formatters) {
           ],
         },
         (err, data) => {
-          this.loadingCount--;
+          this.decreaseLoadingCount();
           if (err) {
             this.showError(err.message, "createIgw");
           } else if (data.InternetGateways) {
@@ -179,17 +176,23 @@ export default class NewIgw extends mixins(Notifications, Formatters) {
     }
   }
 
-  createIgw() {
+  async createIgw(): Promise<void> {
+    const credentials = await this.credentials();
+
+    if (!credentials) {
+      return;
+    }
+
     const EC2 = new EC2Client({
       region: this.selectedRegion,
-      credentials: this.credentials,
+      credentials,
     });
 
     const params: CreateInternetGatewayRequest = {};
 
-    this.loadingCount++;
+    this.incrementLoadingCount();
     EC2.createInternetGateway(params, (err, data) => {
-      this.loadingCount--;
+      this.decreaseLoadingCount();
 
       if (err) {
         this.showError(err.message, "createIgw");
@@ -210,9 +213,9 @@ export default class NewIgw extends mixins(Notifications, Formatters) {
             Resources: [data.InternetGateway.InternetGatewayId],
             Tags: [{ Key: "Name", Value: this.igwName }],
           };
-          this.loadingCount++;
+          this.incrementLoadingCount();
           EC2.createTags(params, (err) => {
-            this.loadingCount--;
+            this.decreaseLoadingCount();
             if (err) {
               this.$store.commit("notifications/show", {
                 variant: "danger",
@@ -221,21 +224,21 @@ export default class NewIgw extends mixins(Notifications, Formatters) {
               });
             }
 
-            if (this.loadingCount === 0) {
+            if (!this.isLoading) {
               this.$router.push("/network/igws");
             }
           });
         }
 
         if (this.selectedVpc && data.InternetGateway?.InternetGatewayId) {
-          this.loadingCount++;
+          this.incrementLoadingCount();
           EC2.attachInternetGateway(
             {
               InternetGatewayId: data.InternetGateway.InternetGatewayId,
               VpcId: this.selectedVpc.split(" ")[0],
             },
             (err) => {
-              this.loadingCount--;
+              this.decreaseLoadingCount();
               if (err) {
                 this.$store.commit("notifications/show", {
                   variant: "danger",
@@ -244,14 +247,14 @@ export default class NewIgw extends mixins(Notifications, Formatters) {
                 });
               }
 
-              if (this.loadingCount === 0) {
+              if (!this.isLoading) {
                 this.$router.push("/network/igws");
               }
             }
           );
         }
 
-        if (this.loadingCount === 0) {
+        if (!this.isLoading) {
           this.$router.push("/network/igws");
         }
       }
@@ -266,7 +269,13 @@ export default class NewIgw extends mixins(Notifications, Formatters) {
   onCurrentRoleIndexChanged() {
     this.regionChanged();
   }
+
+  mounted() {
+    this.$root.$on("refresh", this.regionChanged);
+  }
+
+  beforeDestroy() {
+    this.$root.$off("refresh");
+  }
 }
 </script>
-
-<style scoped></style>

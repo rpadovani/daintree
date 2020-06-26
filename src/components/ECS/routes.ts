@@ -9,6 +9,7 @@ const mainRoute = {
   meta: {
     title: "ECS",
     requiresLogin: true,
+    hideRefresher: true,
   },
 };
 export const ECSRoutes = [mainRoute, ...taskDefinitionsRoutes];

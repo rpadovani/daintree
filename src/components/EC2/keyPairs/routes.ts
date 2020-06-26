@@ -7,7 +7,7 @@ export const keyPairsRoutes = [
   {
     path: "/ec2/keyPairs/new",
     component: NewKeyPair,
-    meta: { title: "New key pair", requiresLogin: true },
+    meta: { title: "New key pair", requiresLogin: true, hideRefresher: true },
   },
   {
     path: "/ec2/keyPairs",

@@ -1,100 +1,53 @@
 <template>
-  <div>
-    <Header v-if="!onlyContent" :hide-refresher="true" />
-    <div class="container mt-2">
-      <h3>EC2 resources</h3>
-      <div class="row mt-2">
-        <div class="col-12 col-sm-6 col-lg-3 mt-1">
-          <gl-avatar-link to="/ec2/instances">
-            <gl-avatar-labeled
-              label="Instances"
-              sub-label="Resizable compute capacity"
-              src="/assets/aws-icons/ec2/Amazon-EC2_Instances_light-bg.svg"
-              shape="rect"
-              :size="32"
-            >
-            </gl-avatar-labeled>
-          </gl-avatar-link>
-        </div>
-        <div class="col-12 col-sm-6 col-lg-3 mt-1">
-          <gl-avatar-link to="/ec2/loadBalancers">
-            <gl-avatar-labeled
-              label="Load balancers"
-              sub-label="Incoming traffic distribution"
-              src="/assets/aws-icons/ec2/Elastic-Load-Balancing.svg"
-              shape="rect"
-              :size="32"
-            >
-            </gl-avatar-labeled>
-          </gl-avatar-link>
-        </div>
-        <div class="col-12 col-sm-6 col-lg-3 mt-1">
-          <gl-avatar-link to="/ec2/targetGroups">
-            <gl-avatar-labeled
-              label="Target groups"
-              sub-label="Route requests to targets"
-              shape="rect"
-              :size="32"
-            >
-            </gl-avatar-labeled>
-          </gl-avatar-link>
-        </div>
-        <div class="col-12 col-sm-6 col-lg-3 mt-1">
-          <gl-avatar-link to="/ec2/keyPairs">
-            <gl-avatar-labeled
-              label="Key pairs"
-              sub-label="SSH to your instances"
-              shape="rect"
-              :size="32"
-              src="assets/aws-icons/ec2/AWS-Key-Management-Service.svg"
-            >
-            </gl-avatar-labeled>
-          </gl-avatar-link>
-        </div>
-        <div class="col-12 col-sm-6 col-lg-3 mt-1">
-          <gl-avatar-link to="/ec2/volumes">
-            <gl-avatar-labeled
-              label="EBS volumes"
-              sub-label="Block storage service"
-              shape="rect"
-              :size="32"
-              src="assets/aws-icons/ec2/Amazon-Elastic-Block-Store-EBS_Volume_light-bg.svg"
-            >
-            </gl-avatar-labeled>
-          </gl-avatar-link>
-        </div>
-        <div class="col-12 col-sm-6 col-lg-3 mt-1">
-          <gl-avatar-link to="/ec2/snapshots">
-            <gl-avatar-labeled
-              label="EBS snapshots"
-              sub-label="Backup your EBS"
-              shape="rect"
-              :size="32"
-              src="assets/aws-icons/ec2/Amazon-Elastic-Block-Store-EBS_Snapshot_light-bg.svg"
-            >
-            </gl-avatar-labeled>
-          </gl-avatar-link>
-        </div>
-      </div>
-    </div>
-  </div>
+  <ResourceMainMenu :entries="entries" resource-name="EC2" />
 </template>
 
 <script lang="ts">
-import { GlAvatarLabeled, GlAvatarLink } from "@gitlab/ui";
-import { Component, Prop, Vue } from "vue-property-decorator";
-import Header from "@/components/Header/Header.vue";
+import { Component, Vue } from "vue-property-decorator";
+import ResourceMainMenu from "@/components/common/ResourceMainMenu.vue";
+import { MenuEntry } from "@/components/common/menuEntry";
 
-@Component({
-  components: {
-    Header,
-    GlAvatarLabeled,
-    GlAvatarLink,
-  },
-})
+@Component({ components: { ResourceMainMenu } })
 export default class EC2Main extends Vue {
-  @Prop(Boolean) readonly onlyContent: boolean | undefined;
+  readonly entries: MenuEntry[] = [
+    {
+      target: "/ec2/instances",
+      label: "Instances",
+      subLabel: "Resizable compute capacity",
+      iconUrl: "/assets/aws-icons/ec2/Amazon-EC2_Instances_light-bg.svg",
+    },
+
+    {
+      target: "/ec2/loadBalancers",
+      label: "Load balancers",
+      subLabel: "Incoming traffic distribution",
+      iconUrl: "/assets/aws-icons/ec2/Elastic-Load-Balancing.svg",
+    },
+    {
+      target: "/ec2/targetGroups",
+      label: "Target groups",
+      subLabel: "Route requests to targets",
+    },
+    {
+      target: "/ec2/keyPairs",
+      label: "Key pairs",
+      subLabel: "SSH to your instances",
+      iconUrl: "assets/aws-icons/ec2/AWS-Key-Management-Service.svg",
+    },
+    {
+      target: "/ec2/volumes",
+      label: "EBS volumes",
+      subLabel: "Block storage service",
+      iconUrl:
+        "assets/aws-icons/ec2/Amazon-Elastic-Block-Store-EBS_Volume_light-bg.svg",
+    },
+    {
+      target: "/ec2/snapshots",
+      label: "EBS snapshots",
+      subLabel: "Backup your EBS",
+      iconUrl:
+        "assets/aws-icons/ec2/Amazon-Elastic-Block-Store-EBS_Snapshot_light-bg.svg",
+    },
+  ];
 }
 </script>
-
-<style scoped></style>

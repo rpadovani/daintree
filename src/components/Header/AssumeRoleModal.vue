@@ -129,5 +129,3 @@ export default class AssumeRoleModal extends Vue {
   }
 }
 </script>
-
-<style scoped></style>

@@ -1,86 +1,82 @@
 <template>
-  <div>
-    <Header :loading="this.loadingCount > 0" />
-    <div class="container mt-2">
-      <h2>Create a new snapshot</h2>
-      <gl-alert variant="tip" class="mb-2 mt-2" :dismissible="false">
-        You can create a point-in-time snapshot of an EBS volume and use it as a
-        baseline for new volumes or for data backup. If you make periodic
-        snapshots of a volume, the snapshots are incremental—the new snapshot
-        saves only the blocks that have changed since your last snapshot.
-      </gl-alert>
-      <gl-form @submit="createSnapshot">
-        <gl-form-group
-          id="region-id"
-          label="Region"
-          label-size="sm"
-          description="To see other regions, enable them in the settings"
-          label-for="region-input"
-          required
-        >
-          <gl-form-select
-            id="region-input"
-            v-model="selectedRegion"
-            :options="regionsEnabled"
-            @change="regionChanged"
-          />
-        </gl-form-group>
+  <div class="container mt-2">
+    <h2>Create a new snapshot</h2>
+    <gl-alert variant="tip" class="mb-2 mt-2" :dismissible="false">
+      You can create a point-in-time snapshot of an EBS volume and use it as a
+      baseline for new volumes or for data backup. If you make periodic
+      snapshots of a volume, the snapshots are incremental—the new snapshot
+      saves only the blocks that have changed since your last snapshot.
+    </gl-alert>
+    <gl-form @submit="createSnapshot">
+      <gl-form-group
+        id="region-id"
+        label="Region"
+        label-size="sm"
+        description="To see other regions, enable them in the settings"
+        label-for="region-input"
+        required
+      >
+        <gl-form-select
+          id="region-input"
+          v-model="selectedRegion"
+          :options="regionsEnabled"
+          @change="regionChanged"
+        />
+      </gl-form-group>
 
-        <gl-form-group
-          id="volume-id"
-          label="Volume"
-          label-size="sm"
-          label-for="volume-input"
-          description="The EBS volume from which to create the snapshot"
-        >
-          <gl-form-select
-            id="volume-input"
-            v-model="selectedVolume"
-            :options="volumesAsList"
-            :disabled="!selectedRegion"
-          />
-        </gl-form-group>
+      <gl-form-group
+        id="volume-id"
+        label="Volume"
+        label-size="sm"
+        label-for="volume-input"
+        description="The EBS volume from which to create the snapshot"
+      >
+        <gl-form-select
+          id="volume-input"
+          v-model="selectedVolume"
+          :options="volumesAsList"
+          :disabled="!selectedRegion"
+        />
+      </gl-form-group>
 
-        <gl-form-input-group
-          class="mt-3"
-          v-model="snapshotName"
-          placeholder="Create a tag with key 'Name' and the value you insert."
-        >
-          <template #prepend>
-            <b-input-group-text>Name</b-input-group-text>
-          </template>
-        </gl-form-input-group>
+      <gl-form-input-group
+        class="mt-3"
+        v-model="snapshotName"
+        placeholder="Create a tag with key 'Name' and the value you insert."
+      >
+        <template #prepend>
+          <b-input-group-text>Name</b-input-group-text>
+        </template>
+      </gl-form-input-group>
 
-        <gl-form-input-group
-          class="mt-3"
-          v-model="snapshotDescription"
-          placeholder="A description for the snapshot."
-        >
-          <template #prepend>
-            <b-input-group-text>Description</b-input-group-text>
-          </template>
-        </gl-form-input-group>
+      <gl-form-input-group
+        class="mt-3"
+        v-model="snapshotDescription"
+        placeholder="A description for the snapshot."
+      >
+        <template #prepend>
+          <b-input-group-text>Description</b-input-group-text>
+        </template>
+      </gl-form-input-group>
 
-        <div class="row justify-content-between mt-3">
-          <gl-button category="secondary" to="/ec2/snapshots">
-            Cancel
-          </gl-button>
-          <gl-button
-            class="float-right"
-            type="submit"
-            category="primary"
-            variant="success"
-            :disabled="createButtonDisabled"
-            >Create new snapshot
-          </gl-button>
-        </div>
-      </gl-form>
-    </div>
+      <div class="row justify-content-between mt-3">
+        <gl-button category="secondary" to="/ec2/snapshots">
+          Cancel
+        </gl-button>
+        <gl-button
+          class="float-right"
+          type="submit"
+          category="primary"
+          variant="success"
+          :disabled="createButtonDisabled"
+          >Create new snapshot
+        </gl-button>
+      </div>
+    </gl-form>
   </div>
 </template>
 
 <script lang="ts">
-import Header from "@/components/Header/Header.vue";
 import {
   GlAlert,
   GlButton,
@@ -101,7 +97,6 @@ import { isString } from "@/utils/isString";
 
 @Component({
   components: {
-    Header,
     GlFormSelect,
     GlFormGroup,
     GlAlert,
@@ -155,7 +150,7 @@ export default class NewSnapshot extends DaintreeComponent {
     if (this.selectedRegion === "") {
       this.volumes = [];
     } else {
-      this.loadingCount++;
+      this.incrementLoadingCount();
 
       const credentials = await this.credentials();
 
@@ -170,7 +165,7 @@ export default class NewSnapshot extends DaintreeComponent {
       } catch (err) {
         this.showError(err, "createSnapshot");
       } finally {
-        this.loadingCount--;
+        this.decreaseLoadingCount();
       }
     }
   }
@@ -225,8 +220,12 @@ export default class NewSnapshot extends DaintreeComponent {
     if (isString(this.$route.query.volumeId)) {
       this.selectedVolume = this.$route.query.volumeId;
     }
+
+    this.$root.$on("refresh", this.loadVolumes);
+  }
+
+  beforeDestroy(): void {
+    this.$root.$off("refresh");
   }
 }
 </script>
-
-<style scoped></style>

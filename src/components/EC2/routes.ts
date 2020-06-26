@@ -14,6 +14,7 @@ const mainRoute = {
   meta: {
     title: "EC2",
     requiresLogin: true,
+    hideRefresher: true,
   },
 };
 export const EC2Routes = [

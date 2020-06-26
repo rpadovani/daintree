@@ -59,6 +59,8 @@ import StateText from "@/components/common/StateText.vue";
 import RegionText from "@/components/common/RegionText.vue";
 import DrawerCards from "@/components/common/DrawerCards.vue";
 import { CardContent } from "@/components/common/cardContent";
+import { Formatters } from "@/mixins/formatters";
+import { mixins } from "vue-class-component";
 
 @Component({
   components: {
@@ -84,7 +86,7 @@ import { CardContent } from "@/components/common/cardContent";
     "gl-modal-directive": GlModalDirective,
   },
 })
-export default class Snapshot extends DaintreeComponent {
+export default class Snapshot extends mixins(DaintreeComponent, Formatters) {
   @Prop(Object) readonly snapshot!: SnapshotWithRegion;
 
   deleteSnapshotButtonProps = {

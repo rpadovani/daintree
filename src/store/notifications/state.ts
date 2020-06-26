@@ -7,6 +7,9 @@ export class AppNotification {
   key = "";
   // We can also set notifications about a certain resource id, so we have super granular control.
   resourceId?: string;
+
+  //We should always put the region, it will shows the flag and use it as unique key for the alert
+  region?: string;
 }
 
 export type AlertVariant = "info" | "danger" | "tip" | "warning" | "success";

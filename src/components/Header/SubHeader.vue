@@ -1,6 +1,6 @@
 <template>
-  <div class="row justify-content-between mr-0">
-    <b-breadcrumb class="gl-breadcrumb-list col-10 ml-5 mt-1">
+  <div class="row justify-content-between mr-0" v-if="isSubHeaderVisible">
+    <b-breadcrumb class="gl-breadcrumb-list col-8 ml-5 mt-1">
       <img
         class="gl-breadcrumb-avatar-tile"
         src="/assets/aws-icons/AWS-Cloud-alt_light-bg.svg"
@@ -67,17 +67,21 @@
       </b-breadcrumb-item>
     </b-breadcrumb>
 
-    <div class="col-1 mt-2 mr-0 pr-3">
+    <div class="col-3 mt-2 mr-0 pr-3 text-right" v-if="isLoaderVisible">
       <gl-icon
         class="float-right"
-        v-if="!hideRefresh && !loading"
+        v-if="!isLoading"
         name="retry"
+        v-gl-tooltip.hover
+        :title="lastRefreshString"
         @click="refresh"
       />
       <gl-loading-icon
         class="float-right"
-        v-if="loading"
+        v-else
         inline
+        v-gl-tooltip.hover
+        :title="lastRefreshString"
         label="Loading"
       ></gl-loading-icon>
     </div>
@@ -91,10 +95,13 @@ import {
   GlSearchBoxByType,
   GlIcon,
   GlLoadingIcon,
+  GlTooltipDirective,
 } from "@gitlab/ui";
 
 import { BBreadcrumbItem, BBreadcrumb } from "bootstrap-vue";
-import { Component, Emit, Prop, Vue } from "vue-property-decorator";
+import { Component } from "vue-property-decorator";
+import { mapGetters } from "vuex";
+import { DaintreeComponent } from "@/mixins/DaintreeComponent";
 @Component({
   components: {
     BBreadcrumb,
@@ -105,11 +112,19 @@ import { Component, Emit, Prop, Vue } from "vue-property-decorator";
     GlIcon,
     GlLoadingIcon,
   },
+  computed: {
+    ...mapGetters("header", [
+      "isSubHeaderVisible",
+      "isLoaderVisible",
+      "isLoading",
+      "lastRefresh",
+    ]),
+  },
+  directives: {
+    "gl-tooltip": GlTooltipDirective,
+  },
 })
-export default class SubHeader extends Vue {
-  @Prop(Boolean) hideRefresh: boolean | undefined;
-  @Prop(Boolean) loading: boolean | undefined;
-
+export default class SubHeader extends DaintreeComponent {
   get selectedSection(): "Network" | "EC2" | undefined {
     const found = this.sections.find(
       (s) => s.link.split("/")[1] === this.$route.path.split("/")[1]
@@ -130,9 +145,17 @@ export default class SubHeader extends Vue {
     return found ? found.name : undefined;
   }
 
-  @Emit("refresh")
-  refresh() {
-    return true;
+  lastRefresh!: Date;
+  isLoading!: boolean;
+  get lastRefreshString(): string {
+    if (this.isLoading) {
+      return "Last refresh: now";
+    }
+    return `Last refresh: ${this.standardDate(this.lastRefresh)}`;
+  }
+
+  refresh(): void {
+    this.$root.$emit("refresh");
   }
 
   sectionSearchTerm = "";
@@ -190,5 +213,3 @@ export default class SubHeader extends Vue {
   }
 }
 </script>
-
-<style scoped></style>

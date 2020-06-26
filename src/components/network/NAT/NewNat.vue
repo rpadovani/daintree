@@ -1,102 +1,99 @@
 <template>
-  <div>
-    <Header @refresh="regionChanged" :loading="loadingCount > 0" />
-    <div class="container mt-2">
-      <h2>Create a new Nat</h2>
-      <gl-alert variant="tip" class="mb-2 mt-2" :dismissible="false">
-        You can use a network address translation (NAT) gateway to enable
-        instances in a private subnet to connect to the internet or other AWS
-        services, but prevent the internet from initiating a connection with
-        those instances. For more information about NAT, see
-        <a
-          href="https://docs.aws.amazon.com/vpc/latest/userguide/vpc-nat.html"
-          target="_blank"
-          >the AWS Guide</a
-        >.
-      </gl-alert>
+  <div class="container mt-2">
+    <h2>Create a new Nat</h2>
+    <gl-alert variant="tip" class="mb-2 mt-2" :dismissible="false">
+      You can use a network address translation (NAT) gateway to enable
+      instances in a private subnet to connect to the internet or other AWS
+      services, but prevent the internet from initiating a connection with those
+      instances. For more information about NAT, see
+      <a
+        href="https://docs.aws.amazon.com/vpc/latest/userguide/vpc-nat.html"
+        target="_blank"
+        >the AWS Guide</a
+      >.
+    </gl-alert>
+    <gl-form-group
+      id="region-id"
+      label="Region"
+      label-size="sm"
+      description="To see other regions, enable them in the settings, in the top right of the page."
+      label-for="region-input"
+    >
+      <gl-form-select
+        id="region-input"
+        v-model="selectedRegion"
+        :options="this.$store.getters['sts/regions']"
+        @change="regionChanged"
+      />
+    </gl-form-group>
+    <gl-form-input-group
+      class="mt-3"
+      v-model="natName"
+      placeholder="Create a tag with key 'Name' and the value you insert."
+    >
+      <template #prepend>
+        <b-input-group-text>Name</b-input-group-text>
+      </template>
+    </gl-form-input-group>
+
+    <gl-form-group
+      id="subnet-id"
+      label="Subnet"
+      label-size="sm"
+      description="Select a public subnet in which to create the Nat Gateway"
+      label-for="subnet-input"
+      class="mt-2"
+    >
+      <gl-form-select
+        id="subnet-input"
+        :disabled="selectedRegion === ''"
+        v-model="selectedSubnet"
+        :options="subnetsOptions"
+      />
+    </gl-form-group>
+
+    <div class="row mt-2 justify-content-between">
       <gl-form-group
-        id="region-id"
-        label="Region"
+        id="eip-id"
+        label="Elastic IP"
         label-size="sm"
-        description="To see other regions, enable them in the settings, in the top right of the page."
-        label-for="region-input"
+        description="Assign an Elastic IP address to the NAT gateway"
+        label-for="eip-input"
+        class="col-9"
       >
         <gl-form-select
-          id="region-input"
-          v-model="selectedRegion"
-          :options="this.$store.getters['sts/regions']"
-          @change="regionChanged"
+          id="eip-input"
+          :disabled="selectedRegion === ''"
+          v-model="selectedEip"
+          :options="eipOptions"
+          :value="selectedEip"
         />
       </gl-form-group>
-      <gl-form-input-group
-        class="mt-3"
-        v-model="natName"
-        placeholder="Create a tag with key 'Name' and the value you insert."
+      <gl-button
+        category="secondary"
+        variant="success"
+        size="medium"
+        class="mt-4"
+        style="height: 100%;"
+        :disabled="selectedRegion === ''"
+        @click="newIp"
+        :loading="allocateLoading"
       >
-        <template #prepend>
-          <b-input-group-text>Name</b-input-group-text>
-        </template>
-      </gl-form-input-group>
+        Allocate a new Elastic IP
+      </gl-button>
+    </div>
 
-      <gl-form-group
-        id="subnet-id"
-        label="Subnet"
-        label-size="sm"
-        description="Select a public subnet in which to create the Nat Gateway"
-        label-for="subnet-input"
-        class="mt-2"
-      >
-        <gl-form-select
-          id="subnet-input"
-          :disabled="selectedRegion === ''"
-          v-model="selectedSubnet"
-          :options="subnetsOptions"
-        />
-      </gl-form-group>
-
-      <div class="row mt-2 justify-content-between">
-        <gl-form-group
-          id="eip-id"
-          label="Elastic IP"
-          label-size="sm"
-          description="Assign an Elastic IP address to the NAT gateway"
-          label-for="eip-input"
-          class="col-9"
-        >
-          <gl-form-select
-            id="eip-input"
-            :disabled="selectedRegion === ''"
-            v-model="selectedEip"
-            :options="eipOptions"
-            :value="selectedEip"
-          />
-        </gl-form-group>
-        <gl-button
-          category="secondary"
-          variant="success"
-          size="medium"
-          class="mt-4"
-          style="height: 100%;"
-          :disabled="selectedRegion === ''"
-          @click="newIp"
-          :loading="allocateLoading"
-        >
-          Allocate a new Elastic IP
-        </gl-button>
-      </div>
-
-      <div class="row justify-content-between mt-3">
-        <gl-button category="secondary" variant="danger" to="/network/nats">
-          Cancel
-        </gl-button>
-        <gl-button
-          :disabled="!canClick"
-          category="primary"
-          variant="success"
-          @click="createNat"
-          >Create NAT
-        </gl-button>
-      </div>
+    <div class="row justify-content-between mt-3">
+      <gl-button category="secondary" variant="danger" to="/network/nats">
+        Cancel
+      </gl-button>
+      <gl-button
+        :disabled="!canClick"
+        category="primary"
+        variant="success"
+        @click="createNat"
+        >Create NAT
+      </gl-button>
     </div>
   </div>
 </template>
@@ -113,7 +110,6 @@ import {
 import { BInputGroupText } from "bootstrap-vue";
 import EC2Client from "aws-sdk/clients/ec2";
 import { Component, Watch } from "vue-property-decorator";
-import Notifications from "@/mixins/notifications";
 import {
   AddressList,
   CreateNatGatewayRequest,
@@ -121,6 +117,7 @@ import {
 } from "aws-sdk/clients/ec2";
 import { mixins } from "vue-class-component";
 import { Formatters } from "@/mixins/formatters";
+import { DaintreeComponent } from "@/mixins/DaintreeComponent";
 
 @Component({
   components: {
@@ -133,7 +130,7 @@ import { Formatters } from "@/mixins/formatters";
     GlButton,
   },
 })
-export default class NewNat extends mixins(Notifications, Formatters) {
+export default class NewNat extends mixins(DaintreeComponent, Formatters) {
   selectedRegion = "";
   selectedSubnet = "";
   selectedEip = "";
@@ -180,29 +177,31 @@ export default class NewNat extends mixins(Notifications, Formatters) {
     return options;
   }
 
-  regionChanged() {
+  regionChanged(): void {
     this.getSubnetsForCurrentRegion();
     this.getEipsForCurrentRegion();
   }
 
-  get credentials() {
-    return this.$store.getters["sts/credentials"];
-  }
-
-  getSubnetsForCurrentRegion() {
+  async getSubnetsForCurrentRegion(): Promise<void> {
     this.hideErrors("createNat");
     if (this.selectedRegion === "") {
       this.subnets = [];
     } else {
+      const credentials = await this.credentials();
+
+      if (!credentials) {
+        return;
+      }
+
       const EC2 = new EC2Client({
         region: this.selectedRegion,
-        credentials: this.credentials,
+        credentials,
       });
 
-      this.loadingCount++;
+      this.incrementLoadingCount();
 
       EC2.describeSubnets({}, (err, data) => {
-        this.loadingCount--;
+        this.decreaseLoadingCount();
         if (err) {
           this.showError(err.message, "createNat");
         } else if (data.Subnets) {
@@ -212,19 +211,25 @@ export default class NewNat extends mixins(Notifications, Formatters) {
     }
   }
 
-  getEipsForCurrentRegion() {
+  async getEipsForCurrentRegion(): Promise<void> {
     this.hideErrors("createNat");
     if (this.selectedRegion === "") {
       this.eips = [];
     } else {
+      const credentials = await this.credentials();
+
+      if (!credentials) {
+        return;
+      }
+
       const EC2 = new EC2Client({
         region: this.selectedRegion,
-        credentials: this.credentials,
+        credentials,
       });
 
-      this.loadingCount++;
+      this.incrementLoadingCount();
       EC2.describeAddresses({}, (err, data) => {
-        this.loadingCount--;
+        this.decreaseLoadingCount();
         if (err) {
           this.showError(err.message, "createNat");
         } else if (data.Addresses) {
@@ -234,10 +239,16 @@ export default class NewNat extends mixins(Notifications, Formatters) {
     }
   }
 
-  createNat() {
+  async createNat(): Promise<void> {
+    const credentials = await this.credentials();
+
+    if (!credentials) {
+      return;
+    }
+
     const EC2 = new EC2Client({
       region: this.selectedRegion,
-      credentials: this.credentials,
+      credentials,
     });
     const AllocationId = this.eips.find(
       (eip) => eip.PublicIp === this.selectedEip.split(" ")[0]
@@ -278,11 +289,16 @@ export default class NewNat extends mixins(Notifications, Formatters) {
     });
   }
 
-  newIp() {
+  async newIp(): Promise<void> {
+    const credentials = await this.credentials();
+
+    if (!credentials) {
+      return;
+    }
     this.allocateLoading = true;
     const EC2 = new EC2Client({
       region: this.selectedRegion,
-      credentials: this.credentials,
+      credentials,
     });
     EC2.allocateAddress({ Domain: "vpc" }, (err, data) => {
       this.allocateLoading = false;
@@ -297,6 +313,14 @@ export default class NewNat extends mixins(Notifications, Formatters) {
     });
   }
 
+  mounted() {
+    this.$root.$on("refresh", this.regionChanged);
+  }
+
+  beforeDestroy() {
+    this.$root.$off("refresh");
+  }
+
   get currentRoleIndex(): number {
     return this.$store.getters["sts/currentRoleIndex"];
   }
@@ -307,5 +331,3 @@ export default class NewNat extends mixins(Notifications, Formatters) {
   }
 }
 </script>
-
-<style scoped></style>

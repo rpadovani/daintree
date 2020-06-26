@@ -367,5 +367,3 @@ export default class VPC extends mixins(Formatters, Notifications) {
   }
 }
 </script>
-
-<style scoped></style>

@@ -84,10 +84,7 @@ import {
 } from "@gitlab/ui";
 import EC2Client from "aws-sdk/clients/ec2";
 import { Component, Prop } from "vue-property-decorator";
-import { Formatters } from "@/mixins/formatters";
 import TagsTable from "@/components/common/TagsTable.vue";
-import { mixins } from "vue-class-component";
-import Notifications from "@/mixins/notifications";
 import FlowLogsTab from "@/components/network/flowLogs/FlowLogsTab.vue";
 import { routeTables } from "@/components/network/routeTables/routeTable";
 import RouteTableWithRegion = routeTables.RouteTableWithRegion;
@@ -96,6 +93,7 @@ import { isString } from "@/utils/isString";
 import ListOfRoutes from "@/components/network/routeTables/ListOfRoutes.vue";
 import DrawerCards from "@/components/common/DrawerCards.vue";
 import { CardContent } from "@/components/common/cardContent";
+import { DaintreeComponent } from "@/mixins/DaintreeComponent";
 
 @Component({
   components: {
@@ -117,7 +115,7 @@ import { CardContent } from "@/components/common/cardContent";
   },
   directives: { "gl-modal-directive": GlModalDirective },
 })
-export default class RouteTable extends mixins(Formatters, Notifications) {
+export default class RouteTable extends DaintreeComponent {
   @Prop(Object) readonly routeTable!: RouteTableWithRegion;
   @Prop(String) readonly mainRouteAssociationId: string | undefined;
 
@@ -226,5 +224,3 @@ export default class RouteTable extends mixins(Formatters, Notifications) {
   }
 }
 </script>
-
-<style scoped></style>

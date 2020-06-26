@@ -324,5 +324,3 @@ export default class Subnet extends mixins(Formatters, Notifications) {
   }
 }
 </script>
-
-<style scoped></style>

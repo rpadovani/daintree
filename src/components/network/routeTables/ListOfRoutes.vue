@@ -52,5 +52,3 @@ export default class ListOfRoutes extends Vue {
   routesFields = ["Destination", "Target", "State", "Origin"];
 }
 </script>
-
-<style scoped></style>

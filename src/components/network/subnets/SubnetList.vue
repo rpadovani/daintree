@@ -1,7 +1,5 @@
 <template>
   <div>
-    <Header v-on:refresh="getAllResources" :loading="loadingCount > 0" />
-
     <gl-drawer
       :open="drawerOpened && selectedResourceKey !== ''"
       @close="close"
@@ -37,7 +35,7 @@
         :items="resourcesAsList"
         :fields="fields"
         :filter="filter"
-        :busy="loadingCount > 0"
+        :busy="isLoading"
         ref="resourcesTable"
         selectable
         select-mode="single"
@@ -74,12 +72,12 @@
       <div class="container">
         <gl-skeleton-loading
           class="mt-5"
-          v-if="loadingCount > 0 && resourcesAsList.length < 1"
+          v-if="isLoading && resourcesAsList.length < 1"
         />
 
         <gl-empty-state
           class="mt-5"
-          v-if="loadingCount === 0 && resourcesAsList.length === 0"
+          v-if="!isLoading && resourcesAsList.length === 0"
           title="No subnets found in the selected regions!"
           svg-path="/assets/undraw_empty_xct9.svg"
           :description="emptyStateDescription"
@@ -106,7 +104,6 @@
 <script lang="ts">
 import { Subnet as AWSSubnet } from "aws-sdk/clients/ec2";
 
-import Header from "@/components/Header/Header.vue";
 import RegionText from "@/components/common/RegionText.vue";
 import {
   GlDrawer,
@@ -127,7 +124,6 @@ import { NetworkComponent } from "@/components/network/networkComponent";
 @Component({
   components: {
     StateText,
-    Header,
     GlTable,
     RegionText,
     GlIcon,
@@ -187,22 +183,11 @@ export default class SubnetList extends NetworkComponent<
       ];
     }
 
-    try {
-      const data = await EC2.describeSubnets(params).promise();
-      if (data.Subnets === undefined) {
-        return [];
-      }
-      return data.Subnets;
-    } catch (err) {
-      this.showError(`[${region}] ` + err, `${region}#loadingSubnets`);
+    const data = await EC2.describeSubnets(params).promise();
+    if (data.Subnets === undefined) {
       return [];
     }
-  }
-
-  destroyed() {
-    this.$store.commit("notifications/dismissByKey", "loadingSubnets");
+    return data.Subnets;
   }
 }
 </script>
-
-<style scoped></style>

@@ -1,6 +1,5 @@
 <template>
   <div>
-    <Header hide-refresher />
     <div class="container mt-2" v-if="!keyCreated">
       <h2>Create a new key pair</h2>
       <gl-alert variant="tip" class="mb-2 mt-2" :dismissible="false">
@@ -82,7 +81,6 @@
 </template>
 
 <script lang="ts">
-import Header from "@/components/Header/Header.vue";
 import {
   GlAlert,
   GlFormGroup,
@@ -97,7 +95,6 @@ import { DaintreeComponent } from "@/mixins/DaintreeComponent";
 
 @Component({
   components: {
-    Header,
     GlFormSelect,
     GlFormGroup,
     GlAlert,
@@ -144,5 +141,3 @@ export default class NewKeyPair extends DaintreeComponent {
   }
 }
 </script>
-
-<style scoped></style>

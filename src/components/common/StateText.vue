@@ -40,7 +40,13 @@ export default class StateText extends Vue {
     | "unused"
     | InstanceStateName
     | VolumeState
-    | SnapshotState;
+    | SnapshotState
+    //ECS clusters:
+    | "ACTIVE"
+    | "PROVISIONING"
+    | "DEPROVISIONING"
+    | "FAILED"
+    | "INACTIVE";
 
   get showLoadingIcon(): boolean {
     return [
@@ -50,11 +56,13 @@ export default class StateText extends Vue {
       "stopping",
       "deleting",
       "creating",
+      "PROVISIONING",
+      "DEPROVISIONING",
     ].includes(this.state);
   }
 
   get color(): string {
-    switch (this.state) {
+    switch (this.state.toLowerCase()) {
       case "running":
       case "attached":
       case "active":
@@ -68,9 +76,11 @@ export default class StateText extends Vue {
       case "detached":
       case "unhealthy":
       case "error":
+      case "inactive":
         return "text-danger";
       case "pending":
       case "creating":
+      case "provisioning":
       case "available":
         return "text-info";
       case "failed":
@@ -79,6 +89,7 @@ export default class StateText extends Vue {
       case "stopped":
       case "stopping":
       case "unused":
+      case "deprovisioning":
         return "text-warning";
       default:
         return "";

@@ -6,6 +6,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Added
+
+- Support for ECS clusters
+
 ### Changed
 
 - Refactor header and subheader to render just once and increase performance

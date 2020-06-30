@@ -191,7 +191,10 @@ export default class SubHeader extends DaintreeComponent {
       { name: "SNS Subscriptions", link: "#/messages/sns_subscriptions" },
       { name: "SQS", link: "#/messages/sqs" },
     ],
-    ECS: [{ name: "Tasks definitions", link: "#/ecs/tasksDefinitions" }],
+    ECS: [
+      { name: "Tasks definitions", link: "#/ecs/tasksDefinitions" },
+      { name: "Clusters", link: "#/ecs/clusters" },
+    ],
   };
 
   get filteredSections(): { name: string; link: string }[] {

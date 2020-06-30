@@ -896,10 +896,10 @@
     lodash "^4.17.13"
     to-fast-properties "^2.0.0"
 
-"@gitlab/svgs@1.145.0":
-  version "1.145.0"
-  resolved "https://registry.yarnpkg.com/@gitlab/svgs/-/svgs-1.145.0.tgz#2251dab907c16aafb6d8c8524c35572d84cde8e2"
-  integrity sha512-RuYtbKIavYAWEKCma3wm/+1nqMn/JfsxwIe+mEr6+hwF7v+S/VLjT4oyRhNpZ2DgfWXGExy1Vh7KFrrAh8cl3w==
+"@gitlab/svgs@1.146.0":
+  version "1.146.0"
+  resolved "https://registry.yarnpkg.com/@gitlab/svgs/-/svgs-1.146.0.tgz#c74118a3f1ab47ae77211d42597f553f395deb5d"
+  integrity sha512-2/k9pAZPgHpZ5Ad0fz9i1109sWcShDE4XcjrjzltNNksbi86lqCKbsSe580ujtlG8KShgGMkDkmUa6AHZi64Xw==
 
 "@gitlab/ui@17.10.1":
   version "17.10.1"

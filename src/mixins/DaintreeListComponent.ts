@@ -2,7 +2,7 @@ import { DaintreeComponent } from "@/mixins/DaintreeComponent";
 import { Component, Ref, Watch } from "vue-property-decorator";
 import { BTable } from "bootstrap-vue";
 
-interface Metadata {
+export interface Metadata {
   stillPresent?: boolean;
   region?: string;
 }

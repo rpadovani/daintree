@@ -10,7 +10,6 @@
       <RouteTable
         :routeTable="selectedResource"
         v-on:deleted="close"
-        v-on:setmain="reloadSelectedRouteTable"
         :mainRouteAssociationId="mainRouteAssociationForSelectedRoute"
       />
     </gl-drawer>

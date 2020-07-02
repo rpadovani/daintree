@@ -144,6 +144,7 @@ export class DaintreeListComponent<
             variant: "warning",
             text: `Deleted ${this.resourceName} with ID ${idFiltered}`,
             key: `deletedResource${idFiltered}`,
+            region,
           });
         }
       });

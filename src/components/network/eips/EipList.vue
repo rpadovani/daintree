@@ -7,11 +7,7 @@
     >
       <template #header>{{ selectedResourceTitle }}</template>
 
-      <Eip
-        :eip="selectedResource"
-        v-on:disassociated="disassociated"
-        v-on:deleted="close"
-      />
+      <Eip :eip="selectedResource" v-on:deleted="close" />
     </gl-drawer>
 
     <div class="container-fluid">
@@ -149,16 +145,6 @@ export default class EipList extends NetworkComponent<Address, "AllocationId"> {
     { key: "InstanceId", sortable: true },
     { key: "AssociationId", sortable: true },
   ];
-
-  //When the selected EIP is disassociated, we refresh its state, and it will be propagated down to the tab
-  //TODO: move update inside component
-  // disassociated() {
-  //   if (this.selectedEip.region && this.selectedEip.AllocationId) {
-  //     this.getEipForRegion(this.selectedEip.region, [
-  //       this.selectedEip.AllocationId,
-  //     ]);
-  //   }
-  // }
 
   async getResourcesForRegion(
     region: string,

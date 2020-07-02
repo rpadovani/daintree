@@ -17,6 +17,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Delete a lot of useless code
 - Hovering the reload icon now shows the date of the last refresh
 - Improve the alerts UI
+- Improve the elastic ip, and the route table page: now they perform better when multiple changes are applied, and they always show updated data
 
 ### Fixed
 

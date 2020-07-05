@@ -1,5 +1,5 @@
 <template>
-  <div>
+  <div class="container">
     <gl-empty-state
       v-if="!failedLogin"
       class="mt-5"

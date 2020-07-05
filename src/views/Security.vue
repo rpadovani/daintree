@@ -50,11 +50,12 @@
           keep your data until the tab is open (so you can reload the page), but
           as soon as you close the tab or the browser your credentials are wiped
           out by the browser itself. It saves some technical cookies, as the
-          list of the regions you have enabled, and it saves your OAuth data if
-          you ask so. It never stores your AWS Access Key or Secret Key - and
-          this is why when you open a new tab, you have to login again. And
-          every time you explicitly logout, Daintree deletes all the bits of
-          information stored on your browser.
+          list of the regions you have enabled, and the version of Daintree that
+          you loaded, and it saves your OAuth data if you ask so. It never
+          stores your AWS Access Key or Secret Key - and this is why when you
+          open a new tab, you have to login again. And every time you explicitly
+          logout, Daintree deletes all the bits of information stored on your
+          browser.
         </p>
 
         <p>

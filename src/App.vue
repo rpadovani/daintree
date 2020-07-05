@@ -5,6 +5,7 @@
     <AssumeRoleModal />
 
     <Header />
+    <Announcements />
     <SubHeader />
     <Notifier />
 
@@ -19,9 +20,11 @@ import RegionModal from "@/components/Header/RegionModal.vue";
 import Header from "@/components/Header/Header.vue";
 import SubHeader from "@/components/Header/SubHeader.vue";
 import Notifier from "@/components/Header//Notifier.vue";
+import Announcements from "@/components/common/Announcements.vue";
 
 @Component({
   components: {
+    Announcements,
     Header,
     CloudwatchModal,
     AssumeRoleModal,

@@ -27,7 +27,7 @@ import { GlBroadcastMessage } from "@gitlab/ui";
   },
 })
 export default class Announcements extends Vue {
-  private isVisible = true;
+  private isVisible = false;
   private readonly currentAppVersion = process.env.VUE_APP_VERSION;
   private readonly localStorageKey = "versionWhenLastVisited";
 

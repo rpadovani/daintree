@@ -6913,7 +6913,7 @@ prepend-http@^1.0.0:
   resolved "https://registry.yarnpkg.com/prepend-http/-/prepend-http-1.0.4.tgz#d4f4562b0ce3696e41ac52d0e002e57a635dc6dc"
   integrity sha1-1PRWKwzjaW5BrFLQ4ALlemNdxtw=
 
-prerender-spa-plugin@^3.4.0:
+prerender-spa-plugin@3.4.0:
   version "3.4.0"
   resolved "https://registry.yarnpkg.com/prerender-spa-plugin/-/prerender-spa-plugin-3.4.0.tgz#332f55e68e1bba68bcf176d8c8dfc8380c5dee8a"
   integrity sha512-4Gtu7XIz5p0VBi1527c/ogu0NNcM5kJPG9q3F26SioeeURVbIJ11B6fuK8pxTmlPqffKPR/2TRRf4o020r4Fqw==

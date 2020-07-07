@@ -18,9 +18,10 @@ lint:
     - yarn run prettier --check "src/**/*.{js,ts,vue}"
 
 buildPackage:
-  image: node:latest
+  image: buildkite/puppeteer:latest
   stage: build
   script:
+    - apt update && apt install curl -y
     - curl "https://gitlab.com/api/v4/projects/18158864/releases" > public/changelog.json
     - yarn install --pure-lockfile
     - yarn build

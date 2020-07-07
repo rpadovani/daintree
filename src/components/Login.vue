@@ -15,7 +15,7 @@
         <gl-form-input
           id="access-key"
           v-model="accessKey"
-          :disabled="isLoading"
+          :disabled="isAccessing"
         />
       </gl-form-group>
 
@@ -29,7 +29,7 @@
           id="secret"
           type="password"
           v-model="secretKey"
-          :disabled="isLoading"
+          :disabled="isAccessing"
         />
       </gl-form-group>
 
@@ -39,7 +39,7 @@
         variant="success"
         @click="loginWithAccessKey"
         block
-        :loading="isLoading"
+        :loading="isAccessing"
         >Login with Access Key
       </gl-button>
     </gl-tab>
@@ -92,7 +92,7 @@
         category="primary"
         variant="success"
         @click="loginWithCognito"
-        :loading="isLoading"
+        :loading="isAccessing"
         block
         >Login with OAuth
       </gl-button>
@@ -139,23 +139,23 @@ export default class Login extends DaintreeComponent {
   cognitoIdentityPoolId = "";
   cognitoRemember = false;
 
-  isLoading = false;
+  isAccessing = false;
 
   get accessKeyButtonDisabled() {
-    return this.isLoading || this.accessKey === "" || this.secretKey === "";
+    return this.isAccessing || this.accessKey === "" || this.secretKey === "";
   }
 
-  get isCognitoButtonDisabled() {
+  get isCognitoButtonDisabled(): boolean {
     return (
-      this.isLoading ||
+      this.isAccessing ||
       this.cognitoDomain === "" ||
       this.cognitoClientId === "" ||
       this.cognitoIdentityPoolId === ""
     );
   }
 
-  async loginWithAccessKey() {
-    this.isLoading = true;
+  async loginWithAccessKey(): Promise<void> {
+    this.isAccessing = true;
     this.dismissAlertByKey("login");
     this.dismissAlertByKey("credentialsExpired");
 
@@ -168,11 +168,11 @@ export default class Login extends DaintreeComponent {
     } catch (err) {
       this.showError(err, "login");
     } finally {
-      this.isLoading = false;
+      this.isAccessing = false;
     }
   }
 
-  mounted() {
+  mounted(): void {
     this.cognitoRemember =
       localStorage.getItem("deleteCognitoDataASAP") !== "Y";
     if (localStorage.getItem("deleteCognitoDataASAP") === "Y") {
@@ -186,7 +186,7 @@ export default class Login extends DaintreeComponent {
       localStorage.getItem("cognitoIdentityPoolId") || "";
   }
 
-  loginWithCognito() {
+  loginWithCognito(): void {
     this.dismissAlertByKey("credentialsExpired");
 
     //We need to remember the identity pool for when we are redirected to Daintree

@@ -12,6 +12,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - New, cleaner, homepage
 - Prerender the new homepage to maximize performance
 
+## Fixed
+
+- Fix missing loading animation while logging in
+
 ## [0.8.0]
 
 ### Added

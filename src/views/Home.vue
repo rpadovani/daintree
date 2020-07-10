@@ -1,4 +1,4 @@
-<template>
+<template functional>
   <div class="container">
     <div class="row mt-5 text-center">
       <gl-empty-state

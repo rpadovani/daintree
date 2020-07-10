@@ -7,20 +7,9 @@
       netmask, and can be the same size as your VPC. An IPv6 CIDR block must be
       a /64 CIDR block.
     </gl-alert>
-    <gl-form-group
-      id="region-id"
-      label="Region"
-      label-size="sm"
-      description="To see other regions, enable them in the settings"
-      label-for="region-input"
-    >
-      <gl-form-select
-        id="region-input"
-        v-model="selectedRegion"
-        :options="this.$store.getters['sts/regions']"
-        @change="regionChanged"
-      />
-    </gl-form-group>
+
+    <RegionDropdown v-model="selectedRegion" />
+
     <gl-form-input-group
       class="mt-3"
       v-model="subnetName"
@@ -31,21 +20,11 @@
       </template>
     </gl-form-input-group>
 
-    <gl-form-group
-      id="vpc-id"
-      label="Vpc"
-      label-size="sm"
-      description="VPC to use for this subnet."
-      label-for="vpc-input"
-      class="mt-2"
-    >
-      <gl-form-select
-        id="vpc-input"
-        :disabled="selectedRegion === '' || isLoading"
-        v-model="selectedVpc"
-        :options="vpcsOptions"
-      />
-    </gl-form-group>
+    <VpcDropdown
+      v-model="selectedVpc"
+      :region="selectedRegion"
+      description="The VPC in which the subnet will be created."
+    />
 
     <gl-form-group
       id="az-id"
@@ -108,6 +87,8 @@ import {
 import { mixins } from "vue-class-component";
 import { Formatters } from "@/mixins/formatters";
 import { DaintreeComponent } from "@/mixins/DaintreeComponent";
+import RegionDropdown from "@/components/common/formComponents/RegionDropdown.vue";
+import VpcDropdown from "@/components/common/formComponents/VpcDropdown.vue";
 
 @Component({
   components: {
@@ -117,6 +98,8 @@ import { DaintreeComponent } from "@/mixins/DaintreeComponent";
     GlFormInputGroup,
     BInputGroupText,
     GlButton,
+    RegionDropdown,
+    VpcDropdown,
   },
 })
 export default class NewSubnet extends mixins(DaintreeComponent, Formatters) {
@@ -127,28 +110,11 @@ export default class NewSubnet extends mixins(DaintreeComponent, Formatters) {
   cidrBlock = "";
   subnetName = "";
 
-  vpcs: VpcList = [];
   az: AvailabilityZoneList = [];
   loadingCount = 0;
 
-  get canClick() {
+  get canClick(): boolean {
     return this.selectedRegion !== "" && this.selectedVpc !== "";
-  }
-
-  get vpcsOptions(): string[] {
-    const options: string[] = [];
-    this.vpcs.forEach((s) => {
-      let option = "";
-      if (s.VpcId) option += s.VpcId;
-      const name = this.extractNameFromTags(s.Tags || []);
-      if (name) option += ` - ${name}`;
-
-      const cidr = s.CidrBlock;
-      if (cidr) option += ` (${cidr})`;
-
-      options.push(option);
-    });
-    return options;
   }
 
   get azOptions(): string[] {
@@ -172,7 +138,7 @@ export default class NewSubnet extends mixins(DaintreeComponent, Formatters) {
   async createSubnet(): Promise<void> {
     const params: CreateSubnetRequest = {
       CidrBlock: this.cidrBlock,
-      VpcId: this.selectedVpc.split(" ")[0],
+      VpcId: this.selectedVpc,
     };
 
     if (this.selectedAz !== "No preference") {
@@ -200,31 +166,10 @@ export default class NewSubnet extends mixins(DaintreeComponent, Formatters) {
     }
   }
 
-  async getVpcsForCurrentRegion() {
-    this.hideErrors("getVpcs");
-    if (this.selectedRegion === "") {
-      this.vpcs = [];
-    } else {
-      this.incrementLoadingCount();
-      const client = await this.EC2();
-      client.describeVpcs(
-        { Filters: [{ Name: "state", Values: ["available"] }] },
-        (err, data) => {
-          this.decreaseLoadingCount();
-          if (err) {
-            this.showError(err.message, "getVpcs");
-          } else if (data.Vpcs) {
-            this.vpcs = data.Vpcs;
-          }
-        }
-      );
-    }
-  }
-
   async getAzForCurrentRegion() {
     this.hideErrors("getAz");
     if (this.selectedRegion === "") {
-      this.vpcs = [];
+      this.az = [];
     } else {
       this.incrementLoadingCount();
       const client = await this.EC2();
@@ -251,7 +196,6 @@ export default class NewSubnet extends mixins(DaintreeComponent, Formatters) {
   }
 
   regionChanged(): void {
-    this.getVpcsForCurrentRegion();
     this.getAzForCurrentRegion();
   }
 }

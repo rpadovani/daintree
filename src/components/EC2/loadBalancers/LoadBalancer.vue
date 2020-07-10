@@ -25,7 +25,7 @@
         </gl-badge>
       </div>
     </div>
-    <gl-tabs theme="blue">
+    <gl-tabs theme="blue" lazy>
       <gl-tab title="Overview">
         <DrawerCards :cards="cards" />
 
@@ -37,15 +37,15 @@
           provider="ELB"
         />
       </gl-tab>
-      <gl-tab title="Security" v-if="loadBalancer.Type === 'application'">
-        <h6>Associated security groups</h6>
-        <ul>
-          <li v-for="s in loadBalancer.SecurityGroups" :key="s">
-            <router-link :to="`/network/securityGroups?GroupId=${s}`">
-              {{ s }}
-            </router-link>
-          </li>
-        </ul>
+      <gl-tab
+        title="Security groups"
+        v-if="loadBalancer.Type === 'application'"
+      >
+        <RelatedSecurityGroups
+          :region="loadBalancer.region"
+          filter-name="group-id"
+          :filter-values="loadBalancer.SecurityGroups"
+        />
       </gl-tab>
       <gl-tab title="Listeners" @click="describeListeners">
         <gl-alert
@@ -146,9 +146,11 @@ import { BvModal } from "bootstrap-vue";
 import DrawerCards from "@/components/common/DrawerCards.vue";
 import { CardContent } from "@/components/common/cardContent";
 import { isString } from "@/utils/isString";
+import RelatedSecurityGroups from "@/components/network/securityGroups/RelatedSecurityGroups.vue";
 
 @Component({
   components: {
+    RelatedSecurityGroups,
     DrawerCards,
     GlBadge,
     GlTabs,

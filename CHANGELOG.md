@@ -6,6 +6,15 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## Added
+
+- Add support for VPC endpoints
+- Add security groups tab to the VPC page
+
+## Changed
+
+- Improved the security groups tab in the Load Balancer page
+
 ## [0.8.1]
 
 ### Changed

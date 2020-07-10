@@ -3,7 +3,7 @@ export interface CardContent {
   title: string;
 
   //The value to show. If undefined, the card will not appear, unless `showIfEmpty` is marked as true
-  value?: string | number | boolean;
+  value?: string | number | boolean | Date;
   showIfEmpty?: boolean;
 
   //Some explanation of the meaning of the content

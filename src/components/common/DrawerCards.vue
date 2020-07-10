@@ -54,6 +54,9 @@
           class="pb-2"
         />
       </span>
+      <span v-else-if="isDate(card.value)">
+        {{ card.value | standardDate }}
+      </span>
       <span v-else>
         {{ card.value }}
 
@@ -77,6 +80,7 @@ import RegionText from "./RegionText.vue";
 import { CardContent } from "@/components/common/cardContent";
 import StateText from "@/components/common/StateText.vue";
 import { mapGetters } from "vuex";
+import { DaintreeComponent } from "@/mixins/DaintreeComponent";
 @Component({
   components: {
     StateText,
@@ -96,7 +100,7 @@ import { mapGetters } from "vuex";
     }),
   },
 })
-export default class DrawerCards extends Vue {
+export default class DrawerCards extends DaintreeComponent {
   @Prop(Array) readonly cards!: CardContent[];
 
   accountId!: string | undefined;
@@ -109,6 +113,10 @@ export default class DrawerCards extends Vue {
         (card.linksTo && card.linksTo.length > 0) ||
         (card.azs && card.azs.length > 0)
     );
+  }
+
+  isDate(value: string | number | boolean | Date): boolean {
+    return value instanceof Date;
   }
 }
 </script>

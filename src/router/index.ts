@@ -75,6 +75,13 @@ const routes = [
       import(/* webpackChunkName: "main_menu" */ "@/components/MainMenu.vue"),
     meta: { title: "Main Menu", requiresLogin: true, hideRefresher: true },
   },
+  {
+    path: "/self_hosting",
+    name: "Self hosting",
+    meta: { title: "Self hosting", hideSubHeader: true },
+    component: () =>
+      import(/* webpackChunkName: "Self hosting" */ "@/views/SelfHosted.vue"),
+  },
   ...NetworkRoutes,
   ...EC2Routes,
   ...MessagesRoutes,

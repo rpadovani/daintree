@@ -19,3 +19,7 @@ Daintree does not aim to replace the original console, but would like to improve
 Thanks for being interested in contributing! Development happens over [Gitlab.com](https://gitlab.com/rpadovani/daintree), but feel free to report issues also over Github, if you prefer :-)
 
 Read [CONTRIBUTING.md](https://gitlab.com/rpadovani/daintree/-/blob/master/CONTRIBUTING.md) for more information!
+
+## Self hosting
+
+You can also self host Daintree! Since it's just a client, you only need a webserver and same storage. Full instructions are available on the [Daintree website](https://daintree.app/#/self_hosted).

@@ -12,6 +12,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Add support for network interfaces
 - Add security groups tab to the VPC page
 - Add network interfaces tab to subnet, security group, and VPC page
+- Add instructions for self hosting
 
 ## Changed
 

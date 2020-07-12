@@ -41,7 +41,10 @@
           <router-link to="/oauth_instructions"
             >OAuth and AWS Identity pools to login
           </router-link>
-          . Or you can download the source code and run it on your own website!
+          . Or you can download
+          <router-link to="/self_hosting"
+            >the source code and run it on your own website</router-link
+          >!
         </p>
 
         <p>

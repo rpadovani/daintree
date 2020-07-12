@@ -9,11 +9,14 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## Added
 
 - Add support for VPC endpoints
+- Add support for network interfaces
 - Add security groups tab to the VPC page
+- Add network interfaces tab to subnet, security group, and VPC page
 
 ## Changed
 
 - Improved the security groups tab in the Load Balancer page
+- Improved network tab for instance page
 
 ## [0.8.1]
 

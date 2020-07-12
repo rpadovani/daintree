@@ -61,6 +61,18 @@
           :filter-value="securityGroup.GroupId"
         />
       </gl-tab>
+
+      <gl-tab title="Network interfaces">
+        <gl-alert variant="tip" :dismissible="false">
+          List of network interfaces associated to this security group.
+        </gl-alert>
+
+        <RelatedNetworkInterfaces
+          :region="securityGroup.region"
+          filter-name="group-id"
+          :filter-values="[securityGroup.GroupId]"
+        />
+      </gl-tab>
     </gl-tabs>
   </div>
 </template>
@@ -91,6 +103,7 @@ import RelatedInstances from "@/components/EC2/instances/RelatedInstances.vue";
 import { CardContent } from "@/components/common/cardContent";
 import { DaintreeComponent } from "@/mixins/DaintreeComponent";
 import DrawerCards from "@/components/common/DrawerCards.vue";
+import RelatedNetworkInterfaces from "@/components/network/networkInterfaces/RelatedNetworkInterfaces.vue";
 
 @Component({
   components: {
@@ -110,6 +123,7 @@ import DrawerCards from "@/components/common/DrawerCards.vue";
     GlButtonGroup,
     SubnetTab,
     DrawerCards,
+    RelatedNetworkInterfaces,
   },
   directives: { "gl-modal-directive": GlModalDirective },
 })

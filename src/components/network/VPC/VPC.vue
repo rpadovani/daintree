@@ -124,6 +124,10 @@
     </gl-tab>
 
     <gl-tab title="Security groups">
+      <gl-alert variant="tip" :dismissible="false">
+        List of security groups created in this VPC.
+      </gl-alert>
+
       <RelatedSecurityGroups
         :region="vpc.region"
         filter-key="vpc-id"
@@ -133,13 +137,25 @@
 
     <gl-tab title="EC2 Instances">
       <gl-alert variant="tip" :dismissible="false">
-        A list of EC2 instances that have been deployed on this VPC.
+        List of EC2 instances that have been deployed on this VPC.
       </gl-alert>
 
       <RelatedInstances
         :region="vpc.region"
         filter-key="vpc-id"
         :filter-value="vpc.VpcId"
+      />
+    </gl-tab>
+
+    <gl-tab title="Network interfaces">
+      <gl-alert variant="tip" :dismissible="false">
+        List of network interfaces belonging to this VPC.
+      </gl-alert>
+
+      <RelatedNetworkInterfaces
+        :region="vpc.region"
+        filter-name="vpc-id"
+        :filter-values="[vpc.VpcId]"
       />
     </gl-tab>
 
@@ -182,9 +198,11 @@ import RelatedRoutesTable from "@/components/network/routeTables/RelatedRoutesTa
 import { CardContent } from "@/components/common/cardContent";
 import DrawerCards from "@/components/common/DrawerCards.vue";
 import RelatedSecurityGroups from "@/components/network/securityGroups/RelatedSecurityGroups.vue";
+import RelatedNetworkInterfaces from "@/components/network/networkInterfaces/RelatedNetworkInterfaces.vue";
 
 @Component({
   components: {
+    RelatedNetworkInterfaces,
     RelatedSecurityGroups,
     RelatedRoutesTable,
     TagsTable,

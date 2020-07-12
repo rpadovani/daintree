@@ -28,42 +28,11 @@
         <DrawerCards :cards="networkCards" />
 
         <h5 class="mt-2">Network interfaces</h5>
-        <gl-tabs theme="blue">
-          <gl-tab
-            v-for="eni in instance.NetworkInterfaces"
-            :key="eni.NetworkInterfaceId"
-            :title="eni.NetworkInterfaceId"
-          >
-            <div class="row justify-content-around">
-              <ul class="col-5">
-                <li>VPC: {{ eni.VpcId }}</li>
-                <li>SubnetID: {{ eni.SubnetId }}</li>
-                <li>Status: {{ eni.Status }}</li>
-                <li>Mac Address: {{ eni.MacAddress }}</li>
-                <li>Description: {{ eni.Description }}</li>
-                <li>
-                  IPv6:
-                  {{
-                    eni.Ipv6Addresses.map((i) => i.Ipv6Address).join(", ") ||
-                    "N/A"
-                  }}
-                </li>
-              </ul>
-
-              <div class="col-5">
-                <h6>Associated security groups</h6>
-                <ul>
-                  <li v-for="s in eni.Groups" :key="s.GroupId">
-                    <router-link
-                      :to="`/network/securityGroups?GroupId=${s.GroupId}`"
-                      >{{ s.GroupId }} {{ s.GroupName }}
-                    </router-link>
-                  </li>
-                </ul>
-              </div>
-            </div>
-          </gl-tab>
-        </gl-tabs>
+        <RelatedNetworkInterfaces
+          :region="instance.region"
+          filter-name="network-interface-id"
+          :filter-values="networkInterfacesId"
+        />
       </gl-tab>
       <gl-tab title="Security">
         <h6>Associated security groups</h6>
@@ -273,6 +242,8 @@ import RelatedRoutesTable from "@/components/network/routeTables/RelatedRoutesTa
 import { CardContent } from "@/components/common/cardContent";
 import { DaintreeComponent } from "@/mixins/DaintreeComponent";
 import DrawerCards from "@/components/common/DrawerCards.vue";
+import RelatedNetworkInterfaces from "@/components/network/networkInterfaces/RelatedNetworkInterfaces.vue";
+import { isString } from "@/utils/isString";
 
 @Component({
   components: {
@@ -286,6 +257,7 @@ import DrawerCards from "@/components/common/DrawerCards.vue";
     RegionText,
     CloudwatchWidget,
     TagsTable,
+    RelatedNetworkInterfaces,
   },
 })
 export default class Instance extends DaintreeComponent {
@@ -312,6 +284,16 @@ export default class Instance extends DaintreeComponent {
       label: "Volume ID",
     },
   ];
+
+  get networkInterfacesId(): string[] {
+    if (!this.instance.NetworkInterfaces) {
+      return [];
+    }
+
+    return this.instance.NetworkInterfaces.map(
+      (n) => n.NetworkInterfaceId
+    ).filter(isString);
+  }
 
   get overviewCards(): CardContent[] {
     return [

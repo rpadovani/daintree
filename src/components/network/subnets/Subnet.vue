@@ -91,6 +91,18 @@
       />
     </gl-tab>
 
+    <gl-tab title="Network interfaces">
+      <gl-alert variant="tip" :dismissible="false">
+        List of network interfaces belonging to this subnet.
+      </gl-alert>
+
+      <RelatedNetworkInterfaces
+        :region="subnet.region"
+        filter-name="subnet-id"
+        :filter-values="[subnet.SubnetId]"
+      />
+    </gl-tab>
+
     <gl-tab title="Flow logs">
       <FlowLogsTab :region="subnet.region" :resource-id="subnet.SubnetId" />
     </gl-tab>
@@ -126,6 +138,7 @@ import RelatedInstances from "@/components/EC2/instances/RelatedInstances.vue";
 import RelatedRoutesTable from "@/components/network/routeTables/RelatedRoutesTable.vue";
 import { CardContent } from "@/components/common/cardContent";
 import DrawerCards from "@/components/common/DrawerCards.vue";
+import RelatedNetworkInterfaces from "@/components/network/networkInterfaces/RelatedNetworkInterfaces.vue";
 
 @Component({
   components: {
@@ -145,6 +158,7 @@ import DrawerCards from "@/components/common/DrawerCards.vue";
     StateText,
     RelatedInstances,
     DrawerCards,
+    RelatedNetworkInterfaces,
   },
   directives: { "gl-modal-directive": GlModalDirective },
 })

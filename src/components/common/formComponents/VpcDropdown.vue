@@ -36,8 +36,8 @@ import { Formatters } from "@/mixins/formatters";
 export default class VpcDropdown extends mixins(DaintreeComponent, Formatters) {
   @Model("change", { type: String }) readonly vpc!: boolean;
   @Prop({ default: "VPC:" }) readonly label!: string;
-  @Prop(String) readonly region = "";
-  @Prop(String) readonly description = "";
+  @Prop({ default: "" }) readonly region!: string;
+  @Prop({ default: "" }) readonly description!: string;
 
   private vpcValue = "";
   private vpcs: VpcList = [];

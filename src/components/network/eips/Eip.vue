@@ -219,6 +219,7 @@ export default class Eip extends mixins(Formatters, DaintreeComponent) {
         title: "Network Interface ID",
         value: this.updatedEip.NetworkInterfaceId,
         helpText: "The ID of the network interface.",
+        linkTo: `/network/interfaces?interfaceId=${this.updatedEip.NetworkInterfaceId}`,
       },
       {
         title: "Instance ID",

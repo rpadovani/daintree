@@ -66,6 +66,13 @@ export default class NetworkMain extends Vue {
       subLabel: "Connect VPCs to AWS services",
       iconUrl: "/assets/aws-icons/network/Amazon-VPC_Endpoints_light-bg.svg",
     },
+    {
+      target: "network/interfaces",
+      label: "Network interfaces",
+      subLabel: "Virtual network card",
+      iconUrl:
+        "/assets/aws-icons/network/Amazon-VPC_Elastic-Network-Interface_light-bg.svg",
+    },
   ];
 }
 </script>

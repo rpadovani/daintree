@@ -1,13 +1,16 @@
 <template>
   <div>
     <gl-drawer
-      :open="drawerOpened && selectedResourceKey !== {}"
+      :open="drawerOpened && selectedResourceKey !== ''"
       @close="close"
       style="min-width: 80%;"
     >
       <template #header>{{ selectedResourceTitle }}</template>
 
-      <Eip :eip="selectedResource" v-on:deleted="close" />
+      <NetworkInterface
+        :networkInterface="selectedResource"
+        v-on:deleted="close"
+      />
     </gl-drawer>
 
     <div class="container-fluid">
@@ -27,8 +30,8 @@
           category="secondary"
           variant="success"
           class="col-12 col-sm-3 col-lg-2"
-          to="/network/eips/new"
-          >Allocate new
+          to="/network/interfaces/new"
+          >New network interface
         </gl-button>
       </div>
       <gl-table
@@ -54,15 +57,16 @@
             compact
           />
         </template>
-
-        <template v-slot:cell(networkinterfaceid)="data">
-          <gl-link :to="`/network/interfaces?NetworkInterfaceId=${data.value}`">
+        <template v-slot:cell(vpcid)="data">
+          <gl-link :to="`/network/vpcs?vpcId=${data.value}`">
             {{ data.value }}
           </gl-link>
         </template>
-
-        <template v-slot:cell(region)="data">
-          <RegionText :region="data.value" />
+        <template v-slot:cell(status)="data">
+          <StateText :state="data.value" />
+        </template>
+        <template v-slot:cell(availabilityzone)="data">
+          <RegionText :region="data.value" is-az />
         </template>
       </gl-table>
 
@@ -74,15 +78,18 @@
 
         <gl-empty-state
           class="mt-5"
-          v-else-if="!isLoading && resourcesAsList.length === 0"
-          title="No Elastic IP found in the selected regions!"
+          v-if="!isLoading && resourcesAsList.length === 0"
+          title="No network interfaces found in the selected regions!"
           svg-path="/assets/undraw_empty_xct9.svg"
           :description="emptyStateDescription"
           compact
         >
           <template #actions>
-            <gl-button icon="plus" variant="success" to="/network/eips/new"
-              >Allocate new Elastic IP
+            <gl-button
+              icon="plus"
+              variant="success"
+              to="/network/interfaces/new"
+              >New network interface
             </gl-button>
             <gl-button
               category="secondary"
@@ -99,86 +106,108 @@
 </template>
 
 <script lang="ts">
-import { Address, DescribeAddressesRequest } from "aws-sdk/clients/ec2";
-import Eip from "./Eip.vue";
+import {
+  NetworkInterface as AWSNetworkInterface,
+  NetworkInterfaceList as AWSNetworkInterfaceList,
+} from "aws-sdk/clients/ec2";
+
 import RegionText from "@/components/common/RegionText.vue";
 import {
   GlButton,
   GlDrawer,
   GlEmptyState,
   GlFormInput,
+  GlIcon,
   GlModalDirective,
   GlSkeletonLoading,
   GlTable,
   GlLink,
+  GlTooltipDirective,
 } from "@gitlab/ui";
-import { Component } from "vue-property-decorator";
+import Component from "vue-class-component";
 import StateText from "@/components/common/StateText.vue";
 import { NetworkComponent } from "@/components/network/networkComponent";
+import NetworkInterface from "./NetworkInterface.vue";
+import { DescribeNetworkInterfacesRequest } from "aws-sdk/clients/ec2";
 
 @Component({
   components: {
     StateText,
     GlTable,
     RegionText,
+    GlIcon,
     GlDrawer,
     GlButton,
     GlFormInput,
-    Eip,
     GlSkeletonLoading,
     GlEmptyState,
     GlLink,
+    NetworkInterface,
   },
   directives: {
     "gl-modal-directive": GlModalDirective,
+    "gl-tooltip": GlTooltipDirective,
   },
 })
-export default class EipList extends NetworkComponent<Address, "AllocationId"> {
-  resourceName = "elastic IP";
-  canCreate = true;
-  resourceUniqueKey: "AllocationId" = "AllocationId";
+export default class NetworkInterfaceList extends NetworkComponent<
+  AWSNetworkInterface,
+  "NetworkInterfaceId" | "Status"
+> {
+  readonly resourceName = "network interface";
+  readonly canCreate = true;
+  readonly resourceUniqueKey: "NetworkInterfaceId" = "NetworkInterfaceId";
+  readonly resourceStateKey: "Status" = "Status";
+  readonly workingStates = ["attaching", "detaching"];
 
-  fields = [
+  readonly fields = [
     {
-      key: "Tags",
+      key: "TagSet",
       label: "Name",
-      sortable: true,
+      sortByFormatter: true,
       formatter: this.extractNameFromTags,
     },
-    { key: "AllocationId", sortable: true },
-    { key: "PublicIp", sortable: true },
+    {
+      key: "NetworkInterfaceId",
+      label: "Interface Id",
+      sortable: true,
+    },
     { key: "PrivateIpAddress", sortable: true },
-    { key: "region", sortable: true },
-    { key: "NetworkInterfaceId", sortable: true },
-    { key: "InstanceId", sortable: true },
-    { key: "AssociationId", sortable: true },
+    {
+      key: "InterfaceType",
+      sortable: true,
+    },
+    {
+      key: "VpcId",
+      sortable: true,
+    },
+    { key: "Status" },
+    { key: "AvailabilityZone", sortable: true },
   ];
 
   async getResourcesForRegion(
     region: string,
-    filterByEipsId?: string[]
-  ): Promise<Address[]> {
+    filterByNetworkInterfacesId?: string[]
+  ): Promise<AWSNetworkInterfaceList> {
     const EC2 = await this.client(region);
     if (!EC2) {
       return [];
     }
 
-    const params: DescribeAddressesRequest = {};
-    if (filterByEipsId) {
+    const params: DescribeNetworkInterfacesRequest = {};
+    if (filterByNetworkInterfacesId) {
       params.Filters = [
         {
-          Name: "allocation-id",
-          Values: filterByEipsId,
+          Name: "network-interface-id",
+          Values: filterByNetworkInterfacesId,
         },
       ];
     }
 
-    const data = await EC2.describeAddresses(params).promise();
-    if (data.Addresses === undefined) {
+    const data = await EC2.describeNetworkInterfaces(params).promise();
+    if (data.NetworkInterfaces === undefined) {
       return [];
     }
-
-    return data.Addresses;
+    return data.NetworkInterfaces;
   }
 }
 </script>

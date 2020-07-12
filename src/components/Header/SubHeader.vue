@@ -178,6 +178,7 @@ export default class SubHeader extends DaintreeComponent {
       { name: "Security Groups", link: "#/network/securityGroups" },
       { name: "Peering connections", link: "#/network/peeringConnections" },
       { name: "Endpoints", link: "#/network/endpoints" },
+      { name: "Network interfaces", link: "#/network/interfaces" },
     ],
     EC2: [
       { name: "Instances", link: "#/ec2/instances" },

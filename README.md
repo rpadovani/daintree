@@ -3,7 +3,7 @@
 ### An opensource alternative implementation of the Amazon Web Services' console. 
 
 Daintree is a website to manage some of your AWS resources: since this is an early preview, at the moment, it supports 
-a subset of **Networking**, **SQS**, and **SNS**. We are working on extending support to other resources!
+a subset of **Networking**, **SQS**, **SNS**, **EC2**, and **ECS**. We are working on extending support to other resources!
 
 Daintree does not aim to replace the original console, but would like to improve the user experience offering:
 

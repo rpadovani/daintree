@@ -41,7 +41,7 @@
     "eslint-plugin-vue": "6.2.2",
     "prerender-spa-plugin": "3.4.0",
     "prettier": "2.0.5",
-    "typescript": "3.9.6",
+    "typescript": "3.9.7",
     "vue-template-compiler": "2.6.11"
   },
   "license": "AGPLv3",

@@ -38,9 +38,7 @@
       </gl-table>
 
       <h5>Tags</h5>
-      <!--I use key to force a rerender, I should study Vue reactivity better ¯\_(ツ)_/¯ -->
       <TagsTable
-        :key="vpc.VpcId"
         :tags="vpc.Tags"
         :region="vpc.region"
         :resource-id="vpc.VpcId"

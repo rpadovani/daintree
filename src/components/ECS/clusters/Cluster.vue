@@ -14,7 +14,6 @@
           provider="ECS"
           :resource-id="updatedCluster.clusterArn"
           :region="updatedCluster.region"
-          :key="updatedCluster.clusterArn"
         />
       </gl-tab>
       <gl-tab title="Capacity provider strategy">

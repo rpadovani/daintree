@@ -7,16 +7,14 @@
       >{{ alertMessage }}
     </gl-alert>
 
-    <gl-empty-state
-      class="mt-5"
-      v-if="tagList.length < 1"
-      title="No tags found associated to this resource!"
-      svg-path="/assets/undraw_void_3ggu.svg"
-      description="You can always create a new tag right now, with the form just below."
-      compact
-    />
-
-    <gl-table v-if="tagList.length > 0" :items="tagList" :fields="fields" fixed>
+    <gl-table
+      :items="tagList"
+      :fields="fields"
+      fixed
+      hover
+      show-empty
+      :busy="tagsState === 'loading'"
+    >
       <template v-slot:cell(key)="data">
         <div class="row">
           <gl-icon
@@ -69,6 +67,20 @@
           </span>
         </div>
       </template>
+
+      <template v-slot:table-busy>
+        <gl-skeleton-loading />
+      </template>
+
+      <template v-slot:empty="">
+        <gl-empty-state
+          class="mt-5"
+          title="No tags found associated to this resource!"
+          svg-path="/assets/undraw_void_3ggu.svg"
+          description="You can always create a new tag right now, with the form just below."
+          compact
+        />
+      </template>
     </gl-table>
 
     <div class="row justify-content-between mt-3 pl-3 pr-2">
@@ -100,7 +112,7 @@
 </template>
 
 <script lang="ts">
-import { Component, Prop } from "vue-property-decorator";
+import { Component, Prop, Watch } from "vue-property-decorator";
 import { TagList, Tag } from "aws-sdk/clients/ec2";
 import ECS from "aws-sdk/clients/ecs";
 import {
@@ -110,6 +122,7 @@ import {
   GlAlert,
   GlButton,
   GlEmptyState,
+  GlSkeletonLoading,
 } from "@gitlab/ui";
 import EC2Client from "aws-sdk/clients/ec2";
 import SNSClient from "aws-sdk/clients/sns";
@@ -132,6 +145,7 @@ interface TagWithMetadata extends Tag {
     GlAlert,
     GlButton,
     GlEmptyState,
+    GlSkeletonLoading,
   },
 })
 export default class TagsTable extends DaintreeComponent {
@@ -146,10 +160,12 @@ export default class TagsTable extends DaintreeComponent {
     | "ECS"
     | undefined;
 
-  fields = [
+  readonly fields = [
     { key: "Key", sortable: true },
     { key: "Value", sortable: true },
   ];
+
+  tagsState: "loading" | "loaded" | "empty" | "error" = "loaded";
 
   alertMessage = "";
   alertVariant: string | undefined;
@@ -207,6 +223,8 @@ export default class TagsTable extends DaintreeComponent {
 
   async reloadAllTags(): Promise<void> {
     const client = await this.client();
+    this.tagsState = "loading";
+
     try {
       if (client instanceof EC2Client) {
         const params = {
@@ -256,8 +274,12 @@ export default class TagsTable extends DaintreeComponent {
         });
         this.incomingTags = newTags;
       }
+
+      this.tagsState = "loaded";
     } catch (err) {
       await this.showErrorIfAny(err, false);
+
+      this.tagsState = "error";
     }
   }
 
@@ -269,6 +291,7 @@ export default class TagsTable extends DaintreeComponent {
 
   async createNewTag(): Promise<void> {
     try {
+      this.tagsState = "loading";
       const tag = { Key: this.newTagKey, Value: this.newTagValue };
       const client = await this.client();
 
@@ -300,7 +323,9 @@ export default class TagsTable extends DaintreeComponent {
       }
 
       this.newTagCreated(tag);
+      this.tagsState = "loaded";
     } catch (err) {
+      this.tagsState = "error";
       await this.showErrorIfAny(err, true);
     }
   }
@@ -424,6 +449,15 @@ export default class TagsTable extends DaintreeComponent {
     this.incomingTags = this.incomingTags?.filter(
       (tag) => tag.Key !== originalKey
     );
+  }
+
+  @Watch("resourceId")
+  onResourceIdChanged(): void {
+    this.incomingTags = Object.assign([], this.tags);
+
+    if (this.provider && ["SQS", "SNS", "ELB", "ECS"].includes(this.provider)) {
+      this.reloadAllTags();
+    }
   }
 
   mounted(): void {

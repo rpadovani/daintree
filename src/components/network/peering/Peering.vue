@@ -31,9 +31,7 @@
       <DrawerCards :cards="cards" />
 
       <h5>Tags</h5>
-      <!--I use key to force a rerender, I should study Vue reactivity better ¯\_(ツ)_/¯ -->
       <TagsTable
-        :key="peering.VpcPeeringConnectionId"
         :tags="peering.Tags"
         :region="peering.region"
         :resource-id="peering.VpcPeeringConnectionId"

@@ -69,7 +69,6 @@
 
     <h5 class="mt-3">Tags</h5>
     <TagsTable
-      :key="igw.InternetGatewayId"
       :tags="igw.Tags"
       :region="igw.region"
       :resource-id="igw.InternetGatewayId"

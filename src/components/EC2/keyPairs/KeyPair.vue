@@ -34,9 +34,7 @@
     />
 
     <h5 class="mt-3">Tags</h5>
-    <!--I use key to force a rerender, I should study Vue reactivity better ¯\_(ツ)_/¯ -->
     <TagsTable
-      :key="keyPair.KeyPairId"
       :tags="keyPair.Tags"
       :region="keyPair.region"
       :resource-id="keyPair.KeyPairId"

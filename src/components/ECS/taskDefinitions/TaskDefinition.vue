@@ -10,7 +10,6 @@
 
         <TagsTable
           v-if="taskDefinition.status === 'ACTIVE'"
-          :key="taskDefinition.taskDefinitionArn"
           :tags="tags"
           :region="region"
           :resource-id="taskDefinition.taskDefinitionArn"

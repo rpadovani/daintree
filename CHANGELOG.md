@@ -6,9 +6,13 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Changed
+
+- Improve tags table performance, and add loading indicator
+
 ## [0.9.0]
 
-## Added
+### Added
 
 - Add support for VPC endpoints
 - Add support for network interfaces
@@ -16,7 +20,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Add network interfaces tab to subnet, security group, and VPC page
 - Add instructions for self hosting
 
-## Changed
+### Changed
 
 - Improved the security groups tab in the Load Balancer page
 - Improved network tab for instance page
@@ -29,7 +33,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - New, cleaner, homepage
 - Prerender the new homepage to maximize performance
 
-## Fixed
+### Fixed
 
 - Fix missing loading animation while logging in
 

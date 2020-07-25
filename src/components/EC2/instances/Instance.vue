@@ -16,9 +16,7 @@
         <DrawerCards :cards="overviewCards" />
 
         <h5 class="mt-2">Tags</h5>
-        <!--I use key to force a rerender, I should study Vue reactivity better ¯\_(ツ)_/¯ -->
         <TagsTable
-          :key="instance.InstanceId"
           :tags="instance.Tags"
           :region="instance.region"
           :resource-id="instance.InstanceId"

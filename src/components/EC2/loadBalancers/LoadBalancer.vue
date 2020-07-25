@@ -31,7 +31,6 @@
 
         <h5 class="mt-2">Tags</h5>
         <TagsTable
-          :key="loadBalancer.LoadBalancerArn"
           :region="loadBalancer.region"
           :resource-id="loadBalancer.LoadBalancerArn"
           provider="ELB"

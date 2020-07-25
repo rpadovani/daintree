@@ -45,9 +45,7 @@
         <DrawerCards :cards="cards" />
 
         <h5 class="mt-2">Tags</h5>
-        <!--I use key to force a rerender, I should study Vue reactivity better ¯\_(ツ)_/¯ -->
         <TagsTable
-          :key="updatedRouteTable.RouteTableId"
           :tags="updatedRouteTable.Tags"
           :region="updatedRouteTable.region"
           :resource-id="updatedRouteTable.RouteTableId"

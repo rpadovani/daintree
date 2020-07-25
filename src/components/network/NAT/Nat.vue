@@ -30,7 +30,6 @@
 
       <h5 class="mt-3">Tags</h5>
       <TagsTable
-        :key="nat.NatGatewayId"
         :tags="nat.Tags"
         :region="nat.region"
         :resource-id="nat.NatGatewayId"

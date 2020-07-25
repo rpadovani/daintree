@@ -6,7 +6,6 @@
 
         <h5 class="mt-2">Tags</h5>
         <TagsTable
-          :key="targetGroup.TargetGroupArn"
           :region="targetGroup.region"
           :resource-id="targetGroup.TargetGroupArn"
           provider="ELB"

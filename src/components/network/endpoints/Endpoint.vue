@@ -32,9 +32,7 @@
       <DrawerCards :cards="cards" />
 
       <h5>Tags</h5>
-      <!--I use key to force a rerender, I should study Vue reactivity better ¯\_(ツ)_/¯ -->
       <TagsTable
-        :key="endpoint.VpcEndpointId"
         :tags="endpoint.Tags"
         :region="endpoint.region"
         :resource-id="endpoint.VpcEndpointId"

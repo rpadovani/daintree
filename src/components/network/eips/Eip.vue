@@ -116,7 +116,6 @@
 
     <h5 class="mt-3">Tags</h5>
     <TagsTable
-      :key="updatedEip.AllocationId"
       :tags="updatedEip.Tags"
       :region="updatedEip.region"
       :resource-id="updatedEip.AllocationId"

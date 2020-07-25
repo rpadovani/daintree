@@ -45,9 +45,7 @@
       <DrawerCards :cards="cards" />
 
       <h5 class="mt-2">Tags</h5>
-      <!--I use key to force a rerender, I should study Vue reactivity better ¯\_(ツ)_/¯ -->
       <TagsTable
-        :key="sqs.QueueArn"
         :region="sqs.region"
         :resource-id="sqs.queueUrl"
         provider="SQS"

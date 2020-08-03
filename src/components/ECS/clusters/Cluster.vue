@@ -43,6 +43,58 @@
         />
       </gl-tab>
 
+      <gl-tab title="Monitoring">
+        <div class="row justify-content-between">
+          <CloudwatchWidget
+            class="col-12 col-md-6 col-lg-4"
+            :metrics="metricsCpuUtilization"
+            :live-data="false"
+            stat="Average"
+            :region="cluster.region"
+            :key="cluster.clusterName + 'cpuUtilization'"
+            :legend="{ position: 'hidden' }"
+            graph-title="CPU utilization"
+            :label="cluster.clusterName"
+          />
+
+          <CloudwatchWidget
+            class="col-12 col-md-6 col-lg-4"
+            :metrics="metricsMemoryUtilization"
+            :live-data="false"
+            stat="Average"
+            :region="cluster.region"
+            :key="cluster.clusterName + 'memoryUtilization'"
+            :legend="{ position: 'hidden' }"
+            graph-title="Memory utilization"
+            :label="cluster.clusterName"
+          />
+
+          <CloudwatchWidget
+            class="col-12 col-md-6 col-lg-4"
+            :metrics="metricsCpuReservation"
+            :live-data="false"
+            stat="Average"
+            :region="cluster.region"
+            :key="cluster.clusterName + 'cpuReservation'"
+            :legend="{ position: 'hidden' }"
+            graph-title="CPU reservation"
+            :label="cluster.clusterName"
+          />
+
+          <CloudwatchWidget
+            class="col-12 col-md-6 col-lg-4"
+            :metrics="metricsMemoryReservation"
+            :live-data="false"
+            stat="Average"
+            :region="cluster.region"
+            :key="cluster.clusterName + 'memoryReservation'"
+            :legend="{ position: 'hidden' }"
+            graph-title="Memory reservation"
+            :label="cluster.clusterName"
+          />
+        </div>
+      </gl-tab>
+
       <gl-tab title="Settings">
         <DrawerCards :cards="settingCards" />
       </gl-tab>
@@ -62,6 +114,8 @@ import { GlTabs, GlTab, GlTable, GlAlert } from "@gitlab/ui";
 import { CardContent } from "@/components/common/cardContent";
 import DrawerCards from "@/components/common/DrawerCards.vue";
 import TagsTable from "@/components/common/TagsTable.vue";
+import CloudwatchWidget from "@/components/cloudwatch/CloudwatchWidget.vue";
+import { Metric } from "aws-sdk/clients/cloudwatch";
 
 @Component({
   components: {
@@ -71,6 +125,7 @@ import TagsTable from "@/components/common/TagsTable.vue";
     GlTab,
     GlTable,
     GlAlert,
+    CloudwatchWidget,
   },
 })
 export default class Cluster extends DaintreeComponent {
@@ -168,6 +223,54 @@ export default class Cluster extends DaintreeComponent {
         helpText:
           "The status of the capacity providers associated with the cluster.",
         isState: true,
+      },
+    ];
+  }
+
+  get metricsCpuUtilization(): Metric[] {
+    return [
+      {
+        Namespace: "AWS/ECS",
+        MetricName: "CPUUtilization",
+        Dimensions: [
+          { Name: "ClusterName", Value: this.cluster.clusterName || "" },
+        ],
+      },
+    ];
+  }
+
+  get metricsMemoryUtilization(): Metric[] {
+    return [
+      {
+        Namespace: "AWS/ECS",
+        MetricName: "MemoryUtilization",
+        Dimensions: [
+          { Name: "ClusterName", Value: this.cluster.clusterName || "" },
+        ],
+      },
+    ];
+  }
+
+  get metricsCpuReservation(): Metric[] {
+    return [
+      {
+        Namespace: "AWS/ECS",
+        MetricName: "CPUReservation",
+        Dimensions: [
+          { Name: "ClusterName", Value: this.cluster.clusterName || "" },
+        ],
+      },
+    ];
+  }
+
+  get metricsMemoryReservation(): Metric[] {
+    return [
+      {
+        Namespace: "AWS/ECS",
+        MetricName: "MemoryReservation",
+        Dimensions: [
+          { Name: "ClusterName", Value: this.cluster.clusterName || "" },
+        ],
       },
     ];
   }

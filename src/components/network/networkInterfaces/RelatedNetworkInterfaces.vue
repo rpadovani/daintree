@@ -43,6 +43,7 @@ import { GlTable, GlSkeletonLoading, GlAlert, GlLink } from "@gitlab/ui";
 import { Formatters } from "@/mixins/formatters";
 import { mixins } from "vue-class-component";
 import StateText from "@/components/common/StateText.vue";
+import { extractNameFromEC2Tags } from "@/components/common/tags";
 
 @Component({
   components: {
@@ -69,7 +70,7 @@ export default class RelatedNetworkInterfaces extends mixins(
       key: "TagSet",
       label: "Name",
       sortByFormatter: true,
-      formatter: this.extractNameFromTags,
+      formatter: extractNameFromEC2Tags,
     },
     {
       key: "NetworkInterfaceId",

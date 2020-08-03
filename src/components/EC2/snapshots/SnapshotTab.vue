@@ -73,6 +73,7 @@ import StateText from "@/components/common/StateText.vue";
 import { DaintreeComponent } from "@/mixins/DaintreeComponent";
 import { Prop, Watch } from "vue-property-decorator";
 import { Formatters } from "@/mixins/formatters";
+import { extractNameFromEC2Tags } from "@/components/common/tags";
 
 @Component({
   components: {
@@ -109,7 +110,7 @@ export default class SnapshotsTab extends mixins(
       key: "Tags",
       label: "Name",
       sortable: true,
-      formatter: this.extractNameFromTags,
+      formatter: extractNameFromEC2Tags,
     },
     { key: "SnapshotId", sortable: true },
     "State",

@@ -73,6 +73,11 @@ export default class NetworkMain extends Vue {
       iconUrl:
         "/assets/aws-icons/network/Amazon-VPC_Elastic-Network-Interface_light-bg.svg",
     },
+    {
+      target: "network/dhcp",
+      label: "DHCP options sets",
+      subLabel: "Dynamic Host Configuration",
+    },
   ];
 }
 </script>

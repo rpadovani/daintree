@@ -22,7 +22,6 @@
             @click="() => (data.item.editing = !data.item.editing)"
           />
           <gl-form-input
-            size="sm"
             class="col-9 ml-2 mt-n2 mb-n2 pl-2"
             v-if="data.item.editing"
             v-model="data.item.Key"
@@ -36,7 +35,6 @@
       <template v-slot:cell(value)="data">
         <div class="row">
           <gl-form-input
-            size="sm"
             class="col-9 ml-2 mt-n2 mb-n2 pl-2"
             v-if="data.item.editing"
             v-model="data.item.Value"
@@ -86,14 +84,12 @@
     <div class="row justify-content-between mt-3 pl-3 pr-2">
       <gl-form-input
         id="key-input"
-        size="sm"
         class="col-5"
         placeholder="Key"
         v-model="newTagKey"
       />
       <gl-form-input
         id="value-input"
-        size="sm"
         class="col-5"
         placeholder="Value"
         v-model="newTagValue"

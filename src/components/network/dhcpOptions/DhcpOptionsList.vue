@@ -7,7 +7,7 @@
     >
       <template #header>{{ selectedResourceTitle }}</template>
 
-      <Endpoint :endpoint="selectedResource" v-on:deleted="close" />
+      <DhcpOptions :dhcpOptions="selectedResource" v-on:deleted="close" />
     </gl-drawer>
 
     <div class="container-fluid">
@@ -27,8 +27,8 @@
           category="secondary"
           variant="success"
           class="col-12 col-sm-3 col-lg-2"
-          to="/network/endpoints/new"
-          >New endpoint
+          to="/network/dhcp/new"
+          >New DHCP options set
         </gl-button>
       </div>
       <gl-table
@@ -54,14 +54,6 @@
             compact
           />
         </template>
-        <template v-slot:cell(vpcid)="data">
-          <gl-link :to="`/network/vpcs?vpcId=${data.value}`">
-            {{ data.value }}
-          </gl-link>
-        </template>
-        <template v-slot:cell(state)="data">
-          <StateText :state="data.value" />
-        </template>
         <template v-slot:cell(region)="data">
           <RegionText :region="data.value" />
         </template>
@@ -76,14 +68,17 @@
         <gl-empty-state
           class="mt-5"
           v-if="!isLoading && resourcesAsList.length === 0"
-          title="No endpoints found in the selected regions!"
+          title="No network interfaces found in the selected regions!"
           svg-path="/assets/undraw_empty_xct9.svg"
           :description="emptyStateDescription"
           compact
         >
           <template #actions>
-            <gl-button icon="plus" variant="success" to="/network/endpoints/new"
-              >New endpoint
+            <gl-button
+              icon="plus"
+              variant="success"
+              to="/network/interfaces/new"
+              >New network interface
             </gl-button>
             <gl-button
               category="secondary"
@@ -101,9 +96,8 @@
 
 <script lang="ts">
 import {
-  DescribeVpcEndpointsRequest,
-  VpcEndpoint,
-  VpcEndpointSet,
+  DhcpOptions as AWSDhcpOptions,
+  DhcpOptionsList as AWSDhcpOptionsList,
 } from "aws-sdk/clients/ec2";
 
 import RegionText from "@/components/common/RegionText.vue";
@@ -122,7 +116,8 @@ import {
 import Component from "vue-class-component";
 import StateText from "@/components/common/StateText.vue";
 import { NetworkComponent } from "@/components/network/networkComponent";
-import Endpoint from "./Endpoint.vue";
+import DhcpOptions from "./DhcpOptions.vue";
+import { DescribeDhcpOptionsRequest } from "aws-sdk/clients/ec2";
 import { extractNameFromEC2Tags } from "@/components/common/tags";
 
 @Component({
@@ -137,68 +132,64 @@ import { extractNameFromEC2Tags } from "@/components/common/tags";
     GlSkeletonLoading,
     GlEmptyState,
     GlLink,
-    Endpoint,
+    DhcpOptions,
   },
   directives: {
     "gl-modal-directive": GlModalDirective,
     "gl-tooltip": GlTooltipDirective,
   },
 })
-export default class EndpointList extends NetworkComponent<
-  VpcEndpoint,
-  "VpcEndpointId" | "State"
+export default class DhcpOptionsList extends NetworkComponent<
+  AWSDhcpOptions,
+  "DhcpOptionsId"
 > {
-  resourceName = "endpoint";
-  canCreate = true;
-  resourceUniqueKey: "VpcEndpointId" = "VpcEndpointId";
-  resourceStateKey: "State" = "State";
-  workingStates = ["Pending", "PendingAcceptance", "Deleting"];
+  readonly resourceName = "DHCP options sets";
+  readonly canCreate = true;
+  readonly resourceUniqueKey: "DhcpOptionsId" = "DhcpOptionsId";
 
-  fields = [
+  readonly fields = [
     {
       key: "Tags",
       label: "Name",
       sortByFormatter: true,
       formatter: extractNameFromEC2Tags,
     },
-    { key: "VpcEndpointId", label: "Endpoint Id", sortable: true },
-    { key: "VpcEndpointType", label: "Type", sortable: true },
     {
-      key: "ServiceName",
+      key: "DhcpOptionsId",
+      label: "DHCP Options ID",
       sortable: true,
     },
     {
-      key: "VpcId",
+      key: "OwnerId",
       sortable: true,
     },
-    { key: "State" },
     { key: "region", sortable: true },
   ];
 
   async getResourcesForRegion(
     region: string,
-    filterByEndpointsId?: string[]
-  ): Promise<VpcEndpointSet> {
+    filterByDhcpOptionssId?: string[]
+  ): Promise<AWSDhcpOptionsList> {
     const EC2 = await this.client(region);
     if (!EC2) {
       return [];
     }
 
-    const params: DescribeVpcEndpointsRequest = {};
-    if (filterByEndpointsId) {
+    const params: DescribeDhcpOptionsRequest = {};
+    if (filterByDhcpOptionssId) {
       params.Filters = [
         {
-          Name: "vpc-endpoint-id",
-          Values: filterByEndpointsId,
+          Name: "dhcp-options-id",
+          Values: filterByDhcpOptionssId,
         },
       ];
     }
 
-    const data = await EC2.describeVpcEndpoints(params).promise();
-    if (data.VpcEndpoints === undefined) {
+    const data = await EC2.describeDhcpOptions(params).promise();
+    if (data.DhcpOptions === undefined) {
       return [];
     }
-    return data.VpcEndpoints;
+    return data.DhcpOptions;
   }
 }
 </script>

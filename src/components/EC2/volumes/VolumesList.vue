@@ -140,6 +140,7 @@ import Component from "vue-class-component";
 import { NetworkComponent } from "@/components/network/networkComponent";
 import Volume from "@/components/EC2/volumes/Volume.vue";
 import StateText from "@/components/common/StateText.vue";
+import { extractNameFromEC2Tags } from "@/components/common/tags";
 
 @Component({
   components: {
@@ -175,7 +176,7 @@ export default class VolumesList extends NetworkComponent<
       key: "Tags",
       label: "Name",
       sortable: true,
-      formatter: this.extractNameFromTags,
+      formatter: extractNameFromEC2Tags,
     },
     { key: "VolumeId", sortable: true },
     "Attachments",

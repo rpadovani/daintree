@@ -131,6 +131,7 @@ import Component from "vue-class-component";
 import { NetworkComponent } from "@/components/network/networkComponent";
 import Snapshot from "@/components/EC2/snapshots/Snapshot.vue";
 import StateText from "@/components/common/StateText.vue";
+import { extractNameFromEC2Tags } from "@/components/common/tags";
 
 @Component({
   components: {
@@ -166,7 +167,7 @@ export default class SnapshotsList extends NetworkComponent<
       key: "Tags",
       label: "Name",
       sortable: true,
-      formatter: this.extractNameFromTags,
+      formatter: extractNameFromEC2Tags,
     },
     { key: "Description" },
     { key: "SnapshotId", sortable: true },

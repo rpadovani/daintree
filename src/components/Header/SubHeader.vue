@@ -179,6 +179,7 @@ export default class SubHeader extends DaintreeComponent {
       { name: "Peering connections", link: "#/network/peeringConnections" },
       { name: "Endpoints", link: "#/network/endpoints" },
       { name: "Network interfaces", link: "#/network/interfaces" },
+      { name: "DHCP options sets", link: "#/network/dhcp" },
     ],
     EC2: [
       { name: "Instances", link: "#/ec2/instances" },

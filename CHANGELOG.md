@@ -8,6 +8,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Changed
 
+- Add general icon for resources without a dedicated icon
 - Improve tags table performance, and add loading indicator
 
 ## [0.9.0]

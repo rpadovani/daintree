@@ -129,6 +129,7 @@ import StateText from "@/components/common/StateText.vue";
 import { NetworkComponent } from "@/components/network/networkComponent";
 import NetworkInterface from "./NetworkInterface.vue";
 import { DescribeNetworkInterfacesRequest } from "aws-sdk/clients/ec2";
+import { extractNameFromEC2Tags } from "@/components/common/tags";
 
 @Component({
   components: {
@@ -164,7 +165,7 @@ export default class NetworkInterfaceList extends NetworkComponent<
       key: "TagSet",
       label: "Name",
       sortByFormatter: true,
-      formatter: this.extractNameFromTags,
+      formatter: extractNameFromEC2Tags,
     },
     {
       key: "NetworkInterfaceId",

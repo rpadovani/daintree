@@ -1024,10 +1024,10 @@
   resolved "https://registry.yarnpkg.com/@types/color-name/-/color-name-1.1.1.tgz#1c1261bbeaa10a8055bbc5d8ab84b7b2afc846a0"
   integrity sha512-rr+OQyAjxze7GgWrSaJwydHStIhHq2lvY3BOC2Mj7KnzI7XK0Uw1TOOdI9lDoajEbSWLiYgoo4f1R51erQfhPQ==
 
-"@types/echarts@4.6.3":
-  version "4.6.3"
-  resolved "https://registry.yarnpkg.com/@types/echarts/-/echarts-4.6.3.tgz#227b33b106203ceb2ca4fa51760f406618caa89a"
-  integrity sha512-XsDsLtPDxSGPqcHvVEbH+z5r9lPiduNOf4aL3NjGprQ/4SliDiTS7DErimHpVdiEOoVFzwjn2usvgLOb1JqOJA==
+"@types/echarts@4.6.4":
+  version "4.6.4"
+  resolved "https://registry.yarnpkg.com/@types/echarts/-/echarts-4.6.4.tgz#8c2418db319e23e0a2893cfdce34176237026f07"
+  integrity sha512-CUE+OEKyiaf39G1w0vK6DwEcz84jMJc3kYuUlPpSjJy9lwLTXjpc/12ARo2y6/CUxTzLvZHBSHtTIAVILdtjwQ==
   dependencies:
     "@types/zrender" "*"
 

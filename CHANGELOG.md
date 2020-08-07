@@ -6,6 +6,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Added
+
+- Add DHCP options sets support
+
 ### Changed
 
 - Add general icon for resources without a dedicated icon

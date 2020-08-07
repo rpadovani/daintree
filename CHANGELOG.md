@@ -10,6 +10,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 - Add general icon for resources without a dedicated icon
 - Improve tags table performance, and add loading indicator
+- Add monitoring tab to ECS clusters
 
 ## [0.9.0]
 

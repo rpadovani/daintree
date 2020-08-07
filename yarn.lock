@@ -901,10 +901,10 @@
   resolved "https://registry.yarnpkg.com/@gitlab/svgs/-/svgs-1.150.0.tgz#7dbbdf1b50c4409adf30d23710bbe4515608e245"
   integrity sha512-jfD1EiawNlBM1XNEz7hriPJg2UOX6zE2/lKMIocSpkg9R58VGyIr+oyWOTn2AfknrepsLfnTiGJNveLdRYcy4w==
 
-"@gitlab/ui@17.42.0":
-  version "17.42.0"
-  resolved "https://registry.yarnpkg.com/@gitlab/ui/-/ui-17.42.0.tgz#410fe3c1dc78e32620dcaf295091676fe95e1297"
-  integrity sha512-LJEpmmPgdXvEkfXm0ePCF/DuRuAP26bI5+gp8SZ3tk2xk0jT7Y/O2sOrnYvPqWl4W5BekRj/x8xrzfR9n+bvTQ==
+"@gitlab/ui@17.43.0":
+  version "17.43.0"
+  resolved "https://registry.yarnpkg.com/@gitlab/ui/-/ui-17.43.0.tgz#2a61ba53aaf8a3325a3eba6753ba57a937bdb656"
+  integrity sha512-3JnzjQtcTWYZGxJfsg58k1oBOrPjWrhwlsW7MD9yHaGm9No71+RP50htck5p5hDRQ+MKxwZ9n4MOON3L8mnjIg==
   dependencies:
     "@babel/standalone" "^7.0.0"
     "@gitlab/vue-toasted" "^1.3.0"
@@ -1024,10 +1024,10 @@
   resolved "https://registry.yarnpkg.com/@types/color-name/-/color-name-1.1.1.tgz#1c1261bbeaa10a8055bbc5d8ab84b7b2afc846a0"
   integrity sha512-rr+OQyAjxze7GgWrSaJwydHStIhHq2lvY3BOC2Mj7KnzI7XK0Uw1TOOdI9lDoajEbSWLiYgoo4f1R51erQfhPQ==
 
-"@types/echarts@4.6.3":
-  version "4.6.3"
-  resolved "https://registry.yarnpkg.com/@types/echarts/-/echarts-4.6.3.tgz#227b33b106203ceb2ca4fa51760f406618caa89a"
-  integrity sha512-XsDsLtPDxSGPqcHvVEbH+z5r9lPiduNOf4aL3NjGprQ/4SliDiTS7DErimHpVdiEOoVFzwjn2usvgLOb1JqOJA==
+"@types/echarts@4.6.4":
+  version "4.6.4"
+  resolved "https://registry.yarnpkg.com/@types/echarts/-/echarts-4.6.4.tgz#8c2418db319e23e0a2893cfdce34176237026f07"
+  integrity sha512-CUE+OEKyiaf39G1w0vK6DwEcz84jMJc3kYuUlPpSjJy9lwLTXjpc/12ARo2y6/CUxTzLvZHBSHtTIAVILdtjwQ==
   dependencies:
     "@types/zrender" "*"
 
@@ -1867,10 +1867,10 @@ autoprefixer@^9.8.0:
     postcss "^7.0.30"
     postcss-value-parser "^4.1.0"
 
-aws-sdk@2.716.0:
-  version "2.716.0"
-  resolved "https://registry.yarnpkg.com/aws-sdk/-/aws-sdk-2.716.0.tgz#d3957fccf6aaf185dd8de61a5a44532cbbd311d8"
-  integrity sha512-/tl65GnyU+vIBKdLALJzKUldr4W0zIjAFOOGgusGPjLPI7XZM8aIw04trQPfK+dcTrv/k7E1fceiEvTX0f+OOQ==
+aws-sdk@2.728.0:
+  version "2.728.0"
+  resolved "https://registry.yarnpkg.com/aws-sdk/-/aws-sdk-2.728.0.tgz#381805dcac7835b5686694e9468d104595bfce42"
+  integrity sha512-pUVSxb+04urr6BMHg32Op+kT1IWGmwbelrQKMdLnvgcgysmBu1P4XbGBg8/SmAXWfuqqWjz8YnmFNY46VJE43A==
   dependencies:
     buffer "4.9.2"
     events "1.1.1"
@@ -8778,10 +8778,10 @@ vue-property-decorator@9.0.0:
   resolved "https://registry.yarnpkg.com/vue-property-decorator/-/vue-property-decorator-9.0.0.tgz#0a5f6d47d33ca62a8876108ccfa65c2c4fb7325a"
   integrity sha512-oegTNPItuHOkW0AP1MnbdNwkmyhfsUIIXvIRHpgC18tVoEo21/i6kItyeekjMs8JgZJeuHzsaTc/DZaJFH4IWQ==
 
-vue-router@3.3.4:
-  version "3.3.4"
-  resolved "https://registry.yarnpkg.com/vue-router/-/vue-router-3.3.4.tgz#4e38abc34a11c41b6c3d8244449a2e363ba6250b"
-  integrity sha512-SdKRBeoXUjaZ9R/8AyxsdTqkOfMcI5tWxPZOUX5Ie1BTL5rPSZ0O++pbiZCeYeythiZIdLEfkDiQPKIaWk5hDg==
+vue-router@3.4.2:
+  version "3.4.2"
+  resolved "https://registry.yarnpkg.com/vue-router/-/vue-router-3.4.2.tgz#541221d7ac467786c1c9381bcf36019d883b9cf8"
+  integrity sha512-n3Ok70hW0EpcJF4lcWIwSHAQbFTnIOLl/fhO8+oTs4jHNtBNsovcVvPZeTOyKEd8C3xF1Crft2ASuOiVT5K1mw==
 
 vue-runtime-helpers@^1.1.2:
   version "1.1.2"

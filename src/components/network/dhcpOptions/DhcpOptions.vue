@@ -1,7 +1,8 @@
 <template>
   <div>
     <DeleteButtonWithConfirmation
-      resource-type="DHCP options sets"
+      class="text-center"
+      resource-type="DHCP options set"
       :resource-id="dhcpOptions.DhcpOptionsId"
       :resource-name="resourceName"
       @primary="deleteDhcpOptions"

@@ -11,7 +11,7 @@
           <gl-avatar-labeled
             :label="entry.label"
             :sub-label="entry.subLabel"
-            :src="entry.iconUrl"
+            :src="entry.iconUrl || '/assets/aws-icons/General.svg'"
             shape="rect"
             :size="32"
           >

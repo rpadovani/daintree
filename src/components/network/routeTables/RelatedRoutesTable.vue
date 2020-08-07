@@ -38,6 +38,7 @@ import EC2Client, { RouteTableList } from "aws-sdk/clients/ec2";
 import { GlTable, GlSkeletonLoading, GlLink, GlAlert } from "@gitlab/ui";
 import { Formatters } from "@/mixins/formatters";
 import { mixins } from "vue-class-component";
+import { extractNameFromEC2Tags } from "@/components/common/tags";
 
 @Component({
   components: {
@@ -64,7 +65,7 @@ export default class RelatedRoutesTable extends mixins(
       key: "Tags",
       label: "Name",
       sortable: true,
-      formatter: this.extractNameFromTags,
+      formatter: extractNameFromEC2Tags,
     },
     "OwnerId",
   ];

@@ -8,6 +8,7 @@ import { securityGroupRoutes } from "@/components/network/securityGroups/routes"
 import { peeringRoutes } from "@/components/network/peering/routes";
 import { endpointRoutes } from "@/components/network/endpoints/routes";
 import { networkInterfaceRoutes } from "@/components/network/networkInterfaces/routes";
+import { dhcpOptionsRoutes } from "@/components/network/dhcpOptions/routes";
 
 const NetworkMain = () =>
   import(/* webpackChunkName: "network_main" */ "./NetworkMain.vue");
@@ -33,4 +34,5 @@ export const NetworkRoutes = [
   ...peeringRoutes,
   ...endpointRoutes,
   ...networkInterfaceRoutes,
+  ...dhcpOptionsRoutes,
 ];

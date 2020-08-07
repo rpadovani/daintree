@@ -124,6 +124,7 @@ import { Component } from "vue-property-decorator";
 import { DescribeInternetGatewaysRequest } from "aws-sdk/clients/ec2";
 import StateText from "@/components/common/StateText.vue";
 import { NetworkComponent } from "@/components/network/networkComponent";
+import { extractNameFromEC2Tags } from "@/components/common/tags";
 
 @Component({
   components: {
@@ -154,7 +155,7 @@ export default class IgwList extends NetworkComponent<
       key: "Tags",
       label: "Name",
       sortable: true,
-      formatter: this.extractNameFromTags,
+      formatter: extractNameFromEC2Tags,
     },
     { key: "InternetGatewayId", sortable: true },
     "State",

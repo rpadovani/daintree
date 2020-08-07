@@ -158,7 +158,7 @@ export default class TasksDefinitionsList extends EcsComponent<
     //   key: "Tags",
     //   label: "Name",
     //   sortByFormatter: true,
-    //   formatter: this.extractNameFromTags,
+    //   formatter: extractNameFromEC2Tags,
     // },
     // { key: "VpcPeeringConnectionId", label: "Peering Id", sortable: true },
     // { key: "Status", label: "State" },

@@ -131,6 +131,7 @@ import {
 import { Component } from "vue-property-decorator";
 import StateText from "@/components/common/StateText.vue";
 import { NetworkComponent } from "@/components/network/networkComponent";
+import { extractNameFromEC2Tags } from "@/components/common/tags";
 
 @Component({
   components: {
@@ -163,7 +164,7 @@ export default class NatList extends NetworkComponent<
       key: "Tags",
       label: "Name",
       sortable: true,
-      formatter: this.extractNameFromTags,
+      formatter: extractNameFromEC2Tags,
     },
     { key: "NatGatewayId", sortable: true },
     "State",

@@ -24,16 +24,6 @@ export class NetworkComponent<
     return resourceKey;
   }
 
-  extractNameFromTags(tags: TagList): string | undefined {
-    const nameTag = tags.filter((v) => v.Key === "Name");
-
-    if (nameTag.length > 0) {
-      return nameTag[0].Value;
-    }
-
-    return "";
-  }
-
   async client(region: string): Promise<EC2Client | void> {
     const credentials = await this.credentials();
 

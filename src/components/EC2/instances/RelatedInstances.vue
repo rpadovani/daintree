@@ -42,6 +42,7 @@ import EC2Client, {
 } from "aws-sdk/clients/ec2";
 import { GlTable, GlSkeletonLoading, GlLink, GlAlert } from "@gitlab/ui";
 import StateText from "@/components/common/StateText.vue";
+import { extractNameFromEC2Tags } from "@/components/common/tags";
 
 @Component({
   components: {
@@ -65,7 +66,7 @@ export default class RelatedInstances extends DaintreeComponent {
       key: "Tags",
       label: "Name",
       sortable: true,
-      formatter: this.extractNameFromTags,
+      formatter: extractNameFromEC2Tags,
     },
     {
       key: "InstanceId",

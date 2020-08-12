@@ -1,6 +1,6 @@
 <template>
   <div>
-    <gl-new-dropdown
+    <gl-dropdown
       lazy
       icon="list-task"
       :text="$route.query.task || 'Select a revision'"
@@ -9,10 +9,10 @@
       category="secondary"
     >
       <gl-search-box-by-type v-model.trim="searchTerm" class="m-2" />
-      <gl-new-dropdown-header>
+      <gl-dropdown-header>
         Active tasks
-      </gl-new-dropdown-header>
-      <gl-new-dropdown-item
+      </gl-dropdown-header>
+      <gl-dropdown-item
         :href="`#/ecs/tasksDefinitions?family=${family}&task=${encodeURIComponent(
           task
         )}`"
@@ -22,9 +22,9 @@
         :is-checked="task === decodeURIComponent($route.query.task || '')"
       >
         {{ task }}
-      </gl-new-dropdown-item>
-      <gl-new-dropdown-header>Inactive tasks</gl-new-dropdown-header>
-      <gl-new-dropdown-item
+      </gl-dropdown-item>
+      <gl-dropdown-header>Inactive tasks</gl-dropdown-header>
+      <gl-dropdown-item
         :href="`#/ecs/tasksDefinitions?family=${family}&task=${encodeURIComponent(
           task
         )}`"
@@ -34,8 +34,8 @@
         :is-checked="task === decodeURIComponent($route.query.task || '')"
       >
         {{ task }}
-      </gl-new-dropdown-item>
-    </gl-new-dropdown>
+      </gl-dropdown-item>
+    </gl-dropdown>
 
     <gl-alert variant="danger" v-if="errorMessage">
       {{ errorMessage }}
@@ -59,9 +59,9 @@
 </template>
 <script lang="ts">
 import {
-  GlNewDropdown,
-  GlNewDropdownHeader,
-  GlNewDropdownItem,
+  GlDropdown,
+  GlDropdownHeader,
+  GlDropdownItem,
   GlSearchBoxByType,
   GlEmptyState,
   GlAlert,
@@ -74,9 +74,9 @@ import TaskDefinition from "@/components/ECS/taskDefinitions/TaskDefinition.vue"
 @Component({
   components: {
     TaskDefinition,
-    GlNewDropdown,
-    GlNewDropdownHeader,
-    GlNewDropdownItem,
+    GlDropdown,
+    GlDropdownHeader,
+    GlDropdownItem,
     GlEmptyState,
     GlAlert,
     GlSearchBoxByType,

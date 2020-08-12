@@ -14,25 +14,22 @@
 
       <!-- We set the breadcrumb to active so it doesn't create a <Link> element which would interfere with the search box -->
       <b-breadcrumb-item class="gl-breadcrumb-item" active>
-        <gl-new-dropdown
-          :text="selectedSection || 'Select a section'"
-          size="small"
-        >
+        <gl-dropdown :text="selectedSection || 'Select a section'" size="small">
           <gl-search-box-by-type v-model.trim="sectionSearchTerm" class="m-2" />
-          <gl-new-dropdown-item
+          <gl-dropdown-item
             v-for="section in filteredSections"
             :key="section.name"
             :href="section.link"
           >
             {{ section.name }}
-          </gl-new-dropdown-item>
-          <gl-new-dropdown-item
+          </gl-dropdown-item>
+          <gl-dropdown-item
             v-show="!filteredSections.length"
             class="text-secondary p-2"
           >
             Nothing found…
-          </gl-new-dropdown-item>
-        </gl-new-dropdown>
+          </gl-dropdown-item>
+        </gl-dropdown>
       </b-breadcrumb-item>
 
       <!-- We set the breadcrumb to active so it doesn't create a <Link> element which would interfere with the search box -->
@@ -41,7 +38,7 @@
         class="gl-breadcrumb-item"
         active
       >
-        <gl-new-dropdown
+        <gl-dropdown
           key="subsections"
           :text="selectedSubsection || 'Select a subsection'"
           size="small"
@@ -50,20 +47,20 @@
             v-model.trim="subsectionSearchTerm"
             class="m-2"
           />
-          <gl-new-dropdown-item
+          <gl-dropdown-item
             v-for="section in filteredSubsections"
             :href="section.link"
             :key="section.name"
           >
             {{ section.name }}
-          </gl-new-dropdown-item>
-          <gl-new-dropdown-item
+          </gl-dropdown-item>
+          <gl-dropdown-item
             v-show="!filteredSubsections.length"
             class="text-secondary p-2"
           >
             Nothing found…
-          </gl-new-dropdown-item>
-        </gl-new-dropdown>
+          </gl-dropdown-item>
+        </gl-dropdown>
       </b-breadcrumb-item>
     </b-breadcrumb>
 
@@ -90,8 +87,8 @@
 
 <script lang="ts">
 import {
-  GlNewDropdownItem,
-  GlNewDropdown,
+  GlDropdownItem,
+  GlDropdown,
   GlSearchBoxByType,
   GlIcon,
   GlLoadingIcon,
@@ -106,9 +103,9 @@ import { DaintreeComponent } from "@/mixins/DaintreeComponent";
   components: {
     BBreadcrumb,
     BBreadcrumbItem,
-    GlNewDropdown,
+    GlDropdown,
     GlSearchBoxByType,
-    GlNewDropdownItem,
+    GlDropdownItem,
     GlIcon,
     GlLoadingIcon,
   },

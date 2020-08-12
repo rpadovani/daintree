@@ -187,9 +187,12 @@ export default class SecurityGroupList extends NetworkComponent<
     if (!EC2) {
       return [];
     }
-    const params: DescribeSecurityGroupsRequest = {
-      GroupIds: filterByGroupId,
-    };
+
+    const params: DescribeSecurityGroupsRequest = {};
+
+    if (filterByGroupId) {
+      params.Filters = [{ Name: "group-id", Values: filterByGroupId }];
+    }
 
     const data = await EC2.describeSecurityGroups(params).promise();
     if (data.SecurityGroups === undefined) {

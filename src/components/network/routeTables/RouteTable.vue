@@ -10,19 +10,6 @@
 
     <gl-tabs theme="blue" lazy>
       <gl-tab title="Overview">
-        <gl-modal
-          modal-id="delete-route-table-modal"
-          title="Delete route table"
-          no-fade
-          :action-primary="deleteRouteTableButtonProps"
-          :action-cancel="cancelProps"
-          @primary="deleteRouteTable"
-        >
-          Are you sure that you want to delete this route table (<b>{{
-            updatedRouteTable.RouteTableId
-          }}</b
-          >)?
-        </gl-modal>
         <div class="row justify-content-center">
           <gl-button-group class="">
             <gl-button
@@ -32,13 +19,14 @@
               @click="setAsMain"
               >Set main route table
             </gl-button>
-            <gl-button
+
+            <DeleteButtonWithConfirmation
               style="height: 100%;"
-              variant="danger"
-              category="secondary"
-              v-gl-modal-directive="'delete-route-table-modal'"
-              >Delete this route table</gl-button
-            >
+              resource-type="route table"
+              :resource-id="updatedRouteTable.RouteTableId"
+              :resource-name="resourceName"
+              @primary="deleteRouteTable"
+            />
           </gl-button-group>
         </div>
 
@@ -68,19 +56,7 @@
 </template>
 
 <script lang="ts">
-import {
-  GlEmptyState,
-  GlSkeletonLoading,
-  GlTab,
-  GlTable,
-  GlTabs,
-  GlCard,
-  GlAlert,
-  GlButton,
-  GlModal,
-  GlModalDirective,
-  GlButtonGroup,
-} from "@gitlab/ui";
+import { GlTab, GlTabs, GlAlert, GlButton, GlButtonGroup } from "@gitlab/ui";
 import EC2Client from "aws-sdk/clients/ec2";
 import { Component, Prop, Watch } from "vue-property-decorator";
 import TagsTable from "@/components/common/TagsTable.vue";
@@ -93,6 +69,8 @@ import ListOfRoutes from "@/components/network/routeTables/ListOfRoutes.vue";
 import DrawerCards from "@/components/common/DrawerCards.vue";
 import { CardContent } from "@/components/common/cardContent";
 import { DaintreeComponent } from "@/mixins/DaintreeComponent";
+import { extractNameFromEC2Tags } from "@/components/common/tags";
+import DeleteButtonWithConfirmation from "@/components/common/DeleteButtonWithConfirmation.vue";
 
 @Component({
   components: {
@@ -100,19 +78,14 @@ import { DaintreeComponent } from "@/mixins/DaintreeComponent";
     TagsTable,
     GlTabs,
     GlTab,
-    GlTable,
-    GlEmptyState,
-    GlSkeletonLoading,
-    GlCard,
     GlAlert,
     GlButton,
-    GlModal,
     FlowLogsTab,
     GlButtonGroup,
     SubnetTab,
     DrawerCards,
+    DeleteButtonWithConfirmation,
   },
-  directives: { "gl-modal-directive": GlModalDirective },
 })
 export default class RouteTable extends DaintreeComponent {
   @Prop(Object) readonly routeTable!: RouteTableWithRegion;
@@ -123,14 +96,9 @@ export default class RouteTable extends DaintreeComponent {
   alertVariant = "";
   alertMessage = "";
 
-  deleteRouteTableButtonProps = {
-    text: "Delete route table",
-    attributes: [{ variant: "danger" }],
-  };
-
-  cancelProps = {
-    text: "Cancel",
-  };
+  get resourceName(): string | undefined {
+    return extractNameFromEC2Tags(this.routeTable.Tags);
+  }
 
   get updatedRouteTable(): RouteTableWithRegion {
     if (this.routeTable.RouteTableId !== this.freshRouteTable.RouteTableId) {

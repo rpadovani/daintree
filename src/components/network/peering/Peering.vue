@@ -1,31 +1,20 @@
 <template>
   <gl-tabs theme="blue" lazy>
     <gl-tab title="Overview">
-      <gl-modal
-        modal-id="delete-peering-modal"
-        title="Delete VPC peering connection"
-        no-fade
-        :action-primary="deletePeeringButtonProps"
-        :action-cancel="cancelProps"
-        @primary="deletePeering"
-      >
-        Are you sure that you want to delete this VPC peering connection ({{
-          peering.VpcPeeringConnectionId
-        }}?
-      </gl-modal>
       <div class="row justify-content-between">
         <gl-alert :variant="alertVariant" :dismissible="false" class="col-9">
           <b>{{ peering.Status.Message }}</b>
         </gl-alert>
-        <gl-button
+
+        <DeleteButtonWithConfirmation
           style="height: 100%;"
-          class="mt-2 col-2"
-          variant="danger"
-          category="secondary"
-          :disabled="peering.Status !== 'available'"
-          v-gl-modal-directive="'delete-peering-modal'"
-          >Delete this peering connection</gl-button
-        >
+          class="mt-2 col-3"
+          resource-type="peering connection"
+          :resource-id="peering.VpcPeeringConnectionId"
+          :resource-name="resourceName"
+          @primary="deletePeering"
+          :disabled="peering.Status.Code !== 'available'"
+        />
       </div>
 
       <DrawerCards :cards="cards" />
@@ -51,14 +40,10 @@
 <script lang="ts">
 import {
   GlAlert,
-  GlButton,
   GlCard,
   GlEmptyState,
-  GlModal,
-  GlModalDirective,
   GlSkeletonLoading,
   GlTab,
-  GlTable,
   GlTabs,
 } from "@gitlab/ui";
 import EC2Client from "aws-sdk/clients/ec2";
@@ -71,26 +56,29 @@ import { DaintreeComponent } from "@/mixins/DaintreeComponent";
 import DrawerCards from "@/components/common/DrawerCards.vue";
 import { CardContent } from "@/components/common/cardContent";
 import { AlertVariant } from "@/store/notifications/state";
+import DeleteButtonWithConfirmation from "@/components/common/DeleteButtonWithConfirmation.vue";
+import { extractNameFromEC2Tags } from "@/components/common/tags";
 
 @Component({
   components: {
     DrawerCards,
     RelatedRoutesTable,
     TagsTable,
-    GlTabs,
     GlTab,
-    GlTable,
+    GlTabs,
     GlEmptyState,
     GlSkeletonLoading,
     GlCard,
     GlAlert,
-    GlButton,
-    GlModal,
+    DeleteButtonWithConfirmation,
   },
-  directives: { "gl-modal-directive": GlModalDirective },
 })
 export default class Peering extends DaintreeComponent {
   @Prop(Object) readonly peering!: PeeringWithRegion;
+
+  get resourceName(): string | undefined {
+    return extractNameFromEC2Tags(this.peering.Tags);
+  }
 
   get cards(): CardContent[] {
     return [
@@ -147,14 +135,6 @@ export default class Peering extends DaintreeComponent {
       },
     ];
   }
-
-  deletePeeringButtonProps = {
-    text: "Delete Peering",
-  };
-
-  cancelProps = {
-    text: "Cancel",
-  };
 
   get alertVariant(): AlertVariant {
     switch (this.peering.Status?.Code) {

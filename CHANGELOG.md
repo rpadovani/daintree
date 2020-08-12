@@ -15,6 +15,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Add general icon for resources without a dedicated icon
 - Improve tags table performance, and add loading indicator
 - Add monitoring tab to ECS clusters
+- Make confirmation mandatory to delete resources
+
+### Fixed
+
+- Fix an issue in internet gateway page where the igw wasn't loaded if detached
+- Fix issues deleting resources (wrong warnings, wrong logics to enable / disable the delete button)
 
 ## [0.9.0]
 

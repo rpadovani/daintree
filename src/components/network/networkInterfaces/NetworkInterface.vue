@@ -1,32 +1,20 @@
 <template>
   <gl-tabs theme="blue" lazy>
     <gl-tab title="Overview">
-      <gl-modal
-        modal-id="delete-network-interface-modal"
-        title="Delete network interface"
-        no-fade
-        :action-primary="deleteNetworkInterfaceButtonProps"
-        :action-cancel="cancelProps"
-        @primary="deleteNetworkInterface"
-      >
-        Are you sure that you want to delete this network interface ({{
-          networkInterface.NetworkInterfaceId
-        }})?
-      </gl-modal>
-      <div class="row justify-content-between">
-        <gl-alert :variant="alertVariant" :dismissible="false" class="col-9">
+      <div class="row justify-content-around">
+        <gl-alert :variant="alertVariant" :dismissible="false" class="col-8">
           Network interface's state: <b>{{ networkInterface.Status }}</b>
         </gl-alert>
 
-        <gl-button
+        <DeleteButtonWithConfirmation
           style="height: 100%;"
-          class="mt-2 col-2"
-          variant="danger"
-          category="secondary"
+          class="mt-2 col-3"
+          resource-type="network interface"
+          :resource-id="networkInterface.NetworkInterfaceId"
+          :resource-name="resourceName"
           :disabled="networkInterface.Status !== 'available'"
-          v-gl-modal-directive="'delete-network-interface-modal'"
-          >Delete this interface</gl-button
-        >
+          @primary="deleteNetworkInterface"
+        />
       </div>
 
       <DrawerCards :cards="cards" />
@@ -85,6 +73,8 @@ import { Metadata } from "@/mixins/DaintreeListComponent";
 import { isString } from "@/utils/isString";
 import SubnetTab from "@/components/network/subnets/SubnetTab.vue";
 import RelatedSecurityGroups from "@/components/network/securityGroups/RelatedSecurityGroups.vue";
+import { extractNameFromEC2Tags } from "@/components/common/tags";
+import DeleteButtonWithConfirmation from "@/components/common/DeleteButtonWithConfirmation.vue";
 
 @Component({
   components: {
@@ -103,6 +93,7 @@ import RelatedSecurityGroups from "@/components/network/securityGroups/RelatedSe
     GlButton,
     GlModal,
     GlIcon,
+    DeleteButtonWithConfirmation,
   },
   directives: { "gl-modal-directive": GlModalDirective },
 })
@@ -266,13 +257,9 @@ export default class NetworkInterface extends DaintreeComponent {
     );
   }
 
-  deleteNetworkInterfaceButtonProps = {
-    text: "Delete networkInterface",
-  };
-
-  cancelProps = {
-    text: "Cancel",
-  };
+  get resourceName(): string | undefined {
+    return extractNameFromEC2Tags(this.networkInterface.TagSet);
+  }
 
   get alertVariant(): AlertVariant {
     switch (this.networkInterface.Status) {

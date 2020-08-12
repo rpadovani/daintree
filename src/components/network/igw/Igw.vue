@@ -24,17 +24,6 @@
       </gl-form-group>
     </gl-modal>
 
-    <gl-modal
-      modal-id="delete-igw-modal"
-      title="Delete internet gateway"
-      no-fade
-      :action-primary="deleteIgwButtonProps"
-      :action-cancel="cancelProps"
-      @primary="deleteIgw"
-    >
-      Are you sure that you want to delete this Internet gateway?
-    </gl-modal>
-
     <gl-alert
       class="mb-2"
       v-if="alertMessage.length > 0"
@@ -55,13 +44,14 @@
         <gl-button category="secondary" :disabled="isDetached" @click="detach"
           >Detach this Internet Gateway
         </gl-button>
-        <gl-button
-          variant="danger"
-          category="secondary"
+        <DeleteButtonWithConfirmation
+          class="text-center"
+          resource-type="Internet Gateway"
+          :resource-id="igw.InternetGatewayId"
+          :resource-name="resourceName"
+          @primary="deleteIgw"
           :disabled="!isDetached"
-          v-gl-modal-directive="'delete-igw-modal'"
-          >Delete this Internet Gateway
-        </gl-button>
+        />
       </gl-button-group>
     </div>
 
@@ -101,6 +91,8 @@ import { Formatters } from "@/mixins/formatters";
 import { VpcList } from "aws-sdk/clients/ec2";
 import DrawerCards from "@/components/common/DrawerCards.vue";
 import { CardContent } from "@/components/common/cardContent";
+import DeleteButtonWithConfirmation from "@/components/common/DeleteButtonWithConfirmation.vue";
+import { extractNameFromEC2Tags } from "@/components/common/tags";
 
 @Component({
   components: {
@@ -115,6 +107,7 @@ import { CardContent } from "@/components/common/cardContent";
     GlFormGroup,
     GlFormSelect,
     DrawerCards,
+    DeleteButtonWithConfirmation,
   },
   directives: { "gl-modal-directive": GlModalDirective },
 })
@@ -127,13 +120,13 @@ export default class Igw extends mixins(Notifications, Formatters) {
   vpcsWithGateway: string[] = [];
   vpcs: VpcList = [];
 
-  deleteIgwButtonProps = {
-    text: "Delete Internet Gateway",
-  };
-
   cancelProps = {
     text: "Cancel",
   };
+
+  get resourceName(): string | undefined {
+    return extractNameFromEC2Tags(this.igw.Tags);
+  }
 
   get attachIgwButtonProps() {
     return {
@@ -190,7 +183,7 @@ export default class Igw extends mixins(Notifications, Formatters) {
   }
 
   get vpcId(): string | undefined {
-    if (this.igw.Attachments) {
+    if (this.igw.Attachments && this.igw.Attachments.length > 0) {
       return this.igw.Attachments[0].VpcId;
     }
 

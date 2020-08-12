@@ -1,17 +1,6 @@
 <template>
   <gl-tabs theme="blue">
     <gl-tab title="Overview">
-      <gl-modal
-        modal-id="delete-volume-modal"
-        :title="`Delete ${volumeName}`"
-        no-fade
-        :action-primary="deleteVolumeButtonProps"
-        :action-cancel="cancelProps"
-        @primary="deleteVolume"
-      >
-        Are you sure that you want to delete this volume ({{ volumeName }})?
-      </gl-modal>
-
       <!--      <gl-modal-->
       <!--        modal-id="edit-volume-modal"-->
       <!--        :title="`Edit ${volumeName}`"-->
@@ -29,15 +18,15 @@
           <!--            v-gl-modal-directive="'edit-volume-modal'"-->
           <!--            >Modify this volume-->
           <!--          </gl-button>-->
-          <gl-button
-            variant="danger"
-            category="secondary"
-            v-gl-modal-directive="'delete-volume-modal'"
+          <DeleteButtonWithConfirmation
+            resource-type="volume"
+            :resource-id="volume.VolumeId"
+            :resource-name="volumeName"
             :disabled="volume.Attachments.length !== 0"
             v-gl-tooltip.hover
             :title="deleteButtonTitle"
-            >Delete this volume
-          </gl-button>
+            @primary="deleteVolume"
+          />
         </gl-button-group>
       </div>
 
@@ -188,6 +177,7 @@ import DrawerCards from "@/components/common/DrawerCards.vue";
 import { CardContent } from "@/components/common/cardContent";
 import { Formatters } from "@/mixins/formatters";
 import { mixins } from "vue-class-component";
+import DeleteButtonWithConfirmation from "@/components/common/DeleteButtonWithConfirmation.vue";
 
 @Component({
   components: {
@@ -211,6 +201,7 @@ import { mixins } from "vue-class-component";
     GlLink,
     CloudwatchWidget,
     DrawerCards,
+    DeleteButtonWithConfirmation,
   },
   directives: {
     "gl-modal-directive": GlModalDirective,
@@ -219,13 +210,6 @@ import { mixins } from "vue-class-component";
 })
 export default class Volume extends mixins(DaintreeComponent, Formatters) {
   @Prop(Object) readonly volume!: VolumeWithRegion;
-
-  deleteVolumeButtonProps = {
-    text: "Delete volume",
-    attributes: {
-      variant: "danger",
-    },
-  };
 
   detachVolumeButtonProps = {
     text: "Detach volume",

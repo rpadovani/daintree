@@ -1,32 +1,12 @@
 <template>
   <gl-tabs theme="blue">
     <gl-tab title="Overview">
-      <gl-modal
-        modal-id="delete-sns-modal"
-        title="Delete subscription"
-        no-fade
-        :action-primary="deleteSnsButtonProps"
-        :action-cancel="cancelProps"
+      <DeleteButtonWithConfirmation
+        class="text-center"
+        resource-type="subscription"
+        :resource-id="subscriptionName"
         @primary="deleteSns"
-      >
-        Are you sure that you want to delete the subscription named
-        <b>{{
-          sns.subscriptionArn.split(":")[
-            sns.subscriptionArn.split(":").length - 1
-          ]
-        }}</b
-        >?
-      </gl-modal>
-      <div class="row justify-content-center">
-        <gl-button-group>
-          <gl-button
-            variant="danger"
-            category="secondary"
-            v-gl-modal-directive="'delete-sns-modal'"
-            >Delete this subscription
-          </gl-button>
-        </gl-button-group>
-      </div>
+      />
 
       <DrawerCards :cards="cards" />
     </gl-tab>
@@ -119,10 +99,6 @@ import {
   GlTabs,
   GlCard,
   GlAlert,
-  GlButton,
-  GlModal,
-  GlModalDirective,
-  GlButtonGroup,
   GlIcon,
 } from "@gitlab/ui";
 import SNSClient from "aws-sdk/clients/sns";
@@ -136,6 +112,7 @@ import hljs from "highlight.js/lib/core";
 import json from "highlight.js/lib/languages/json";
 import DrawerCards from "@/components/common/DrawerCards.vue";
 import { CardContent } from "@/components/common/cardContent";
+import DeleteButtonWithConfirmation from "@/components/common/DeleteButtonWithConfirmation.vue";
 hljs.registerLanguage("json", json);
 
 @Component({
@@ -147,24 +124,22 @@ hljs.registerLanguage("json", json);
     GlSkeletonLoading,
     GlCard,
     GlAlert,
-    GlButton,
-    GlModal,
-    GlButtonGroup,
     GlIcon,
     DrawerCards,
+    DeleteButtonWithConfirmation,
   },
-  directives: { "gl-modal-directive": GlModalDirective },
 })
 export default class SNSSubscription extends mixins(Formatters, Notifications) {
   @Prop(Object) readonly sns!: SubscriptionWithRegion;
 
-  deleteSnsButtonProps = {
-    text: "Delete subscription",
-  };
+  get subscriptionName(): string {
+    if (!this.sns.subscriptionArn) {
+      return "";
+    }
 
-  cancelProps = {
-    text: "Cancel",
-  };
+    const split = this.sns.subscriptionArn.split(":");
+    return split[split.length - 1];
+  }
 
   get endpointCard(): CardContent {
     if (this.sns.Protocol === "sqs") {

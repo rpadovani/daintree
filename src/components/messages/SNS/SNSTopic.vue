@@ -1,28 +1,12 @@
 <template>
   <gl-tabs theme="blue">
     <gl-tab title="Overview">
-      <gl-modal
-        modal-id="delete-sns-modal"
-        title="Delete topic"
-        no-fade
-        :action-primary="deleteSnsButtonProps"
-        :action-cancel="cancelProps"
+      <DeleteButtonWithConfirmation
+        class="text-center"
+        resource-type="topic"
+        :resource-id="topicName"
         @primary="deleteSns"
-      >
-        Are you sure that you want to delete the topic named
-        <b>{{ sns.topicArn.split(":")[sns.topicArn.split(":").length - 1] }}</b
-        >?
-      </gl-modal>
-      <div class="row justify-content-center">
-        <gl-button-group>
-          <gl-button
-            variant="danger"
-            category="secondary"
-            v-gl-modal-directive="'delete-sns-modal'"
-            >Delete this topic
-          </gl-button>
-        </gl-button-group>
-      </div>
+      />
 
       <DrawerCards :cards="cards" />
 
@@ -101,10 +85,6 @@ import {
   GlTabs,
   GlCard,
   GlAlert,
-  GlButton,
-  GlModal,
-  GlModalDirective,
-  GlButtonGroup,
   GlIcon,
 } from "@gitlab/ui";
 import { Component, Prop, Watch } from "vue-property-decorator";
@@ -119,6 +99,7 @@ import json from "highlight.js/lib/languages/json";
 import SNSClient, { SubscriptionsList } from "aws-sdk/clients/sns";
 import DrawerCards from "@/components/common/DrawerCards.vue";
 import { CardContent } from "@/components/common/cardContent";
+import DeleteButtonWithConfirmation from "@/components/common/DeleteButtonWithConfirmation.vue";
 hljs.registerLanguage("json", json);
 
 @Component({
@@ -132,23 +113,21 @@ hljs.registerLanguage("json", json);
     GlSkeletonLoading,
     GlCard,
     GlAlert,
-    GlButton,
-    GlModal,
-    GlButtonGroup,
     GlIcon,
+    DeleteButtonWithConfirmation,
   },
-  directives: { "gl-modal-directive": GlModalDirective },
 })
 export default class SNSTopic extends mixins(Formatters, Notifications) {
   @Prop(Object) readonly sns!: TopicWithRegion;
 
-  deleteSnsButtonProps = {
-    text: "Delete topic",
-  };
+  get topicName(): string {
+    if (!this.sns.topicArn) {
+      return "";
+    }
 
-  cancelProps = {
-    text: "Cancel",
-  };
+    const split = this.sns.topicArn.split(":");
+    return split[split.length - 1];
+  }
 
   get cards(): CardContent[] {
     return [

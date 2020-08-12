@@ -36,7 +36,7 @@ import DrawerCards from "@/components/common/DrawerCards.vue";
 import { CardContent } from "@/components/common/cardContent";
 import { Metadata } from "@/mixins/DaintreeListComponent";
 import DeleteButtonWithConfirmation from "@/components/common/DeleteButtonWithConfirmation.vue";
-import { extractNameFromEC2Tags } from "@/components/common/tags";
+import { extractNameFromEC2Tags } from "@/components/common/tags.ts";
 
 @Component({
   components: {

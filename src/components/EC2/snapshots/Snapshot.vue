@@ -1,23 +1,12 @@
 <template>
   <div>
-    <gl-modal
-      modal-id="delete-snapshot-modal"
-      :title="`Delete ${snapshotName}`"
-      no-fade
-      :action-primary="deleteSnapshotButtonProps"
-      :action-cancel="cancelProps"
+    <DeleteButtonWithConfirmation
+      class="text-center"
+      resource-type="snapshot"
+      :resource-id="snapshot.SnapshotId"
+      :resource-name="snapshotName"
       @primary="deleteSnapshot"
-    >
-      Are you sure that you want to delete this snapshot ({{ snapshotName }})?
-    </gl-modal>
-    <div class="col-12 text-center">
-      <gl-button
-        variant="danger"
-        category="secondary"
-        v-gl-modal-directive="'delete-snapshot-modal'"
-        >Delete this snapshot
-      </gl-button>
-    </div>
+    />
 
     <DrawerCards :cards="cards" />
 
@@ -31,72 +20,26 @@
 </template>
 
 <script lang="ts">
-import {
-  GlEmptyState,
-  GlSkeletonLoading,
-  GlTable,
-  GlCard,
-  GlAlert,
-  GlButton,
-  GlModal,
-  GlTabs,
-  GlModalDirective,
-  GlTab,
-  GlButtonGroup,
-  GlLink,
-  GlProgressBar,
-} from "@gitlab/ui";
 import EC2Client from "aws-sdk/clients/ec2";
 import { Component, Prop } from "vue-property-decorator";
 import TagsTable from "@/components/common/TagsTable.vue";
-import SubnetTab from "@/components/network/subnets/SubnetTab.vue";
 import { snapshots } from "@/components/EC2/snapshots/snapshot";
 import SnapshotWithRegion = snapshots.SnapshotWithRegion;
 import { DaintreeComponent } from "@/mixins/DaintreeComponent";
-import StateText from "@/components/common/StateText.vue";
-import RegionText from "@/components/common/RegionText.vue";
 import DrawerCards from "@/components/common/DrawerCards.vue";
 import { CardContent } from "@/components/common/cardContent";
-import { Formatters } from "@/mixins/formatters";
-import { mixins } from "vue-class-component";
+import DeleteButtonWithConfirmation from "@/components/common/DeleteButtonWithConfirmation.vue";
+import { extractNameFromEC2Tags } from "@/components/common/tags";
 
 @Component({
   components: {
     DrawerCards,
     TagsTable,
-    GlTable,
-    GlEmptyState,
-    GlSkeletonLoading,
-    GlCard,
-    GlAlert,
-    GlButton,
-    GlModal,
-    GlProgressBar,
-    SubnetTab,
-    StateText,
-    RegionText,
-    GlTab,
-    GlTabs,
-    GlButtonGroup,
-    GlLink,
-  },
-  directives: {
-    "gl-modal-directive": GlModalDirective,
+    DeleteButtonWithConfirmation,
   },
 })
-export default class Snapshot extends mixins(DaintreeComponent, Formatters) {
+export default class Snapshot extends DaintreeComponent {
   @Prop(Object) readonly snapshot!: SnapshotWithRegion;
-
-  deleteSnapshotButtonProps = {
-    text: "Delete snapshot",
-    attributes: {
-      variant: "danger",
-    },
-  };
-
-  cancelProps = {
-    text: "Cancel",
-  };
 
   get cards(): CardContent[] {
     return [
@@ -148,9 +91,7 @@ export default class Snapshot extends mixins(DaintreeComponent, Formatters) {
   }
 
   get snapshotName(): string | undefined {
-    const tagName = this.extractNameFromTags(this.snapshot.Tags || []);
-
-    return tagName || this.snapshot.SnapshotId;
+    return extractNameFromEC2Tags(this.snapshot.Tags || []);
   }
 
   async EC2Client() {
@@ -193,9 +134,3 @@ export default class Snapshot extends mixins(DaintreeComponent, Formatters) {
   }
 }
 </script>
-
-<style scoped>
-.hidden-header {
-  display: none;
-}
-</style>

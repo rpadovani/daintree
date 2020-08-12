@@ -34,6 +34,7 @@
       variant="danger"
       category="secondary"
       v-gl-modal-directive="'confirm-deletion'"
+      :disabled="disabled"
       >Delete this {{ resourceType }}</gl-button
     >
   </div>
@@ -55,6 +56,7 @@ export default class DeleteButtonWithConfirmation extends Vue {
   @Prop() readonly resourceType!: string;
   @Prop() readonly resourceId!: string;
   @Prop({ default: "" }) readonly resourceName!: string;
+  @Prop({ default: false }) readonly disabled!: boolean;
 
   confirmationBox = "";
 

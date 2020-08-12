@@ -118,7 +118,7 @@ import StateText from "@/components/common/StateText.vue";
 import { NetworkComponent } from "@/components/network/networkComponent";
 import DhcpOptions from "./DhcpOptions.vue";
 import { DescribeDhcpOptionsRequest } from "aws-sdk/clients/ec2";
-import { extractNameFromEC2Tags } from "@/components/common/tags";
+import { extractNameFromEC2Tags } from "@/components/common/tags.ts";
 
 @Component({
   components: {

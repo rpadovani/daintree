@@ -1,29 +1,20 @@
 <template>
   <gl-tabs theme="blue" lazy>
     <gl-tab title="Overview">
-      <gl-modal
-        modal-id="delete-vpc-modal"
-        title="Delete VPC"
-        no-fade
-        :action-primary="deleteVpcButtonProps"
-        :action-cancel="cancelProps"
-        @primary="deleteVpc"
-      >
-        Are you sure that you want to delete this VPC?
-      </gl-modal>
       <div class="row justify-content-between">
         <gl-alert :variant="alertVariant" :dismissible="false" class="col-9">
           <b>{{ vpc.State }}</b>
         </gl-alert>
-        <gl-button
+
+        <DeleteButtonWithConfirmation
           style="height: 100%;"
           class="mt-2 col-2"
-          variant="danger"
-          category="secondary"
+          resource-type="VPC"
+          :resource-id="vpc.VpcId"
+          :resource-name="resourceName"
+          @primary="deleteVpc"
           :disabled="vpc.State !== 'available'"
-          v-gl-modal-directive="'delete-vpc-modal'"
-          >Delete this VPC</gl-button
-        >
+        />
       </div>
 
       <DrawerCards :cards="cards" />
@@ -173,8 +164,6 @@ import {
   GlCard,
   GlAlert,
   GlButton,
-  GlModal,
-  GlModalDirective,
 } from "@gitlab/ui";
 import EC2Client from "aws-sdk/clients/ec2";
 import { Component, Prop, Watch } from "vue-property-decorator";
@@ -197,7 +186,8 @@ import { CardContent } from "@/components/common/cardContent";
 import DrawerCards from "@/components/common/DrawerCards.vue";
 import RelatedSecurityGroups from "@/components/network/securityGroups/RelatedSecurityGroups.vue";
 import RelatedNetworkInterfaces from "@/components/network/networkInterfaces/RelatedNetworkInterfaces.vue";
-import { extractNameFromEC2Tags } from "@/components/common/tags";
+import { extractNameFromEC2Tags } from "@/components/common/tags.ts";
+import DeleteButtonWithConfirmation from "@/components/common/DeleteButtonWithConfirmation.vue";
 
 @Component({
   components: {
@@ -213,24 +203,19 @@ import { extractNameFromEC2Tags } from "@/components/common/tags";
     GlCard,
     GlAlert,
     GlButton,
-    GlModal,
     FlowLogsTab,
     SubnetTab,
     RelatedInstances,
     DrawerCards,
+    DeleteButtonWithConfirmation,
   },
-  directives: { "gl-modal-directive": GlModalDirective },
 })
 export default class VPC extends mixins(Formatters, Notifications) {
   @Prop(Object) readonly vpc!: VpcWithRegion;
 
-  deleteVpcButtonProps = {
-    text: "Delete VPC",
-  };
-
-  cancelProps = {
-    text: "Cancel",
-  };
+  get resourceName(): string | undefined {
+    return extractNameFromEC2Tags(this.vpc.Tags);
+  }
 
   get filterByVPC(): FilterList {
     return [{ Name: "vpc-id", Values: [this.vpc.VpcId || ""] }];

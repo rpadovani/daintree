@@ -1,32 +1,20 @@
 <template>
   <gl-tabs theme="blue" lazy>
     <gl-tab title="Overview">
-      <gl-modal
-        modal-id="delete-endpoint-modal"
-        title="Delete VPC endpoint"
-        no-fade
-        :action-primary="deleteEndpointButtonProps"
-        :action-cancel="cancelProps"
-        @primary="deleteEndpoint"
-      >
-        Are you sure that you want to delete this VPC endpoint ({{
-          endpoint.VpcEndpointId
-        }})?
-      </gl-modal>
       <div class="row justify-content-between">
         <gl-alert :variant="alertVariant" :dismissible="false" class="col-9">
           Endpoint's state: <b>{{ endpoint.State }}</b>
         </gl-alert>
 
-        <gl-button
+        <DeleteButtonWithConfirmation
           style="height: 100%;"
           class="mt-2 col-2"
-          variant="danger"
-          category="secondary"
+          resource-type="VPC endpoint"
+          :resource-id="endpoint.VpcEndpointId"
+          :resource-name="resourceName"
+          @primary="deleteEndpoint"
           :disabled="endpoint.State !== 'available'"
-          v-gl-modal-directive="'delete-endpoint-modal'"
-          >Delete this endpoint</gl-button
-        >
+        />
       </div>
 
       <DrawerCards :cards="cards" />
@@ -124,8 +112,6 @@ import {
   GlButton,
   GlCard,
   GlEmptyState,
-  GlModal,
-  GlModalDirective,
   GlSkeletonLoading,
   GlTab,
   GlTable,
@@ -146,6 +132,8 @@ import hljs from "highlight.js/lib/core";
 import json from "highlight.js/lib/languages/json";
 import SubnetTab from "@/components/network/subnets/SubnetTab.vue";
 import RelatedSecurityGroups from "@/components/network/securityGroups/RelatedSecurityGroups.vue";
+import { extractNameFromEC2Tags } from "@/components/common/tags.ts";
+import DeleteButtonWithConfirmation from "@/components/common/DeleteButtonWithConfirmation.vue";
 hljs.registerLanguage("json", json);
 
 @Component({
@@ -163,10 +151,9 @@ hljs.registerLanguage("json", json);
     GlCard,
     GlAlert,
     GlButton,
-    GlModal,
     GlIcon,
+    DeleteButtonWithConfirmation,
   },
-  directives: { "gl-modal-directive": GlModalDirective },
 })
 export default class Endpoint extends DaintreeComponent {
   @Prop(Object) readonly endpoint!: VpcEndpoint & Metadata;
@@ -229,13 +216,9 @@ export default class Endpoint extends DaintreeComponent {
     return this.endpoint.Groups?.map((group) => group.GroupId).filter(isString);
   }
 
-  deleteEndpointButtonProps = {
-    text: "Delete endpoint",
-  };
-
-  cancelProps = {
-    text: "Cancel",
-  };
+  get resourceName(): string | undefined {
+    return extractNameFromEC2Tags(this.endpoint.Tags);
+  }
 
   get alertVariant(): AlertVariant {
     //toLowerCase: the typings from the library are broken :/

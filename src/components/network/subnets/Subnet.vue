@@ -1,29 +1,20 @@
 <template>
   <gl-tabs theme="blue" lazy>
     <gl-tab title="Overview">
-      <gl-modal
-        modal-id="delete-subnet-modal"
-        title="Delete subnet"
-        no-fade
-        :action-primary="deleteSubnetButtonProps"
-        :action-cancel="cancelProps"
-        @primary="deleteSubnet"
-      >
-        Are you sure that you want to delete this subnet?
-      </gl-modal>
       <div class="row justify-content-between">
         <gl-alert :variant="alertVariant" :dismissible="false" class="col-9">
           <b>{{ subnet.State }}</b>
         </gl-alert>
-        <gl-button
+
+        <DeleteButtonWithConfirmation
           style="height: 100%;"
           class="mt-2 col-2"
-          variant="danger"
-          category="secondary"
+          resource-type="subnet"
+          :resource-id="subnet.SubnetId"
+          :resource-name="resourceName"
+          @primary="deleteSubnet"
           :disabled="subnet.State !== 'available'"
-          v-gl-modal-directive="'delete-subnet-modal'"
-          >Delete this subnet</gl-button
-        >
+        />
       </div>
 
       <DrawerCards :cards="cards" />
@@ -117,8 +108,6 @@ import {
   GlCard,
   GlAlert,
   GlButton,
-  GlModal,
-  GlModalDirective,
 } from "@gitlab/ui";
 import EC2Client from "aws-sdk/clients/ec2";
 import { Component, Prop, Watch } from "vue-property-decorator";
@@ -137,6 +126,8 @@ import RelatedRoutesTable from "@/components/network/routeTables/RelatedRoutesTa
 import { CardContent } from "@/components/common/cardContent";
 import DrawerCards from "@/components/common/DrawerCards.vue";
 import RelatedNetworkInterfaces from "@/components/network/networkInterfaces/RelatedNetworkInterfaces.vue";
+import DeleteButtonWithConfirmation from "@/components/common/DeleteButtonWithConfirmation.vue";
+import { extractNameFromEC2Tags } from "@/components/common/tags";
 
 @Component({
   components: {
@@ -152,24 +143,19 @@ import RelatedNetworkInterfaces from "@/components/network/networkInterfaces/Rel
     GlCard,
     GlAlert,
     GlButton,
-    GlModal,
     StateText,
     RelatedInstances,
     DrawerCards,
     RelatedNetworkInterfaces,
+    DeleteButtonWithConfirmation,
   },
-  directives: { "gl-modal-directive": GlModalDirective },
 })
 export default class Subnet extends mixins(Formatters, Notifications) {
   @Prop(Object) readonly subnet!: SubnetWithRegion;
 
-  deleteSubnetButtonProps = {
-    text: "Delete subnet",
-  };
-
-  cancelProps = {
-    text: "Cancel",
-  };
+  get resourceName(): string | undefined {
+    return extractNameFromEC2Tags(this.subnet.Tags);
+  }
 
   get cards(): CardContent[] {
     return [

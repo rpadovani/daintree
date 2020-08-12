@@ -34,33 +34,30 @@
           </div>
         </div>
         <gl-nav-item-dropdown :text="prettyCredentials" right size="lg">
-          <gl-new-dropdown-header
+          <gl-dropdown-header
             id="dropdown-header-roles"
             v-if="roles.length > 0"
           >
             Roles
-          </gl-new-dropdown-header>
-          <gl-new-dropdown-item
+          </gl-dropdown-header>
+          <gl-dropdown-item
             v-for="(role, index) in roles"
             :key="index"
             :active="index === currentRoleIndex"
             @click="() => switchRole(index)"
           >
             {{ role.nickname || `${role.role} @ ${role.accountId}` }}
-          </gl-new-dropdown-item>
-          <gl-new-dropdown-item
-            v-if="currentRoleIndex !== -1"
-            @click="backToMain"
-          >
+          </gl-dropdown-item>
+          <gl-dropdown-item v-if="currentRoleIndex !== -1" @click="backToMain">
             Return to {{ mainUsername }}
-          </gl-new-dropdown-item>
-          <gl-new-dropdown-header id="dropdown-header-actions">
+          </gl-dropdown-item>
+          <gl-dropdown-header id="dropdown-header-actions">
             Actions
-          </gl-new-dropdown-header>
-          <gl-new-dropdown-item v-gl-modal-directive="'assume-role-modal-id'">
+          </gl-dropdown-header>
+          <gl-dropdown-item v-gl-modal-directive="'assume-role-modal-id'">
             Assume role
-          </gl-new-dropdown-item>
-          <gl-new-dropdown-item @click="signOut">Sign Out</gl-new-dropdown-item>
+          </gl-dropdown-item>
+          <gl-dropdown-item @click="signOut">Sign Out</gl-dropdown-item>
         </gl-nav-item-dropdown>
       </b-navbar-nav>
       <b-navbar-nav class="ml-auto" v-else>
@@ -76,8 +73,8 @@ import {
   GlNavbar,
   GlNavItem,
   GlNavItemDropdown,
-  GlNewDropdownItem,
-  GlNewDropdownHeader,
+  GlDropdownItem,
+  GlDropdownHeader,
 } from "@gitlab/ui";
 
 import {
@@ -99,8 +96,8 @@ import { DaintreeComponent } from "@/mixins/DaintreeComponent";
     BNavbarToggle,
     GlNavItem,
     GlNavItemDropdown,
-    GlNewDropdownItem,
-    GlNewDropdownHeader,
+    GlDropdownItem,
+    GlDropdownHeader,
     BNavbarNav,
     BCollapse,
   },

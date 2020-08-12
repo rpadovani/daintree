@@ -43,7 +43,7 @@ import { GlTable, GlSkeletonLoading, GlAlert, GlLink } from "@gitlab/ui";
 import { Formatters } from "@/mixins/formatters";
 import { mixins } from "vue-class-component";
 import StateText from "@/components/common/StateText.vue";
-import { extractNameFromEC2Tags } from "@/components/common/tags";
+import { extractNameFromEC2Tags } from "@/components/common/tags.ts";
 
 @Component({
   components: {

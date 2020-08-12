@@ -146,7 +146,7 @@ import Component from "vue-class-component";
 import StateText from "@/components/common/StateText.vue";
 import { NetworkComponent } from "@/components/network/networkComponent";
 import Peering from "@/components/network/peering/Peering.vue";
-import { extractNameFromEC2Tags } from "@/components/common/tags";
+import { extractNameFromEC2Tags } from "@/components/common/tags.ts";
 
 @Component({
   components: {

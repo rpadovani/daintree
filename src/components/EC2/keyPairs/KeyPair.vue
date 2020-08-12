@@ -1,27 +1,12 @@
 <template>
   <div>
-    <gl-modal
-      modal-id="delete-key-pair-modal"
-      :title="`Delete ${keyPair.KeyName}`"
-      no-fade
-      :action-primary="deleteKeyPairButtonProps"
-      :action-cancel="cancelProps"
+    <DeleteButtonWithConfirmation
+      class="text-center"
+      resource-type="key pair"
+      :resource-id="keyPair.KeyPairId"
+      :resource-name="keyPair.KeyName"
       @primary="deleteKeyPair"
-    >
-      Are you sure that you want to delete this key pair ({{
-        keyPair.KeyName
-      }})?
-    </gl-modal>
-    <div class="row justify-content-center">
-      <gl-button
-        style="height: 100%;"
-        class="mt-2 col-2"
-        variant="danger"
-        category="secondary"
-        v-gl-modal-directive="'delete-key-pair-modal'"
-        >Delete this key pair
-      </gl-button>
-    </div>
+    />
 
     <DrawerCards :cards="cards" />
 
@@ -43,60 +28,27 @@
 </template>
 
 <script lang="ts">
-import {
-  GlEmptyState,
-  GlSkeletonLoading,
-  GlTable,
-  GlCard,
-  GlAlert,
-  GlButton,
-  GlModal,
-  GlModalDirective,
-} from "@gitlab/ui";
 import EC2Client from "aws-sdk/clients/ec2";
 import { Component, Prop } from "vue-property-decorator";
 import TagsTable from "@/components/common/TagsTable.vue";
-import FlowLogsTab from "@/components/network/flowLogs/FlowLogsTab.vue";
-import SubnetTab from "@/components/network/subnets/SubnetTab.vue";
 import { keyPairs } from "@/components/EC2/keyPairs/keyPair";
 import KeyPairWithRegion = keyPairs.KeyPairWithRegion;
 import { DaintreeComponent } from "@/mixins/DaintreeComponent";
-import StateText from "@/components/common/StateText.vue";
 import RelatedInstances from "@/components/EC2/instances/RelatedInstances.vue";
 import { CardContent } from "@/components/common/cardContent";
 import DrawerCards from "@/components/common/DrawerCards.vue";
+import DeleteButtonWithConfirmation from "@/components/common/DeleteButtonWithConfirmation.vue";
 
 @Component({
   components: {
     RelatedInstances,
     TagsTable,
-    GlTable,
-    GlEmptyState,
-    GlSkeletonLoading,
-    GlCard,
-    GlAlert,
-    GlButton,
-    GlModal,
-    FlowLogsTab,
-    SubnetTab,
-    StateText,
     DrawerCards,
+    DeleteButtonWithConfirmation,
   },
-  directives: { "gl-modal-directive": GlModalDirective },
 })
 export default class KeyPair extends DaintreeComponent {
   @Prop(Object) readonly keyPair!: KeyPairWithRegion;
-
-  deleteKeyPairButtonProps = {
-    text: "Delete key pair",
-    attributes: {
-      variant: "danger",
-    },
-  };
-
-  cancelProps = {
-    text: "Cancel",
-  };
 
   get cards(): CardContent[] {
     return [
@@ -157,9 +109,3 @@ export default class KeyPair extends DaintreeComponent {
   }
 }
 </script>
-
-<style scoped>
-.hidden-header {
-  display: none;
-}
-</style>

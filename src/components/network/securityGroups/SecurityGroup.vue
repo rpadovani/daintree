@@ -9,19 +9,13 @@
     </gl-alert>
     <gl-tabs theme="blue" lazy>
       <gl-tab title="Overview">
-        <gl-modal
-          modal-id="delete-security-group-modal"
-          title="Delete security group"
-          no-fade
-          :action-primary="deleteSecurityGroupButtonProps"
-          :action-cancel="cancelProps"
+        <DeleteButtonWithConfirmation
+          class="text-center"
+          resource-type="security group"
+          :resource-id="securityGroup.GroupId"
+          :resource-name="resourceName"
           @primary="deleteSecurityGroup"
-        >
-          Are you sure that you want to delete this security group (<b>{{
-            securityGroup.GroupId
-          }}</b
-          >)?
-        </gl-modal>
+        />
 
         <DrawerCards :cards="cards" />
 
@@ -76,19 +70,7 @@
 </template>
 
 <script lang="ts">
-import {
-  GlEmptyState,
-  GlSkeletonLoading,
-  GlTab,
-  GlTable,
-  GlTabs,
-  GlCard,
-  GlAlert,
-  GlButton,
-  GlModal,
-  GlModalDirective,
-  GlButtonGroup,
-} from "@gitlab/ui";
+import { GlTab, GlTabs, GlAlert } from "@gitlab/ui";
 import EC2Client from "aws-sdk/clients/ec2";
 import { Component, Prop } from "vue-property-decorator";
 import TagsTable from "@/components/common/TagsTable.vue";
@@ -102,6 +84,8 @@ import { CardContent } from "@/components/common/cardContent";
 import { DaintreeComponent } from "@/mixins/DaintreeComponent";
 import DrawerCards from "@/components/common/DrawerCards.vue";
 import RelatedNetworkInterfaces from "@/components/network/networkInterfaces/RelatedNetworkInterfaces.vue";
+import DeleteButtonWithConfirmation from "@/components/common/DeleteButtonWithConfirmation.vue";
+import { extractNameFromEC2Tags } from "@/components/common/tags";
 
 @Component({
   components: {
@@ -110,20 +94,13 @@ import RelatedNetworkInterfaces from "@/components/network/networkInterfaces/Rel
     TagsTable,
     GlTabs,
     GlTab,
-    GlTable,
-    GlEmptyState,
-    GlSkeletonLoading,
-    GlCard,
     GlAlert,
-    GlButton,
-    GlModal,
     FlowLogsTab,
-    GlButtonGroup,
     SubnetTab,
     DrawerCards,
     RelatedNetworkInterfaces,
+    DeleteButtonWithConfirmation,
   },
-  directives: { "gl-modal-directive": GlModalDirective },
 })
 export default class SecurityGroup extends DaintreeComponent {
   @Prop(Object) readonly securityGroup!: SecurityGroupWithRegion;
@@ -132,14 +109,9 @@ export default class SecurityGroup extends DaintreeComponent {
   alertVariant = "";
   alertMessage = "";
 
-  deleteSecurityGroupButtonProps = {
-    text: "Delete security group",
-    attributes: [{ variant: "danger" }],
-  };
-
-  cancelProps = {
-    text: "Cancel",
-  };
+  get resourceName(): string | undefined {
+    return extractNameFromEC2Tags(this.securityGroup.Tags);
+  }
 
   get cards(): CardContent[] {
     return [

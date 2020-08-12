@@ -13,81 +13,89 @@
       <div>
         Statistic
         <gl-new-dropdown class="ml-2" icon="tachometer" :text="stat">
-          <gl-dropdown-item @click="() => (selectedStat = 'Sum')">
+          <gl-new-dropdown-item @click="() => (selectedStat = 'Sum')">
             Sum
-          </gl-dropdown-item>
-          <gl-dropdown-item @click="() => (selectedStat = 'Average')">
+          </gl-new-dropdown-item>
+          <gl-new-dropdown-item @click="() => (selectedStat = 'Average')">
             Average
-          </gl-dropdown-item>
-          <gl-dropdown-item @click="() => (selectedStat = 'Minimum')">
+          </gl-new-dropdown-item>
+          <gl-new-dropdown-item @click="() => (selectedStat = 'Minimum')">
             Minimum
-          </gl-dropdown-item>
-          <gl-dropdown-item @click="() => (selectedStat = 'Maximum')">
+          </gl-new-dropdown-item>
+          <gl-new-dropdown-item @click="() => (selectedStat = 'Maximum')">
             Maximum
-          </gl-dropdown-item>
-          <gl-dropdown-item @click="() => (selectedStat = 'Sample Count')">
+          </gl-new-dropdown-item>
+          <gl-new-dropdown-item @click="() => (selectedStat = 'Sample Count')">
             Sample Count
-          </gl-dropdown-item>
+          </gl-new-dropdown-item>
         </gl-new-dropdown>
       </div>
 
       <div>
         Period
         <gl-new-dropdown class="ml-2" icon="timer" :text="period">
-          <gl-dropdown-item @click="() => (selectedPeriod = 60)">
+          <gl-new-dropdown-item @click="() => (selectedPeriod = 60)">
             1 minute
-          </gl-dropdown-item>
-          <gl-dropdown-item @click="() => (selectedPeriod = 60 * 5)">
+          </gl-new-dropdown-item>
+          <gl-new-dropdown-item @click="() => (selectedPeriod = 60 * 5)">
             5 minutes
-          </gl-dropdown-item>
-          <gl-dropdown-item @click="() => (selectedPeriod = 60 * 15)">
+          </gl-new-dropdown-item>
+          <gl-new-dropdown-item @click="() => (selectedPeriod = 60 * 15)">
             15 minutes
-          </gl-dropdown-item>
-          <gl-dropdown-item @click="() => (selectedPeriod = 60 * 60)">
+          </gl-new-dropdown-item>
+          <gl-new-dropdown-item @click="() => (selectedPeriod = 60 * 60)">
             1 hour
-          </gl-dropdown-item>
-          <gl-dropdown-item @click="() => (selectedPeriod = 60 * 60 * 6)">
+          </gl-new-dropdown-item>
+          <gl-new-dropdown-item @click="() => (selectedPeriod = 60 * 60 * 6)">
             6 hours
-          </gl-dropdown-item>
-          <gl-dropdown-item @click="() => (selectedPeriod = 60 * 60 * 24)">
+          </gl-new-dropdown-item>
+          <gl-new-dropdown-item @click="() => (selectedPeriod = 60 * 60 * 24)">
             1 day
-          </gl-dropdown-item>
+          </gl-new-dropdown-item>
         </gl-new-dropdown>
       </div>
 
       <div>
         Time range
         <gl-new-dropdown class="ml-2" icon="clock" :text="timeRange">
-          <gl-dropdown-item @click="() => (selectedTimeRange = 60 * 60)">
+          <gl-new-dropdown-item @click="() => (selectedTimeRange = 60 * 60)">
             Last 1 hour
-          </gl-dropdown-item>
-          <gl-dropdown-item @click="() => (selectedTimeRange = 60 * 60 * 3)">
+          </gl-new-dropdown-item>
+          <gl-new-dropdown-item
+            @click="() => (selectedTimeRange = 60 * 60 * 3)"
+          >
             Last 3 hours
-          </gl-dropdown-item>
-          <gl-dropdown-item @click="() => (selectedTimeRange = 60 * 60 * 6)">
+          </gl-new-dropdown-item>
+          <gl-new-dropdown-item
+            @click="() => (selectedTimeRange = 60 * 60 * 6)"
+          >
             Last 6 hours
-          </gl-dropdown-item>
-          <gl-dropdown-item @click="() => (selectedTimeRange = 60 * 60 * 12)">
+          </gl-new-dropdown-item>
+          <gl-new-dropdown-item
+            @click="() => (selectedTimeRange = 60 * 60 * 12)"
+          >
             Last 12 hours
-          </gl-dropdown-item>
-          <gl-dropdown-item @click="() => (selectedTimeRange = 60 * 60 * 24)">
+          </gl-new-dropdown-item>
+          <gl-new-dropdown-item
+            @click="() => (selectedTimeRange = 60 * 60 * 24)"
+          >
             Last 24 hours
-          </gl-dropdown-item>
-          <gl-dropdown-item
+          </gl-new-dropdown-item>
+          <gl-new-dropdown-item
             @click="() => (selectedTimeRange = 60 * 60 * 24 * 3)"
           >
             Last 3 days
-          </gl-dropdown-item>
-          <gl-dropdown-item
+          </gl-new-dropdown-item>
+          <gl-new-dropdown-item
             @click="() => (selectedTimeRange = 60 * 60 * 24 * 7)"
           >
             Last 1 week
-          </gl-dropdown-item>
-          <gl-dropdown-item
+          </gl-new-dropdown-item>
+          <gl-new-dropdown-item
             @click="() => (selectedTimeRange = 60 * 60 * 24 * 14)"
           >
             Last 2 weeks
-          </gl-dropdown-item>
+          </gl-new-dropdown-item>
         </gl-new-dropdown>
       </div>
 
@@ -123,7 +131,7 @@ import { BvModal } from "bootstrap-vue";
 import {
   GlModal,
   GlNewDropdown,
-  GlDropdownItem,
+  GlNewDropdownItem,
   GlDaterangePicker,
   GlIcon,
   GlLoadingIcon,
@@ -141,7 +149,7 @@ import Notifications from "@/mixins/notifications";
     GlModal,
     GlLineChart,
     GlNewDropdown,
-    GlDropdownItem,
+    GlNewDropdownItem,
     GlDaterangePicker,
     GlIcon,
     GlLoadingIcon,

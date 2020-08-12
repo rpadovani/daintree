@@ -1,29 +1,20 @@
 <template>
   <gl-tabs theme="blue" v-if="nat" class="mt-n3" lazy>
     <gl-tab title="Overview">
-      <gl-modal
-        modal-id="delete-nat-modal"
-        title="Delete NAT gateway"
-        no-fade
-        :action-primary="deleteNatButtonProps"
-        :action-cancel="cancelProps"
-        @primary="deleteNat"
-      >
-        Are you sure that you want to delete this NAT gateway?
-      </gl-modal>
       <div class="row justify-content-between">
         <gl-alert :variant="alertVariant" :dismissible="false" class="col-9">
           <b>{{ nat.State }}</b>
         </gl-alert>
-        <gl-button
+
+        <DeleteButtonWithConfirmation
           style="height: 100%;"
           class="mt-2 col-2"
-          variant="danger"
-          category="secondary"
+          resource-type="NAT Gateway"
+          :resource-id="nat.NatGatewayId"
+          :resource-name="resourceName"
+          @primary="deleteNat"
           :disabled="nat.State !== 'available'"
-          v-gl-modal-directive="'delete-nat-modal'"
-          >Delete this NAT Gateway</gl-button
-        >
+        />
       </div>
 
       <DrawerCards :cards="cards" />
@@ -159,16 +150,7 @@
 </template>
 
 <script lang="ts">
-import {
-  GlTable,
-  GlCard,
-  GlAlert,
-  GlButton,
-  GlModal,
-  GlModalDirective,
-  GlTabs,
-  GlTab,
-} from "@gitlab/ui";
+import { GlAlert, GlTabs, GlTab } from "@gitlab/ui";
 import { Formatters } from "@/mixins/formatters";
 import { Prop, Component } from "vue-property-decorator";
 import { nats } from "@/components/network/NAT/nat";
@@ -182,33 +164,27 @@ import { Metric } from "aws-sdk/clients/cloudwatch";
 import RelatedRoutesTable from "@/components/network/routeTables/RelatedRoutesTable.vue";
 import { CardContent } from "@/components/common/cardContent";
 import DrawerCards from "@/components/common/DrawerCards.vue";
+import { extractNameFromEC2Tags } from "@/components/common/tags";
+import DeleteButtonWithConfirmation from "@/components/common/DeleteButtonWithConfirmation.vue";
 
 @Component({
   components: {
     RelatedRoutesTable,
     TagsTable,
-    GlTable,
-    GlCard,
     GlAlert,
-    GlButton,
-    GlModal,
     GlTabs,
     GlTab,
     CloudwatchWidget,
     DrawerCards,
+    DeleteButtonWithConfirmation,
   },
-  directives: { "gl-modal-directive": GlModalDirective },
 })
 export default class Nat extends mixins(Formatters, Notifications) {
   @Prop(Object) readonly nat!: NatWithRegion;
 
-  deleteNatButtonProps = {
-    text: "Delete NAT Gateway",
-  };
-
-  cancelProps = {
-    text: "Cancel",
-  };
+  get resourceName(): string | undefined {
+    return extractNameFromEC2Tags(this.nat.Tags);
+  }
 
   get createTime(): string | undefined {
     if (this.nat.CreateTime) {

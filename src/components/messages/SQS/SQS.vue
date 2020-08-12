@@ -13,18 +13,6 @@
         >?
       </gl-modal>
 
-      <gl-modal
-        modal-id="delete-sqs-modal"
-        title="Delete queue"
-        no-fade
-        :action-primary="deleteSqsButtonProps"
-        :action-cancel="cancelProps"
-        @primary="deleteSqs"
-      >
-        Are you sure that you want to delete the queue named
-        <b>{{ sqs.queueUrl.split("/")[sqs.queueUrl.split("/").length - 1] }}</b
-        >?
-      </gl-modal>
       <div class="row justify-content-center">
         <gl-button-group>
           <gl-button
@@ -33,12 +21,12 @@
             v-gl-modal-directive="'purge-sqs-modal'"
             >Purge this queue
           </gl-button>
-          <gl-button
-            variant="danger"
-            category="secondary"
-            v-gl-modal-directive="'delete-sqs-modal'"
-            >Delete this queue
-          </gl-button>
+          <DeleteButtonWithConfirmation
+            class="text-center"
+            resource-type="queue"
+            :resource-id="queueName"
+            @primary="deleteSqs"
+          />
         </gl-button-group>
       </div>
 
@@ -196,6 +184,7 @@ import { Metric } from "aws-sdk/clients/cloudwatch";
 import DrawerCards from "@/components/common/DrawerCards.vue";
 import { CardContent } from "@/components/common/cardContent";
 import { DaintreeComponent } from "@/mixins/DaintreeComponent";
+import DeleteButtonWithConfirmation from "@/components/common/DeleteButtonWithConfirmation.vue";
 
 @Component({
   components: {
@@ -212,15 +201,12 @@ import { DaintreeComponent } from "@/mixins/DaintreeComponent";
     GlModal,
     GlButtonGroup,
     DrawerCards,
+    DeleteButtonWithConfirmation,
   },
   directives: { "gl-modal-directive": GlModalDirective },
 })
 export default class SQS extends DaintreeComponent {
   @Prop(Object) readonly sqs!: QueueWithRegion;
-
-  deleteSqsButtonProps = {
-    text: "Delete queue",
-  };
 
   purgeSqsButtonProps = {
     text: "Purge queue",

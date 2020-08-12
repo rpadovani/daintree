@@ -132,7 +132,7 @@ import Component from "vue-class-component";
 import StateText from "@/components/common/StateText.vue";
 import RouteTable from "@/components/network/routeTables/RouteTable.vue";
 import { NetworkComponent } from "@/components/network/networkComponent";
-import { extractNameFromEC2Tags } from "@/components/common/tags";
+import { extractNameFromEC2Tags } from "@/components/common/tags.ts";
 
 @Component({
   components: {

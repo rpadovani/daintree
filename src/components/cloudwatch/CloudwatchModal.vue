@@ -61,24 +61,16 @@
           <gl-dropdown-item @click="() => (selectedTimeRange = 60 * 60)">
             Last 1 hour
           </gl-dropdown-item>
-          <gl-dropdown-item
-            @click="() => (selectedTimeRange = 60 * 60 * 3)"
-          >
+          <gl-dropdown-item @click="() => (selectedTimeRange = 60 * 60 * 3)">
             Last 3 hours
           </gl-dropdown-item>
-          <gl-dropdown-item
-            @click="() => (selectedTimeRange = 60 * 60 * 6)"
-          >
+          <gl-dropdown-item @click="() => (selectedTimeRange = 60 * 60 * 6)">
             Last 6 hours
           </gl-dropdown-item>
-          <gl-dropdown-item
-            @click="() => (selectedTimeRange = 60 * 60 * 12)"
-          >
+          <gl-dropdown-item @click="() => (selectedTimeRange = 60 * 60 * 12)">
             Last 12 hours
           </gl-dropdown-item>
-          <gl-dropdown-item
-            @click="() => (selectedTimeRange = 60 * 60 * 24)"
-          >
+          <gl-dropdown-item @click="() => (selectedTimeRange = 60 * 60 * 24)">
             Last 24 hours
           </gl-dropdown-item>
           <gl-dropdown-item

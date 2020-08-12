@@ -6,6 +6,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.10.0]
+
 ### Added
 
 - Add DHCP options sets support
@@ -199,7 +201,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 - First public release, with basic support for Networking, EC2, SQS, and SNS.
 
-[Unreleased]: https://gitlab.com/rpadovani/daintree/-/compare/v0.9.0...master
+[Unreleased]: https://gitlab.com/rpadovani/daintree/-/compare/v0.10.0...master
+[0.9.0]: https://gitlab.com/rpadovani/daintree/-/compare/v0.9.0...v0.10.0
 [0.9.0]: https://gitlab.com/rpadovani/daintree/-/compare/v0.8.1...v0.9.0
 [0.8.1]: https://gitlab.com/rpadovani/daintree/-/compare/v0.8.0...v0.8.1
 [0.8.0]: https://gitlab.com/rpadovani/daintree/-/compare/v0.7.0...v0.8.0

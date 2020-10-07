@@ -1105,10 +1105,10 @@
     minimatch "^3.0.4"
     strip-json-comments "^3.1.1"
 
-"@gitlab/svgs@1.170.0":
-  version "1.170.0"
-  resolved "https://registry.yarnpkg.com/@gitlab/svgs/-/svgs-1.170.0.tgz#b40fb7a8af2545683e85c2257b34f78460ed1006"
-  integrity sha512-f3GYf/iEcZPxRARK6ufx0m9rQSpgnYcQFYUtM5uQs+oMTse9oSSk/pQ6Vru9mgIcxw3YiYVMjP/WsP5EgVABbw==
+"@gitlab/svgs@1.171.0":
+  version "1.171.0"
+  resolved "https://registry.yarnpkg.com/@gitlab/svgs/-/svgs-1.171.0.tgz#abc3092bf804f0898301626130e0f3231834924a"
+  integrity sha512-TPfdqIxQDda+0CQHhb9XdF50lmqDmADu6yT8R4oZi6BoUtWLdiHbyFt+RnVU6t7EmjIKicNAii7Ga+f2ljCfUA==
 
 "@gitlab/ui@21.16.1":
   version "21.16.1"

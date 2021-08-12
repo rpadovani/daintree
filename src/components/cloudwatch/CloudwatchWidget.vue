@@ -56,8 +56,8 @@ export default class CloudwatchWidget extends Notifications {
 
   @Prop(Number) readonly height: number | undefined;
   @Prop(Number) readonly width: number | undefined;
-  @Prop(Object) readonly xAxis: echarts.EChartOption.XAxis | undefined;
-  @Prop(Object) readonly yAxis: echarts.EChartOption.YAxis | undefined;
+  @Prop(Object) readonly xAxis: any | undefined;
+  @Prop(Object) readonly yAxis: any | undefined;
   @Prop(String) readonly graphTitle: string | undefined;
   @Prop(String) readonly label: string | undefined;
 

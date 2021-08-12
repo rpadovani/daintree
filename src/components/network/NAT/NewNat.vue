@@ -74,7 +74,7 @@
         variant="success"
         size="medium"
         class="mt-4"
-        style="height: 100%;"
+        style="height: 100%"
         :disabled="selectedRegion === ''"
         @click="newIp"
         :loading="allocateLoading"
@@ -319,10 +319,6 @@ export default class NewNat extends mixins(DaintreeComponent, Formatters) {
 
   beforeDestroy() {
     this.$root.$off("refresh");
-  }
-
-  get currentRoleIndex(): number {
-    return this.$store.getters["sts/currentRoleIndex"];
   }
 
   @Watch("currentRoleIndex")

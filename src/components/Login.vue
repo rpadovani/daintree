@@ -2,9 +2,9 @@
   <gl-tabs
     theme="blue"
     class="mx-auto mt-5"
-    style="max-width: 600px; width: 99%;"
+    style="max-width: 600px; width: 99%"
   >
-    <gl-tab title="Login with Access Key">
+    <gl-tab title="Login with APLS">
       <gl-form-group
         id="access-key-id"
         label="Access Key ID"

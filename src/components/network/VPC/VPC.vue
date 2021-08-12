@@ -7,7 +7,7 @@
         </gl-alert>
 
         <DeleteButtonWithConfirmation
-          style="height: 100%;"
+          style="height: 100%"
           class="mt-2 col-2"
           resource-type="VPC"
           :resource-id="vpc.VpcId"
@@ -186,7 +186,7 @@ import { CardContent } from "@/components/common/cardContent";
 import DrawerCards from "@/components/common/DrawerCards.vue";
 import RelatedSecurityGroups from "@/components/network/securityGroups/RelatedSecurityGroups.vue";
 import RelatedNetworkInterfaces from "@/components/network/networkInterfaces/RelatedNetworkInterfaces.vue";
-import { extractNameFromEC2Tags } from "@/components/common/tags.ts";
+import { extractNameFromEC2Tags } from "@/components/common/tags";
 import DeleteButtonWithConfirmation from "@/components/common/DeleteButtonWithConfirmation.vue";
 
 @Component({

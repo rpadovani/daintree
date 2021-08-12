@@ -167,8 +167,8 @@ export default class CloudwatchModal extends Notifications {
   protected readonly region!: string;
   protected readonly credentials!: Credentials;
   protected readonly visible!: boolean;
-  protected readonly xAxis!: echarts.EChartOption.XAxis;
-  protected readonly yAxis!: echarts.EChartOption.YAxis;
+  protected readonly xAxis!: any;
+  protected readonly yAxis!: any;
 
   loading = false;
 
@@ -188,7 +188,7 @@ export default class CloudwatchModal extends Notifications {
     attributes: [{ hidden: true }],
   };
 
-  get chartOptions(): echarts.EChartOption {
+  get chartOptions(): any {
     return {
       xAxis: this.xAxis,
       yAxis: this.yAxis,

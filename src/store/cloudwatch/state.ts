@@ -6,12 +6,12 @@ export class CloudwatchState {
   region: string | undefined = undefined;
   modalTitle: string | undefined = undefined;
 
-  xAxis: echarts.EChartOption.XAxis = {
+  xAxis: any = {
     name: "Time",
     type: "category",
   };
 
-  yAxis: echarts.EChartOption.YAxis = {
+  yAxis: any = {
     name: "Count",
   };
 }

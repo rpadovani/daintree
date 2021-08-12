@@ -201,10 +201,6 @@ export default class NewRouteTable extends mixins(
     }
   }
 
-  get currentRoleIndex(): number {
-    return this.$store.getters["sts/currentRoleIndex"];
-  }
-
   mounted(): void {
     this.$root.$on("refresh", this.regionChanged);
   }

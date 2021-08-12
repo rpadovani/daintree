@@ -37,7 +37,7 @@
     ></i>
 
     <i v-if="errorLoading" class="pt-2 mt-2 mb-0 pb-0">
-      <small style="color: red;">
+      <small style="color: red">
         We weren't able to determine which regions you have access to, so we
         show you all of them.
       </small></i
@@ -101,7 +101,7 @@ export default class RegionModal extends Vue {
   }
 
   get isLoggedIn(): boolean {
-    return this.$store.getters["sts/isLoggedIn"];
+    return true;
   }
 
   get regions(): string[] {

@@ -77,7 +77,7 @@
         <div class="row mt-2 p-2">
           <div class="col-12 col-lg-6 order-12 order-lg-0">
             <img
-              style="max-height: 200px;"
+              style="max-height: 200px"
               src="/assets/undraw_visualization_c2ps.svg"
               alt="Cool"
               class="mx-auto d-block"
@@ -143,7 +143,7 @@
 
         <div class="row mt-2 p-2">
           <img
-            style="max-height: 200px;"
+            style="max-height: 200px"
             class="col-12 col-lg-6 order-12 order-lg-0"
             src="/assets/undraw_fast_loading_0lbh.svg"
             alt="Fast loading"
@@ -177,7 +177,7 @@
           </div>
           <div class="col-12 col-lg-6">
             <img
-              style="max-height: 200px;"
+              style="max-height: 200px"
               src="/assets/undraw_To_the_stars_qhyy.svg"
               alt="To the stars!"
               class="mx-auto d-block"

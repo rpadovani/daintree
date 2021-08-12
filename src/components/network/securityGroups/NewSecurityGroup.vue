@@ -199,9 +199,6 @@ export default class NewSecurityGroup extends mixins(
     }
   }
 
-  get currentRoleIndex(): number {
-    return this.$store.getters["sts/currentRoleIndex"];
-  }
 
   @Watch("currentRoleIndex")
   onCurrentRoleIndexChanged() {

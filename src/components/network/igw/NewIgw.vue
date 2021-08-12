@@ -261,10 +261,6 @@ export default class NewIgw extends mixins(DaintreeComponent, Formatters) {
     });
   }
 
-  get currentRoleIndex(): number {
-    return this.$store.getters["sts/currentRoleIndex"];
-  }
-
   @Watch("currentRoleIndex")
   onCurrentRoleIndexChanged() {
     this.regionChanged();

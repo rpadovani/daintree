@@ -100,12 +100,13 @@ const router = new VueRouter({
 });
 
 router.beforeEach((to, from, next) => {
-  if (to.meta.requiresLogin && !store.getters["sts/isLoggedIn"]) {
-    store.commit("sts/routeAfterLogin", to);
-    next("/login");
-  } else {
-    next();
-  }
+  next()
+  // if (to.meta.requiresLogin && !store.getters["sts/isLoggedIn"]) {
+  //   store.commit("sts/routeAfterLogin", to);
+  //   next("/login");
+  // } else {
+  //   next();
+  // }
 });
 
 router.afterEach((to) => {

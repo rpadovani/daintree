@@ -9,9 +9,7 @@
         />
       </div>
       <div class="gl-banner-content">
-        <h1 class="gl-banner-title">
-          Login with OAuth!
-        </h1>
+        <h1 class="gl-banner-title">Login with OAuth!</h1>
         <p>
           If you don't want to share your AWS keys with a random website
           (rightly so!), you can login with an OAuth provider of your choice,
@@ -35,9 +33,7 @@
           please write to
           <a href="mailto:rpadovani@daintree.app">rpadovani@daintree.app</a>.
         </p>
-        <h1 class="gl-banner-title">
-          Parameters
-        </h1>
+        <h1 class="gl-banner-title">Parameters</h1>
         <p>
           For this workflow to work you need a well configured
           <a

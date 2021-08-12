@@ -17,12 +17,13 @@
         <gl-nav-item to="/about">Features</gl-nav-item>
         <gl-nav-item to="/contribute">Contribute</gl-nav-item>
       </b-navbar-nav>
-      <b-navbar-nav class="ml-auto" v-if="prettyCredentials">
+      <b-navbar-nav class="ml-auto" >
         <div
           class="col my-auto"
           v-if="regions"
           v-gl-modal-directive="'region-modal-id'"
         >
+          ciao
           <div class="row" v-for="n in nrRegionsRows" :key="n">
             <RegionText
               class="ml-1"
@@ -60,9 +61,7 @@
           <gl-dropdown-item @click="signOut">Sign Out</gl-dropdown-item>
         </gl-nav-item-dropdown>
       </b-navbar-nav>
-      <b-navbar-nav class="ml-auto" v-else>
-        <gl-nav-item to="/login">Login</gl-nav-item>
-      </b-navbar-nav>
+
     </b-collapse>
   </gl-navbar>
 </template>
@@ -112,10 +111,6 @@ export default class Header extends DaintreeComponent {
 
   get roles(): Role[] {
     return this.$store.getters["sts/roles"];
-  }
-
-  get currentRoleIndex() {
-    return this.$store.getters["sts/currentRoleIndex"];
   }
 
   get prettyCredentials(): string {

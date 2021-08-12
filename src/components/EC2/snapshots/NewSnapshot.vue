@@ -60,9 +60,7 @@
       </gl-form-input-group>
 
       <div class="row justify-content-between mt-3">
-        <gl-button category="secondary" to="/ec2/snapshots">
-          Cancel
-        </gl-button>
+        <gl-button category="secondary" to="/ec2/snapshots"> Cancel </gl-button>
         <gl-button
           class="float-right"
           type="submit"

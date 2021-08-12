@@ -30,7 +30,7 @@ import { GlButton, GlButtonGroup, GlBadge } from "@gitlab/ui";
         year: "numeric",
         month: "short",
         day: "numeric",
-      };
+      } as const;
 
       return new Date(date).toLocaleDateString(undefined, options);
     },

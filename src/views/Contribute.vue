@@ -17,9 +17,7 @@
           Any help is appreciated!
         </p>
 
-        <h1 class="gl-banner-title">
-          Report a bug
-        </h1>
+        <h1 class="gl-banner-title">Report a bug</h1>
         <p>
           If you found a bug, the best way to report it would be opening an
           issue in the
@@ -41,9 +39,7 @@
           <a href="mailto:security@daintree.app">security@daintree.app</a>.
         </p>
 
-        <h1 class="gl-banner-title">
-          Spread the word!
-        </h1>
+        <h1 class="gl-banner-title">Spread the word!</h1>
 
         <p>
           More users mean more feedback, and more people available to help the
@@ -54,9 +50,7 @@
           >.
         </p>
 
-        <h1 class="gl-banner-title">
-          Contact the developer
-        </h1>
+        <h1 class="gl-banner-title">Contact the developer</h1>
 
         <p>
           Since there are no trackers on this website, developers have no idea
@@ -65,9 +59,7 @@
           <a href="mailto:rpadovani@daintree.app">rpadovani@daintree.app</a>!
         </p>
 
-        <h1 class="gl-banner-title">
-          Write some code
-        </h1>
+        <h1 class="gl-banner-title">Write some code</h1>
 
         <p>
           Daintree is written in Vue.js + Typescript: if you want to contribute

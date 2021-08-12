@@ -42,7 +42,7 @@ import EC2Client, {
 } from "aws-sdk/clients/ec2";
 import { GlTable, GlSkeletonLoading, GlLink, GlAlert } from "@gitlab/ui";
 import StateText from "@/components/common/StateText.vue";
-import { extractNameFromEC2Tags } from "@/components/common/tags.ts";
+import { extractNameFromEC2Tags } from "@/components/common/tags";
 
 @Component({
   components: {

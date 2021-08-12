@@ -8,7 +8,7 @@ export function standardDate(date: Date): string {
     day: "numeric",
     hour: "numeric",
     minute: "numeric",
-  };
+  } as const;
   return date.toLocaleDateString(undefined, options);
 }
 
@@ -21,7 +21,7 @@ export function standardDateFromUnixSecondsString(unix: string): string {
     day: "numeric",
     hour: "numeric",
     minute: "numeric",
-  };
+  } as const;
   return new Date(toNumber * 1000).toLocaleDateString(undefined, options);
 }
 
@@ -34,7 +34,7 @@ export function standardDateFromUnixSecondsString(unix: string): string {
         day: "numeric",
         hour: "numeric",
         minute: "numeric",
-      };
+      } as const;
       return date.toLocaleDateString(undefined, options);
     },
 
@@ -47,7 +47,7 @@ export function standardDateFromUnixSecondsString(unix: string): string {
         day: "numeric",
         hour: "numeric",
         minute: "numeric",
-      };
+      } as const;
       return new Date(toNumber * 1000).toLocaleDateString(undefined, options);
     },
   },
@@ -60,7 +60,7 @@ export class Formatters extends Vue {
       day: "numeric",
       hour: "numeric",
       minute: "numeric",
-    };
+    } as const;
     return date.toLocaleDateString(undefined, options);
   }
 

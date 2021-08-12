@@ -9,9 +9,7 @@
       category="secondary"
     >
       <gl-search-box-by-type v-model.trim="searchTerm" class="m-2" />
-      <gl-dropdown-header>
-        Active tasks
-      </gl-dropdown-header>
+      <gl-dropdown-header> Active tasks </gl-dropdown-header>
       <gl-dropdown-item
         :href="`#/ecs/tasksDefinitions?family=${family}&task=${encodeURIComponent(
           task

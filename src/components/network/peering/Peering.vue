@@ -7,7 +7,7 @@
         </gl-alert>
 
         <DeleteButtonWithConfirmation
-          style="height: 100%;"
+          style="height: 100%"
           class="mt-2 col-3"
           resource-type="peering connection"
           :resource-id="peering.VpcPeeringConnectionId"

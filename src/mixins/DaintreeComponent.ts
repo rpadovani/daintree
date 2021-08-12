@@ -9,6 +9,7 @@ import {
 import { mapActions, mapGetters, mapMutations } from "vuex";
 import { AppNotification } from "@/store/notifications/state";
 import store from "@/store";
+import { Command } from "@tauri-apps/api/shell";
 
 @Component({
   filters: {
@@ -107,8 +108,25 @@ export class DaintreeComponent extends Vue {
 
   async credentials(): Promise<Credentials | undefined> {
     try {
-      await this.stsCredentials.getPromise();
-      return this.stsCredentials;
+      const accessKeyId = await new Command(
+        "printenv",
+        "AWS_ACCESS_KEY_ID"
+      ).execute();
+
+      const secretAccessKey = await new Command(
+        "printenv",
+        "AWS_SECRET_ACCESS_KEY"
+      ).execute();
+
+      const sessionToken = await new Command(
+        "printenv",
+        "AWS_SESSION_TOKEN"
+      ).execute();
+
+      console.log(accessKeyId)
+
+
+      return new Credentials(accessKeyId.stdout, secretAccessKey.stdout, sessionToken.stdout);
     } catch {
       store.commit("sts/routeAfterLogin", this.$route.fullPath);
       this.showAlert({
@@ -117,7 +135,7 @@ export class DaintreeComponent extends Vue {
         variant: "warning",
       });
       sessionStorage.clear();
-      this.$router.push("/login");
+
     }
   }
 }

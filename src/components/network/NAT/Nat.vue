@@ -7,7 +7,7 @@
         </gl-alert>
 
         <DeleteButtonWithConfirmation
-          style="height: 100%;"
+          style="height: 100%"
           class="mt-2 col-2"
           resource-type="NAT Gateway"
           :resource-id="nat.NatGatewayId"

@@ -9,9 +9,7 @@
         />
       </div>
       <div class="gl-banner-content">
-        <h1 class="gl-banner-title">
-          Host Daintree on your server!
-        </h1>
+        <h1 class="gl-banner-title">Host Daintree on your server!</h1>
         <p>
           Would you like to self-host Daintree under your own domain? You are
           totally free to do so, and it's quite an easy process! Just remember:

@@ -30,7 +30,7 @@
     </gl-modal>
 
     <gl-button
-      style="height: 100%;"
+      style="height: 100%"
       variant="danger"
       category="secondary"
       v-gl-modal-directive="'confirm-deletion'"

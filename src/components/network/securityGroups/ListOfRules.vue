@@ -43,7 +43,7 @@ import FlattenRule = securityGroups.FlattenRule;
 @Component({ components: { GlTable, GlEmptyState } })
 export default class ListOfRules extends Vue {
   @Prop(Array) readonly rules: IpPermission[] | undefined;
-  @Prop(Boolean) readonly isOutbound: boolean | undefined;
+  @Prop(Boolean) readonly isOutbound: boolean = false;
 
   fields = [
     { key: "port", label: "Port range" },

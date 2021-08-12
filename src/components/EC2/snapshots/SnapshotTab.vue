@@ -73,7 +73,7 @@ import StateText from "@/components/common/StateText.vue";
 import { DaintreeComponent } from "@/mixins/DaintreeComponent";
 import { Prop, Watch } from "vue-property-decorator";
 import { Formatters } from "@/mixins/formatters";
-import { extractNameFromEC2Tags } from "@/components/common/tags.ts";
+import { extractNameFromEC2Tags } from "@/components/common/tags";
 
 @Component({
   components: {

@@ -103,8 +103,6 @@ import { DaintreeComponent } from "@/mixins/DaintreeComponent";
 export default class DrawerCards extends DaintreeComponent {
   @Prop(Array) readonly cards!: CardContent[];
 
-  accountId!: string | undefined;
-
   get filteredCards(): CardContent[] {
     return this.cards.filter(
       (card) =>

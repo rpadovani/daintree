@@ -71,7 +71,7 @@
       <div class="row">
         <code
           class="gl-font-monospace col-12 col-md-11 col-lg-9"
-          style="word-break: break-all;"
+          style="word-break: break-all"
         >
           {{ keyMaterial }}
         </code>

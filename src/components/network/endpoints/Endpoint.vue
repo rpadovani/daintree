@@ -7,7 +7,7 @@
         </gl-alert>
 
         <DeleteButtonWithConfirmation
-          style="height: 100%;"
+          style="height: 100%"
           class="mt-2 col-2"
           resource-type="VPC endpoint"
           :resource-id="endpoint.VpcEndpointId"
@@ -132,7 +132,7 @@ import hljs from "highlight.js/lib/core";
 import json from "highlight.js/lib/languages/json";
 import SubnetTab from "@/components/network/subnets/SubnetTab.vue";
 import RelatedSecurityGroups from "@/components/network/securityGroups/RelatedSecurityGroups.vue";
-import { extractNameFromEC2Tags } from "@/components/common/tags.ts";
+import { extractNameFromEC2Tags } from "@/components/common/tags";
 import DeleteButtonWithConfirmation from "@/components/common/DeleteButtonWithConfirmation.vue";
 hljs.registerLanguage("json", json);
 

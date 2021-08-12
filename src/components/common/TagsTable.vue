@@ -145,7 +145,7 @@ interface TagWithMetadata extends Tag {
   },
 })
 export default class TagsTable extends DaintreeComponent {
-  @Prop(Array) readonly tags: TagList | ECS.Tags | undefined;
+  @Prop(Array) readonly tags: TagList | ECS.Tags | undefined = [];
   @Prop(String) readonly region!: string;
   @Prop(String) readonly resourceId!: string;
   @Prop(String) readonly provider:

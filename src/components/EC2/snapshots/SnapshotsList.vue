@@ -3,7 +3,7 @@
     <gl-drawer
       :open="drawerOpened && selectedResourceKey !== ''"
       @close="close"
-      style="min-width: 80%;"
+      style="min-width: 80%"
     >
       <template #header>{{ selectedResourceTitle }}</template>
 
@@ -131,7 +131,7 @@ import Component from "vue-class-component";
 import { NetworkComponent } from "@/components/network/networkComponent";
 import Snapshot from "@/components/EC2/snapshots/Snapshot.vue";
 import StateText from "@/components/common/StateText.vue";
-import { extractNameFromEC2Tags } from "@/components/common/tags.ts";
+import { extractNameFromEC2Tags } from "@/components/common/tags";
 
 @Component({
   components: {

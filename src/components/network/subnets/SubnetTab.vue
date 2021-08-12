@@ -30,7 +30,7 @@ import { Formatters } from "@/mixins/formatters";
 import EC2Client from "aws-sdk/clients/ec2";
 
 import { GlEmptyState, GlTable, GlAlert, GlSkeletonLoading } from "@gitlab/ui";
-import { extractNameFromEC2Tags } from "@/components/common/tags.ts";
+import { extractNameFromEC2Tags } from "@/components/common/tags";
 
 @Component({
   components: {

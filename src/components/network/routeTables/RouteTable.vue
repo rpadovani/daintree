@@ -21,7 +21,7 @@
             </gl-button>
 
             <DeleteButtonWithConfirmation
-              style="height: 100%;"
+              style="height: 100%"
               resource-type="route table"
               :resource-id="updatedRouteTable.RouteTableId"
               :resource-name="resourceName"

@@ -1,5 +1,5 @@
 <template>
-  <div class="row justify-content-between mr-0" v-if="isSubHeaderVisible">
+  <div class="row justify-content-between mr-0">
     <b-breadcrumb class="gl-breadcrumb-list col-8 ml-5 mt-1">
       <img
         class="gl-breadcrumb-avatar-tile"
@@ -143,7 +143,6 @@ export default class SubHeader extends DaintreeComponent {
   }
 
   lastRefresh!: Date;
-  isLoading!: boolean;
   get lastRefreshString(): string {
     if (this.isLoading) {
       return "Last refresh: now";

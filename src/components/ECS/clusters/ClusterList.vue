@@ -3,7 +3,7 @@
     <gl-drawer
       :open="drawerOpened && selectedResourceKey !== ''"
       @close="close"
-      style="min-width: 80%;"
+      style="min-width: 80%"
     >
       <template #header>{{ selectedResourceTitle }}</template>
 

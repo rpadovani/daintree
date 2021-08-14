@@ -128,6 +128,7 @@ import DrawerCards from "@/components/common/DrawerCards.vue";
 import RelatedNetworkInterfaces from "@/components/network/networkInterfaces/RelatedNetworkInterfaces.vue";
 import DeleteButtonWithConfirmation from "@/components/common/DeleteButtonWithConfirmation.vue";
 import { extractNameFromEC2Tags } from "@/components/common/tags";
+import { DaintreeComponent } from "@/mixins/DaintreeComponent";
 
 @Component({
   components: {
@@ -150,7 +151,7 @@ import { extractNameFromEC2Tags } from "@/components/common/tags";
     DeleteButtonWithConfirmation,
   },
 })
-export default class Subnet extends mixins(Formatters, Notifications) {
+export default class Subnet extends DaintreeComponent {
   @Prop(Object) readonly subnet!: SubnetWithRegion;
 
   get resourceName(): string | undefined {
@@ -208,10 +209,10 @@ export default class Subnet extends mixins(Formatters, Notifications) {
     ];
   }
 
-  get EC2() {
+  async EC2() {
     return new EC2Client({
       region: this.subnet.region,
-      credentials: this.$store.getters["sts/credentials"],
+      credentials: await this.credentials(),
     });
   }
 
@@ -240,11 +241,13 @@ export default class Subnet extends mixins(Formatters, Notifications) {
     { key: "RuleAction", sortable: true },
   ];
 
-  describeAcls() {
+  async describeAcls() {
     this.aclsError = "";
     this.acls = [];
     this.aclsState = "loading";
-    this.EC2.describeNetworkAcls(
+
+    const EC2 = await this.EC2();
+    EC2.describeNetworkAcls(
       {
         Filters: [
           {
@@ -294,12 +297,13 @@ export default class Subnet extends mixins(Formatters, Notifications) {
     return "info";
   }
 
-  deleteSubnet() {
+  async deleteSubnet() {
     if (!this.subnet.SubnetId) {
       return;
     }
 
-    this.EC2.deleteSubnet({ SubnetId: this.subnet.SubnetId }, (err) => {
+    const EC2 = await this.EC2();
+    EC2.deleteSubnet({ SubnetId: this.subnet.SubnetId }, (err) => {
       if (err) {
         this.showError(err.message, "deleteSubnet");
       } else {

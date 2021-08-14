@@ -11,6 +11,10 @@
           data.value
         }}</router-link>
       </template>
+
+      <template v-slot:cell(AvailabilityZone)="data">
+        <RegionText :region="data.value" is-az />
+      </template>
     </gl-table>
 
     <gl-empty-state
@@ -26,11 +30,12 @@
 <script lang="ts">
 import { Component, Prop, Watch } from "vue-property-decorator";
 import { SubnetList } from "aws-sdk/clients/ec2";
-import { Formatters } from "@/mixins/formatters";
 import EC2Client from "aws-sdk/clients/ec2";
 
 import { GlEmptyState, GlTable, GlAlert, GlSkeletonLoading } from "@gitlab/ui";
 import { extractNameFromEC2Tags } from "@/components/common/tags";
+import { DaintreeComponent } from "@/mixins/DaintreeComponent";
+import RegionText from "@/components/common/RegionText.vue";
 
 @Component({
   components: {
@@ -38,9 +43,10 @@ import { extractNameFromEC2Tags } from "@/components/common/tags";
     GlTable,
     GlAlert,
     GlSkeletonLoading,
+    RegionText,
   },
 })
-export default class SubnetTab extends Formatters {
+export default class SubnetTab extends DaintreeComponent {
   @Prop(String) readonly region: string | undefined;
 
   @Prop(String) readonly filterName: string | undefined;
@@ -71,11 +77,17 @@ export default class SubnetTab extends Formatters {
     },
   ];
 
-  get credentials() {
-    return this.$store.getters["sts/credentials"];
+  async EC2Client(): Promise<EC2Client | void> {
+    const credentials = await this.credentials();
+
+    if (credentials === undefined) {
+      return;
+    }
+
+    return new EC2Client({ region: this.region, credentials });
   }
 
-  describeSubnets(fullReload = false) {
+  async describeSubnets(fullReload = false): Promise<void> {
     if (fullReload) {
       this.state = "loading";
       this.subnets = [];
@@ -84,32 +96,33 @@ export default class SubnetTab extends Formatters {
     const params = {
       Filters: [{ Name: this.filterName, Values: this.filterValues }],
     };
-    const EC2 = new EC2Client({
-      region: this.region,
-      credentials: this.credentials,
-    });
 
-    EC2.describeSubnets(params, (err, data) => {
-      if (err) {
-        this.error = err.message;
-        this.state = "error";
-      } else {
-        this.error = undefined;
-        this.subnets = data.Subnets;
-        this.state =
-          this.subnets === undefined || this.subnets.length === 0
-            ? "empty"
-            : "loaded";
-      }
-    });
+    const EC2 = await this.EC2Client();
+
+    if (!EC2) {
+      return;
+    }
+
+    try {
+      const response = await EC2.describeSubnets(params).promise();
+      this.error = undefined;
+      this.subnets = response.Subnets;
+      this.state =
+        this.subnets === undefined || this.subnets.length === 0
+          ? "empty"
+          : "loaded";
+    } catch (err) {
+      this.error = err.message;
+      this.state = "error";
+    }
   }
 
   @Watch("filterValues")
-  onFilterValuesChanged() {
+  onFilterValuesChanged(): void {
     this.describeSubnets(true);
   }
 
-  mounted() {
+  mounted(): void {
     this.describeSubnets();
   }
 }

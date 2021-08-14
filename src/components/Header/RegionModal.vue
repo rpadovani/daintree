@@ -58,6 +58,7 @@ import RegionText from "@/components/common/RegionText.vue";
 import EC2Client from "aws-sdk/clients/ec2";
 import { isString } from "@/utils/isString";
 import { ALL_REGIONS } from "@/components/common/regions";
+import { DaintreeComponent } from "@/mixins/DaintreeComponent";
 
 @Component({
   components: {
@@ -69,7 +70,7 @@ import { ALL_REGIONS } from "@/components/common/regions";
   },
   directives: { modal: GlModalDirective },
 })
-export default class RegionModal extends Vue {
+export default class RegionModal extends DaintreeComponent {
   enabledRegions: string[] = [];
   errorLoading = false;
 
@@ -120,11 +121,11 @@ export default class RegionModal extends Vue {
     this.$store.commit("sts/setEnabledRegions", this.selectedRegions);
   }
 
-  loadEnabledRegions() {
+  async loadEnabledRegions() {
     //The region doesn't really matter here, but it is mandatory
     const EC2 = new EC2Client({
       region: "us-east-1",
-      credentials: this.$store.getters["sts/credentials"],
+      credentials: await this.credentials(),
     });
     EC2.describeRegions({}, (err, data) => {
       if (err) {

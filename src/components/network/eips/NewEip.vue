@@ -66,6 +66,7 @@ import { Component } from "vue-property-decorator";
 import Notifications from "@/mixins/notifications";
 import { mixins } from "vue-class-component";
 import { Formatters } from "@/mixins/formatters";
+import { DaintreeComponent } from "@/mixins/DaintreeComponent";
 
 @Component({
   components: {
@@ -78,7 +79,7 @@ import { Formatters } from "@/mixins/formatters";
     GlIcon,
   },
 })
-export default class NewEip extends mixins(Notifications, Formatters) {
+export default class NewEip extends DaintreeComponent {
   selectedRegion = "";
   eipName = "";
 
@@ -86,10 +87,10 @@ export default class NewEip extends mixins(Notifications, Formatters) {
     return this.selectedRegion !== "";
   }
 
-  createEip() {
+  async createEip() {
     const EC2 = new EC2Client({
       region: this.selectedRegion,
-      credentials: this.$store.getters["sts/credentials"],
+      credentials: await this.credentials(),
     });
 
     EC2.allocateAddress({ Domain: "vpc" }, (err, data) => {

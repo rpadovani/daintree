@@ -166,6 +166,7 @@ import { CardContent } from "@/components/common/cardContent";
 import DrawerCards from "@/components/common/DrawerCards.vue";
 import { extractNameFromEC2Tags } from "@/components/common/tags";
 import DeleteButtonWithConfirmation from "@/components/common/DeleteButtonWithConfirmation.vue";
+import { DaintreeComponent } from "@/mixins/DaintreeComponent";
 
 @Component({
   components: {
@@ -179,7 +180,7 @@ import DeleteButtonWithConfirmation from "@/components/common/DeleteButtonWithCo
     DeleteButtonWithConfirmation,
   },
 })
-export default class Nat extends mixins(Formatters, Notifications) {
+export default class Nat extends DaintreeComponent {
   @Prop(Object) readonly nat!: NatWithRegion;
 
   get resourceName(): string | undefined {
@@ -409,18 +410,14 @@ export default class Nat extends mixins(Formatters, Notifications) {
     return "info";
   }
 
-  get credentials() {
-    return this.$store.getters["sts/credentials"];
-  }
-
-  deleteNat() {
+  async deleteNat() {
     if (!this.nat.NatGatewayId) {
       return;
     }
 
     const EC2 = new EC2Client({
       region: this.nat.region,
-      credentials: this.credentials,
+      credentials: await this.credentials(),
     });
     EC2.deleteNatGateway(
       { NatGatewayId: this.nat.NatGatewayId },

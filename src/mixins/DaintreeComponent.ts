@@ -42,7 +42,6 @@ export class DaintreeComponent extends Vue {
   dismissAlertByKey!: (key: string) => void;
   dismissAlertByResourceID!: (resourceID: string) => void;
   regionsEnabled!: string[];
-  stsCredentials!: Credentials;
   currentRoleIndex!: number;
   accountId!: string | undefined;
 
@@ -85,7 +84,7 @@ export class DaintreeComponent extends Vue {
   incrementLoadingCount!: () => void;
   decreaseLoadingCount!: () => void;
 
-  showError(msg: string, key: string, region?: string) {
+  showError(msg: string, key: string, region?: string): void {
     this.showAlert({
       key: key,
       text: msg,
@@ -94,7 +93,7 @@ export class DaintreeComponent extends Vue {
     });
   }
 
-  hideErrors(key: string) {
+  hideErrors(key: string): void {
     this.dismissAlertByKey(key);
   }
 
@@ -107,35 +106,58 @@ export class DaintreeComponent extends Vue {
   }
 
   async credentials(): Promise<Credentials | undefined> {
-    try {
-      const accessKeyId = await new Command(
-        "printenv",
-        "AWS_ACCESS_KEY_ID"
-      ).execute();
+    //TODO: move this to Rust as soon as the AWS Rust SDK implements
+    //  a proper credential provider
+    const accessKeyId = await new Command(
+      "printenv",
+      "AWS_ACCESS_KEY_ID"
+    ).execute();
 
-      const secretAccessKey = await new Command(
-        "printenv",
-        "AWS_SECRET_ACCESS_KEY"
-      ).execute();
+    const secretAccessKey = await new Command(
+      "printenv",
+      "AWS_SECRET_ACCESS_KEY"
+    ).execute();
 
-      const sessionToken = await new Command(
-        "printenv",
-        "AWS_SESSION_TOKEN"
-      ).execute();
+    if (accessKeyId.code !== 0 || secretAccessKey.code !== 0) {
+      //TODO: redirect to a dedicated page
+      this.showAlert({
+        key: "credentialsExpired",
+        text: "No credentials found.",
+        variant: "warning",
+      });
 
-      console.log(accessKeyId)
+      return;
+    }
 
+    const sessionToken = await new Command(
+      "printenv",
+      "AWS_SESSION_TOKEN"
+    ).execute();
 
-      return new Credentials(accessKeyId.stdout, secretAccessKey.stdout, sessionToken.stdout);
-    } catch {
-      store.commit("sts/routeAfterLogin", this.$route.fullPath);
+    const credentials = new Credentials(
+      accessKeyId.stdout,
+      secretAccessKey.stdout,
+      sessionToken.code === 0 ? sessionToken.stdout : ""
+    );
+
+    // Refresh credentials, if necessary
+    console.log("HEREs");
+    await credentials.getPromise();
+
+    console.log(JSON.parse(JSON.stringify(credentials)));
+
+    if (credentials.expired) {
       this.showAlert({
         key: "credentialsExpired",
         text: "Your credentials have expired, please login again.",
         variant: "warning",
       });
-      sessionStorage.clear();
 
+      return;
     }
+
+    console.log(credentials);
+
+    return credentials;
   }
 }

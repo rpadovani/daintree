@@ -62,7 +62,7 @@
             class="ml-2"
             variant="info"
             category="secondary"
-            to="/ec2/keyPairs"
+            to="/ec2/key_pairs"
           >
             Go back to key pairs list
           </gl-button>

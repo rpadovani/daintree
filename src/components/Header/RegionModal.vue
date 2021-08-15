@@ -59,6 +59,7 @@ import EC2Client from "aws-sdk/clients/ec2";
 import { isString } from "@/utils/isString";
 import { ALL_REGIONS } from "@/components/common/regions";
 import { DaintreeComponent } from "@/mixins/DaintreeComponent";
+import { listen } from "@tauri-apps/api/event";
 
 @Component({
   components: {
@@ -140,6 +141,11 @@ export default class RegionModal extends DaintreeComponent {
   }
 
   mounted() {
+    // Listening to the Rust event from the menu
+    listen("show_regions_modal", () => {
+      this.regionModal.show("region-modal-id");
+    });
+
     if (this.isLoggedIn) {
       this.loadEnabledRegions();
     }

@@ -3,7 +3,7 @@
     modal-id="assume-role-modal-id"
     title="Switch role"
     no-fade
-    ref="modal"
+    ref="assumeRoleModal"
     :action-primary="primaryProps"
     :action-cancel="cancelProps"
     @primary="save"
@@ -67,9 +67,10 @@ import {
   GlButton,
   GlFormCheckbox,
 } from "@gitlab/ui";
-import { Component, Vue } from "vue-property-decorator";
-import { BInputGroupText } from "bootstrap-vue";
+import { Component, Ref, Vue } from "vue-property-decorator";
+import { BInputGroupText, BvModal } from "bootstrap-vue";
 import { Role } from "@/store/sts/state";
+import { listen } from "@tauri-apps/api/event";
 
 @Component({
   components: {
@@ -83,6 +84,8 @@ import { Role } from "@/store/sts/state";
   },
 })
 export default class AssumeRoleModal extends Vue {
+  @Ref("assumeRoleModal") readonly assumeRoleModal!: BvModal;
+
   accountID = "";
   role = "";
   nickname = "";
@@ -126,6 +129,12 @@ export default class AssumeRoleModal extends Vue {
       })
       // eslint-disable-next-line @typescript-eslint/no-empty-function
       .catch(() => {});
+  }
+
+  mounted(): void {
+    listen("show_switch_role_modal", () => {
+      this.assumeRoleModal.show("assume-role-modal-id");
+    });
   }
 }
 </script>

@@ -5,7 +5,7 @@
       @close="close"
       style="min-width: 80%"
     >
-      <template #header>{{ selectedResourceTitle }}</template>
+      <template #title>{{ selectedResourceTitle }}</template>
 
       <VPC :vpc="selectedResource" v-on:deleted="close" />
     </gl-drawer>

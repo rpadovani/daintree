@@ -9,7 +9,7 @@
         alt="logo-aws"
       />
       <b-breadcrumb-item href="/#/home" class="gl-breadcrumb-item">
-        Resources
+        All resources
       </b-breadcrumb-item>
 
       <!-- We set the breadcrumb to active so it doesn't create a <Link> element which would interfere with the search box -->
@@ -121,97 +121,5 @@ import { DaintreeComponent } from "@/mixins/DaintreeComponent";
     "gl-tooltip": GlTooltipDirective,
   },
 })
-export default class SubHeader extends DaintreeComponent {
-  get selectedSection(): "Network" | "EC2" | undefined {
-    const found = this.sections.find(
-      (s) => s.link.split("/")[1] === this.$route.path.split("/")[1]
-    );
-
-    return found ? (found.name as "Network" | "EC2") : undefined;
-  }
-
-  get selectedSubsection(): string | undefined {
-    if (!this.selectedSection) {
-      return undefined;
-    }
-
-    const found = this.subsections[this.selectedSection].find((s) => {
-      return `#${this.$route.fullPath}`.startsWith(s.link);
-    });
-
-    return found ? found.name : undefined;
-  }
-
-  lastRefresh!: Date;
-  get lastRefreshString(): string {
-    if (this.isLoading) {
-      return "Last refresh: now";
-    }
-    return `Last refresh: ${this.standardDate(this.lastRefresh)}`;
-  }
-
-  refresh(): void {
-    this.$root.$emit("refresh");
-  }
-
-  sectionSearchTerm = "";
-  readonly sections = [
-    { name: "Network", link: "#/network" },
-    { name: "EC2", link: "#/ec2" },
-    { name: "Messages", link: "#/messages" },
-    { name: "ECS", link: "#/ecs" },
-  ];
-
-  subsectionSearchTerm = "";
-  readonly subsections = {
-    Network: [
-      { name: "VPCs", link: "#/network/vpcs" },
-      { name: "Subnets", link: "#/network/subnets" },
-      { name: "Internet Gateways", link: "#/network/igws" },
-      { name: "Nat Gateways", link: "#/network/nats" },
-      { name: "Route Tables", link: "#/network/routeTables" },
-      { name: "Elastic IPs", link: "#/network/eips" },
-      { name: "Security Groups", link: "#/network/securityGroups" },
-      { name: "Peering connections", link: "#/network/peeringConnections" },
-      { name: "Endpoints", link: "#/network/endpoints" },
-      { name: "Network interfaces", link: "#/network/interfaces" },
-      { name: "DHCP options sets", link: "#/network/dhcp" },
-    ],
-    EC2: [
-      { name: "Instances", link: "#/ec2/instances" },
-      { name: "Load Balancers", link: "#/ec2/loadBalancers" },
-      { name: "Target groups", link: "#/ec2/targetGroups" },
-      { name: "Key pairs", link: "#/ec2/keyPairs" },
-      { name: "EBS volumes", link: "#/ec2/volumes" },
-      { name: "EBS snapshots", link: "#/ec2/snapshots" },
-    ],
-    Messages: [
-      { name: "SNS Topics", link: "#/messages/sns_topics" },
-      { name: "SNS Subscriptions", link: "#/messages/sns_subscriptions" },
-      { name: "SQS", link: "#/messages/sqs" },
-    ],
-    ECS: [
-      { name: "Tasks definitions", link: "#/ecs/tasksDefinitions" },
-      { name: "Clusters", link: "#/ecs/clusters" },
-    ],
-  };
-
-  get filteredSections(): { name: string; link: string }[] {
-    const lowerCasedSearchTerm = this.sectionSearchTerm.toLowerCase();
-    return this.sections.filter((resultString) =>
-      resultString["name"].toLowerCase().includes(lowerCasedSearchTerm)
-    );
-  }
-
-  get filteredSubsections(): { name: string; link: string }[] {
-    const lowerCasedSearchTerm = this.subsectionSearchTerm.toLowerCase();
-    if (this.selectedSection) {
-      return this.subsections[this.selectedSection].filter((resultString) =>
-        resultString["name"].toLowerCase().includes(lowerCasedSearchTerm)
-      );
-    }
-
-    return [];
-  }
-}
+export default class SubHeader extends DaintreeComponent {}
 </script>

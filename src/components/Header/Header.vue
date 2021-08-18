@@ -184,7 +184,7 @@ export default class Header extends DaintreeComponent {
     this.$store.commit("sts/backToMain");
   }
 
-  async switchRole(roleIndex: number) {
+  async switchRole(roleIndex: number): Promise<void> {
     try {
       this.hideErrors("switchRoleError");
       await this.$store.dispatch("sts/assumeRole", {

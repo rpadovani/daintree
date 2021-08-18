@@ -106,6 +106,14 @@ export class DaintreeComponent extends Vue {
   }
 
   async credentials(): Promise<Credentials | undefined> {
+    //First, let's check if we already have credentials
+    const existingCredentials = this.$store.getters[
+      "sts/credentials"
+    ] as Credentials;
+    if (existingCredentials && !existingCredentials.expired) {
+      return existingCredentials;
+    }
+
     //TODO: move this to Rust as soon as the AWS Rust SDK implements
     //  a proper credential provider
     const accessKeyId = await new Command(
@@ -141,10 +149,7 @@ export class DaintreeComponent extends Vue {
     );
 
     // Refresh credentials, if necessary
-    console.log("HEREs");
     await credentials.getPromise();
-
-    console.log(JSON.parse(JSON.stringify(credentials)));
 
     if (credentials.expired) {
       this.showAlert({
@@ -155,8 +160,6 @@ export class DaintreeComponent extends Vue {
 
       return;
     }
-
-    console.log(credentials);
 
     return credentials;
   }

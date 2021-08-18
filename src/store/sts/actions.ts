@@ -21,68 +21,6 @@ async function getCallerIdentity(
 }
 
 export const STSActions = {
-  loginWithAccessKey(
-    context: ActionContext<STSState, any>,
-    payload: { ["accessKeyId"]: string; ["secretAccessKey"]: string }
-  ) {
-    const credentials = new Credentials({
-      accessKeyId: payload.accessKeyId,
-      secretAccessKey: payload.secretAccessKey,
-    });
-
-    return getCallerIdentity("accessKey", context, credentials);
-  },
-
-  async loginWithCognito(
-    context: ActionContext<STSState, any>,
-    payload: {
-      ["issuer"]: string;
-      ["idToken"]: string;
-      ["cognitoIdentityPoolId"]: string;
-    }
-  ) {
-    context.commit("notifications/dismissByKey", "cognitoCallback", {
-      root: true,
-    });
-
-    //Cognito returns `https://` in the issuer field, but it is not required by the identity pool
-    //Not sure about other issuers
-    const iss = payload.issuer.replace("https://", "");
-
-    const Logins: { [key: string]: string } = {};
-    Logins[iss] = payload.idToken;
-
-    //The cognito identity pool contains the region in the name
-    const region = payload.cognitoIdentityPoolId.split(":")[0];
-
-    const cognitoIdentityClient = new CognitoIdentityClient({ region });
-
-    //We first retrieve the ID of the user
-    const getIdResponse = await cognitoIdentityClient
-      .getId({ IdentityPoolId: payload.cognitoIdentityPoolId, Logins })
-      .promise();
-
-    if (!getIdResponse.IdentityId) {
-      throw new Error("Identity not found");
-    }
-
-    const cognitoCredentials = new CognitoIdentityCredentials(
-      {
-        IdentityId: getIdResponse.IdentityId,
-        Logins,
-      },
-      { region }
-    );
-
-    await cognitoCredentials.getPromise();
-
-    sessionStorage.setItem("cognito#IdentityId", getIdResponse.IdentityId);
-    sessionStorage.setItem("cognito#Logins", JSON.stringify(Logins));
-    sessionStorage.setItem("cognito#Region", region);
-
-    return getCallerIdentity("cognito", context, cognitoCredentials);
-  },
-
   async assumeRole(
     context: ActionContext<STSState, any>,
     payload: {
@@ -92,11 +30,7 @@ export const STSActions = {
       ["newRole"]?: boolean;
       ["remember"]?: boolean;
     }
-  ) {
-    if (!context.state.credentials) {
-      throw new Error("Not logged in");
-    }
-
+  ): Promise<void> {
     //We go back to the main account to switch role
     const credentials = context.state.credentials;
 

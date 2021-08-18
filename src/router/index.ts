@@ -18,13 +18,6 @@ const routes = [
     meta: { hideSubHeader: true },
   },
   {
-    path: "/login",
-    name: "Login",
-    component: () =>
-      import(/* webpackChunkName: "login" */ "@/components/Login.vue"),
-    meta: { title: "Login", hideSubHeader: true },
-  },
-  {
     path: "/changelog",
     name: "Changelog",
     component: () =>
@@ -39,27 +32,11 @@ const routes = [
     meta: { title: "Security", hideSubHeader: true },
   },
   {
-    path: "/cognito_callback",
-    name: "Cognito Callback",
-    component: () =>
-      import(
-        /* webpackChunkName: "cognito_callback" */ "@/components/CognitoCallback.vue"
-      ),
-    meta: { title: "Logging in...", hideSubHeader: true },
-  },
-  {
     path: "/about",
     name: "About",
     meta: { title: "Features", hideSubHeader: true },
     component: () =>
       import(/* webpackChunkName: "about" */ "@/views/About.vue"),
-  },
-  {
-    path: "/oauth_instructions",
-    name: "OAuth Instruction",
-    component: () =>
-      import(/* webpackChunkName: "oauth_instruction" */ "@/views/OAuth.vue"),
-    meta: { title: "OAuth instructions", hideSubHeader: true },
   },
   {
     path: "/contribute",
@@ -74,13 +51,6 @@ const routes = [
     component: () =>
       import(/* webpackChunkName: "main_menu" */ "@/components/MainMenu.vue"),
     meta: { title: "Main Menu", requiresLogin: true, hideRefresher: true },
-  },
-  {
-    path: "/self_hosting",
-    name: "Self hosting",
-    meta: { title: "Self hosting", hideSubHeader: true },
-    component: () =>
-      import(/* webpackChunkName: "Self hosting" */ "@/views/SelfHosted.vue"),
   },
   ...NetworkRoutes,
   ...EC2Routes,
@@ -100,7 +70,7 @@ const router = new VueRouter({
 });
 
 router.beforeEach((to, from, next) => {
-  next()
+  next();
   // if (to.meta.requiresLogin && !store.getters["sts/isLoggedIn"]) {
   //   store.commit("sts/routeAfterLogin", to);
   //   next("/login");
